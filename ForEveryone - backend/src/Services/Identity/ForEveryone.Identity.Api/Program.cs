@@ -8,9 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Puerto por defecto de Vite
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+
 
 var app = builder.Build();
 
@@ -25,8 +36,8 @@ if (app.Environment.IsDevelopment())
     var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
     await db.Database.MigrateAsync();
 }
-
-app.UseHttpsRedirection();
+app.UseCors("AllowReact");
+// app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
