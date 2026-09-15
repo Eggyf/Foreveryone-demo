@@ -30,6 +30,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Puerto por defecto de Vite
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -41,8 +52,8 @@ if (app.Environment.IsDevelopment())
     var db = scope.ServiceProvider.GetRequiredService<KingdomDbContext>();
     db.Database.Migrate();
 }
-
-app.UseHttpsRedirection();
+app.UseCors("AllowReact");
+// app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
