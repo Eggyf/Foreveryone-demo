@@ -1,0 +1,15 @@
+## --- .NET / C# ---
+*.user
+*.suo
+bin/
+obj/
+*.dll
+*.pdb
+*.cache
+*.log
+.vs/
+.idea/
+[Bb]in/
+[Oo]bj/
+appsettings.Development.json
+*.userosscache

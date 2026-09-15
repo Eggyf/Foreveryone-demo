@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/ForEveryone.SharedKernel/ForEveryone.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Heroes/">
+    <Project Path="src/Services/Heroes/ForEveryone.Heroes.Api/ForEveryone.Heroes.Api.csproj" />
+    <Project Path="src/Services/Heroes/ForEveryone.Heroes.Application/ForEveryone.Heroes.Application.csproj" />
+    <Project Path="src/Services/Heroes/ForEveryone.Heroes.Domain/ForEveryone.Heroes.Domain.csproj" />
+    <Project Path="src/Services/Heroes/ForEveryone.Heroes.Infrastructure/ForEveryone.Heroes.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Identity/">
+    <Project Path="src/Services/Identity/ForEveryone.Identity.Api/ForEveryone.Identity.Api.csproj" />
+    <Project Path="src/Services/Identity/ForEveryone.Identity.Application/ForEveryone.Identity.Application.csproj" />
+    <Project Path="src/Services/Identity/ForEveryone.Identity.Domain/ForEveryone.Identity.Domain.csproj" />
+    <Project Path="src/Services/Identity/ForEveryone.Identity.Infrastructure/ForEveryone.Identity.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Kingdom/">
+    <Project Path="src/Services/Kingdom/ForEveryone.Kingdom.Api/ForEveryone.Kingdom.Api.csproj" />
+    <Project Path="src/Services/Kingdom/ForEveryone.Kingdom.Application/ForEveryone.Kingdom.Application.csproj" />
+    <Project Path="src/Services/Kingdom/ForEveryone.Kingdom.Domain/ForEveryone.Kingdom.Domain.csproj" />
+    <Project Path="src/Services/Kingdom/ForEveryone.Kingdom.Infrastructure/ForEveryone.Kingdom.Infrastructure.csproj" />
+  </Folder>
+</Solution>
