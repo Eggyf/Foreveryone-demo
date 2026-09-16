@@ -45,12 +45,14 @@ public class EmbarkOnAdventureCommandHandler : IRequestHandler<EmbarkOnAdventure
         if (!hero.IsDefeated)
         {
             int expGained = 50;
+            int goldGained = 20; // NUEVO: Recompensa de oro
             hero.GainExperience(expGained);
+            hero.AddGold(goldGained); // NUEVO
             await _heroRepository.UpdateAsync(hero);
 
             string msg = hero.Level > levelBefore
-                ? $"¡Victoria! Ganaste {expGained} de experiencia. ¡HAS SUBIDO AL NIVEL {hero.Level}!"
-                : $"¡Victoria! Ganaste {expGained} de experiencia. Vida restante: {hero.CurrentHealth}/{hero.Stats.Health}.";
+                ? $"¡Victoria! Ganaste {expGained} de experiencia y {goldGained} de oro. ¡HAS SUBIDO AL NIVEL {hero.Level}!"
+                : $"¡Victoria! Ganaste {expGained} de experiencia y {goldGained} de oro. Vida restante: {hero.CurrentHealth}/{hero.Stats.Health}.";
 
             return new AdventureResult(true, expGained, levelBefore, hero.Level, msg);
         }

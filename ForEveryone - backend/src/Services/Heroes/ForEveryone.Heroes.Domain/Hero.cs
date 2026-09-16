@@ -8,9 +8,9 @@ public class Hero
     public int Level { get; private set; }
     public int Experience { get; private set; }
     public HeroStats Stats { get; private set; }
-
-    // NUEVO: Vida actual del héroe (cambia durante el combate)
     public int CurrentHealth { get; private set; }
+    public int Gold { get; private set; } // NUEVO: Oro del héroe
+
     public bool IsDefeated => CurrentHealth <= 0;
 
     private Hero() { }
@@ -23,7 +23,8 @@ public class Hero
         Level = 1;
         Experience = 0;
         Stats = stats;
-        CurrentHealth = stats.Health; // Empieza con vida máxima
+        CurrentHealth = stats.Health;
+        Gold = 0; // Empieza sin oro
     }
 
     public void GainExperience(int amount)
@@ -47,20 +48,47 @@ public class Hero
             Defense = Stats.Defense + 5,
             Mana = Stats.Mana + 10
         };
-        // Al subir de nivel, el héroe se cura completamente
         CurrentHealth = Stats.Health;
     }
 
-    // NUEVO: Recibir daño en combate
     public void TakeDamage(int amount)
     {
         if (amount <= 0) return;
         CurrentHealth = Math.Max(0, CurrentHealth - amount);
     }
 
-    // NUEVO: Descansar para recuperar vida
     public void Rest()
     {
         CurrentHealth = Stats.Health;
+    }
+
+    // --- NUEVAS MECÁNICAS DE TIENDA ---
+    public void AddGold(int amount)
+    {
+        if (amount <= 0) return;
+        Gold += amount;
+    }
+
+    public void ApplyPermanentBoost(int attackBoost, int defenseBoost)
+    {
+        Stats = Stats with
+        {
+            Attack = Stats.Attack + attackBoost,
+            Defense = Stats.Defense + defenseBoost
+        };
+    }
+
+    public void PurchaseItem(int cost, int attackBoost, int defenseBoost, bool healToFull)
+    {
+        if (Gold < cost)
+            throw new InvalidOperationException("Oro insuficiente para comprar este objeto.");
+
+        Gold -= cost;
+
+        if (attackBoost > 0 || defenseBoost > 0)
+            ApplyPermanentBoost(attackBoost, defenseBoost);
+
+        if (healToFull)
+            CurrentHealth = Stats.Health;
     }
 }
