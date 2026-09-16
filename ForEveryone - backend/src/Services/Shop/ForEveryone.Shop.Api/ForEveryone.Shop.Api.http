@@ -1,0 +1,6 @@
+@ForEveryone.Shop.Api_HostAddress = http://localhost:5136
+
+GET {{ForEveryone.Shop.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

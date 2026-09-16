@@ -1,10 +1,11 @@
 import type { HeroData } from '../types';
 
-export const HeroCard = ({ hero, onCreate, onAdventure, onRest }: { 
+export const HeroCard = ({ hero, onCreate, onAdventure, onRest, onOpenShop }: { 
     hero: HeroData | null, 
     onCreate: () => void,
     onAdventure: () => void,
-    onRest: () => void
+    onRest: () => void,
+    onOpenShop: () => void
 }) => {
   if (!hero) {
     return (
@@ -18,7 +19,7 @@ export const HeroCard = ({ hero, onCreate, onAdventure, onRest }: {
   return (
     <div className="stats-card">
       <h3>⚔️ Héroe: {hero.class}</h3>
-      <p>🧡 Nivel: {hero.level}</p>
+      <p>🧡 Nivel: {hero.level} | 🪙 Oro: {hero.gold}</p>
       <ul>
         <li style={{ color: hero.currentHealth > 0 ? '#e74c3c' : '#888' }}>
           ❤️ Vida: {hero.currentHealth} / {hero.health} {hero.currentHealth === 0 && ' (DERROTADO)'}
@@ -32,18 +33,22 @@ export const HeroCard = ({ hero, onCreate, onAdventure, onRest }: {
         <button 
             className="adventure-btn" 
             onClick={onAdventure}
-            disabled={hero.currentHealth === 0} // No puede aventurarse si está muerto
+            disabled={hero.currentHealth === 0}
         >
-          🗡️ Ir a la Aventura
+          🗡️ Aventura
         </button>
         <button 
             className="rest-btn" 
             onClick={onRest}
-            disabled={hero.currentHealth === hero.health} // No puede descansar si está full
+            disabled={hero.currentHealth === hero.health}
         >
           🛏️ Descansar
         </button>
       </div>
+      
+      <button className="shop-btn" onClick={onOpenShop}>
+        🏪 Abrir Tienda
+      </button>
     </div>
   );
 };

@@ -21,15 +21,16 @@ public class GetHeroQueryHandler : IRequestHandler<GetHeroQuery, GetHeroResult?>
         if (hero is null) return null;
 
         return new GetHeroResult(
-     hero.Id,
-     hero.Class.ToString(),
-     hero.Level,
-     hero.Stats.Health,
-     hero.Stats.Attack,
-     hero.Stats.Defense,
-     hero.Stats.Mana,
-     hero.CurrentHealth // <-- NUEVO
- );
+    hero.Id,
+    hero.Class.ToString(),
+    hero.Level,
+    hero.Stats.Health,
+    hero.Stats.Attack,
+    hero.Stats.Defense,
+    hero.Stats.Mana,
+    hero.CurrentHealth,
+    hero.Gold // <-- NUEVO
+);
     }
 
 

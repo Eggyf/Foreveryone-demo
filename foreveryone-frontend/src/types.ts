@@ -3,7 +3,8 @@ export interface HeroData {
     class: string;
     level: number;
     health: number;
-    currentHealth: number; // NUEVO
+    currentHealth: number;
+    gold: number; // NUEVO
     attack: number;
     defense: number;
     mana: number;
@@ -25,4 +26,11 @@ export interface BuildingData {
     type: number;
     name: string;
     level: number;
+}
+
+export interface ShopItemData {
+    id: string;
+    name: string;
+    description: string;
+    cost: number;
 }

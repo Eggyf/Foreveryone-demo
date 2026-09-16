@@ -11,6 +11,59 @@
   --border: #3a3a3a;
 }
 
+.game-layout {
+  width: 100%;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #111;
+  border-top: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #888;
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--gold);
+  background: #222;
+}
+
+.nav-link.active {
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold);
+}
+
+.logout-btn-nav {
+  background: #c0392b;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+}
+
+.page-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 body {
   margin: 0;
   font-family: "Roboto", sans-serif;
@@ -371,4 +424,123 @@ form button:hover {
 
 .army-actions button:hover {
   background: #95a5a6;
+}
+
+.shop-btn {
+  background: #f39c12 !important;
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  color: white;
+  border: 1px solid #e67e22;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.shop-btn:hover {
+  background: #e67e22 !important;
+}
+
+.shop-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.shop-modal {
+  background: var(--bg-card);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.shop-header h3 {
+  margin: 0;
+  color: var(--gold);
+}
+
+.gold-display {
+  font-weight: bold;
+  color: #f39c12;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.shop-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border-left: 3px solid #f39c12;
+}
+
+.item-info {
+  text-align: left;
+}
+
+.item-info h4 {
+  margin: 0 0 5px 0;
+  color: #eee;
+}
+
+.item-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.item-action {
+  text-align: right;
+}
+
+.item-cost {
+  display: block;
+  color: #f39c12;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.item-action button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.item-action button:disabled {
+  background: #555;
+  cursor: not-allowed;
 }

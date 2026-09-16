@@ -22,4 +22,10 @@
     <Project Path="src/Services/Kingdom/ForEveryone.Kingdom.Domain/ForEveryone.Kingdom.Domain.csproj" />
     <Project Path="src/Services/Kingdom/ForEveryone.Kingdom.Infrastructure/ForEveryone.Kingdom.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Services/Shop/">
+    <Project Path="src/Services/Shop/ForEveryone.Shop.Api/ForEveryone.Shop.Api.csproj" />
+    <Project Path="src/Services/Shop/ForEveryone.Shop.Application/ForEveryone.Shop.Application.csproj" />
+    <Project Path="src/Services/Shop/ForEveryone.Shop.Domain/ForEveryone.Shop.Domain.csproj" />
+    <Project Path="src/Services/Shop/ForEveryone.Shop.Infrastructure/ForEveryone.Shop.Infrastructure.csproj" />
+  </Folder>
 </Solution>

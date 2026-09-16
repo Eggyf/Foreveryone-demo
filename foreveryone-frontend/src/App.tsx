@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Auth } from './components/Auth';
-import { Dashboard } from './components/Dashboard';
+import { GameLayout } from './components/GameLayout';
+import { HeroPage } from './pages/HeroPage';
+import { CastlePage } from './pages/CastlePage';
+import { ShopPage } from './pages/ShopPage';
 import './App.css';
 
-// Función auxiliar para no repetir código
 const extractUserId = (token: string | null): string => {
   if (!token) return '';
   try {
@@ -16,15 +19,13 @@ const extractUserId = (token: string | null): string => {
 };
 
 function App() {
-  // Inicializamos el estado leyendo directamente del localStorage de forma perezosa
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [userId, setUserId] = useState<string>(() => extractUserId(localStorage.getItem('token')));
 
-  // Se llama cuando el Login es exitoso
   const handleAuthSuccess = (newToken: string) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
-    setUserId(extractUserId(newToken)); // Extraemos el ID en el mismo flujo, sin useEffect
+    setUserId(extractUserId(newToken));
   };
 
   const handleLogout = () => {
@@ -34,16 +35,25 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      <h1>ForEveryone</h1>
-      <p>Bienvenido al reino de Eldoria</p>
-      
-      {!token ? (
-        <Auth onSuccess={handleAuthSuccess} />
-      ) : (
-        <Dashboard userId={userId} onLogout={handleLogout} />
-      )}
-    </div>
+    <BrowserRouter>
+      <div className="app-container">
+        <h1>ForEveryone</h1>
+        <p>Bienvenido al reino de Eldoria</p>
+        
+        {!token ? (
+          <Auth onSuccess={handleAuthSuccess} />
+        ) : (
+          <Routes>
+            <Route path="/" element={<GameLayout userId={userId} onLogout={handleLogout} />}>
+              <Route index element={<Navigate to="/hero" replace />} />
+              <Route path="hero" element={<HeroPage userId={userId} />} />
+              <Route path="castle" element={<CastlePage userId={userId} />} />
+              <Route path="shop" element={<ShopPage userId={userId} />} />
+            </Route>
+          </Routes>
+        )}
+      </div>
+    </BrowserRouter>
   );
 }
 
