@@ -9,29 +9,27 @@ public class Hero
     public int Experience { get; private set; }
     public HeroStats Stats { get; private set; }
 
-    private Hero() { } // Para EF Core
+    // NUEVO: Vida actual del héroe (cambia durante el combate)
+    public int CurrentHealth { get; private set; }
+    public bool IsDefeated => CurrentHealth <= 0;
+
+    private Hero() { }
 
     public Hero(Guid id, Guid userId, HeroClass heroClass, HeroStats stats)
     {
-        if (id == Guid.Empty) throw new ArgumentException("Invalid Hero ID");
-        if (userId == Guid.Empty) throw new ArgumentException("Invalid User ID");
-
         Id = id;
         UserId = userId;
         Class = heroClass;
         Level = 1;
         Experience = 0;
         Stats = stats;
+        CurrentHealth = stats.Health; // Empieza con vida máxima
     }
 
     public void GainExperience(int amount)
     {
-        if (amount <= 0)
-            throw new ArgumentException("Experience must be greater than zero", nameof(amount));
-
+        if (amount <= 0) throw new ArgumentException("Experience must be greater than zero", nameof(amount));
         Experience += amount;
-
-        // Regla de negocio: Se necesita (Nivel * 100) de experiencia para subir de nivel
         while (Experience >= Level * 100)
         {
             Experience -= Level * 100;
@@ -42,8 +40,6 @@ public class Hero
     private void LevelUp()
     {
         Level++;
-
-        // Al subir de nivel, las stats aumentan (usamos la expresión 'with' para crear un nuevo Value Object)
         Stats = Stats with
         {
             Health = Stats.Health + 20,
@@ -51,5 +47,20 @@ public class Hero
             Defense = Stats.Defense + 5,
             Mana = Stats.Mana + 10
         };
+        // Al subir de nivel, el héroe se cura completamente
+        CurrentHealth = Stats.Health;
+    }
+
+    // NUEVO: Recibir daño en combate
+    public void TakeDamage(int amount)
+    {
+        if (amount <= 0) return;
+        CurrentHealth = Math.Max(0, CurrentHealth - amount);
+    }
+
+    // NUEVO: Descansar para recuperar vida
+    public void Rest()
+    {
+        CurrentHealth = Stats.Health;
     }
 }

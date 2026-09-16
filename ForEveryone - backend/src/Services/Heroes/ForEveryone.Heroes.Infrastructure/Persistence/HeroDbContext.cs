@@ -16,6 +16,7 @@ public class HeroesDbContext : DbContext
             builder.HasKey(h => h.Id);
             builder.HasIndex(h => h.UserId).IsUnique(); // Forzamos 1 héroe por usuario en BD
             builder.Property(h => h.Class).HasConversion<string>();
+            builder.Property(h => h.CurrentHealth).IsRequired(); // <-- NUEVO
 
             // Mapeo del Value Object
             builder.OwnsOne(h => h.Stats, sb =>

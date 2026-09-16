@@ -3,6 +3,7 @@ using System;
 using ForEveryone.Heroes.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ForEveryone.Heroes.Infrastructure.Migrations
 {
     [DbContext(typeof(HeroesDbContext))]
-    partial class HeroesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260916162010_AddHeroCurrentHealth")]
+    partial class AddHeroCurrentHealth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

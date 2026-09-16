@@ -1,4 +1,4 @@
-namespace ForEveryone.Kingdom.Domain;
+using ForEveryone.Kingdom.Domain;
 
 public class Kingdoms
 {
@@ -7,13 +7,14 @@ public class Kingdoms
     public int CastleLevel { get; private set; }
     public Resources Resources { get; private set; }
     public DateTime LastCollectedTime { get; private set; }
+    public int ArmySize { get; private set; } // NUEVO: Tamaño del ejército
 
-    // Cambio aquí: Usamos una List con setter privado para que EF Core la mapee sin problemas
     public List<Building> Buildings { get; private set; } = new();
 
     private Kingdoms()
     {
         Resources = default!;
+        LastCollectedTime = default!;
     }
 
     public Kingdoms(Guid id, Guid userId)
@@ -23,10 +24,41 @@ public class Kingdoms
         CastleLevel = 1;
         Resources = Resources.Initial;
         LastCollectedTime = DateTime.UtcNow;
+        ArmySize = 0;
         Buildings.Add(new Building(BuildingType.Castle, 1));
     }
 
-    // Lógica de recolección pasiva
+    // --- MÉTODO NUEVO: ENTRENAR TROPAS ---
+    public void TrainSoldiers(int amount)
+    {
+        if (amount <= 0)
+            throw new ArgumentException("La cantidad a entrenar debe ser mayor a 0.");
+
+        var barracks = Buildings.FirstOrDefault(b => b.Type == BuildingType.Barracks);
+        if (barracks is null)
+            throw new InvalidOperationException("Necesitas construir un Cuartel (Barracks) primero.");
+
+        // Costo por soldado: 50 Oro, 25 Comida
+        int goldCost = amount * 50;
+        int foodCost = amount * 25;
+        var cost = new Resources(0, 0, goldCost, foodCost);
+
+        if (!Resources.CanAfford(cost))
+            throw new InvalidOperationException("Oro o Comida insuficientes para entrenar tropas.");
+
+        Resources = Resources.Deduct(cost);
+        ArmySize += amount;
+    }
+
+    // Lógica de Poder Militar
+    public int GetMilitaryPower()
+    {
+        // Poder = Soldados + (Nivel de Castillo * 10)
+        return ArmySize + (CastleLevel * 10);
+    }
+
+    // --- MÉTODOS EXISTENTES (CollectResources, UpgradeBuilding, AddBuilding) ---
+    // ... (Mantén los métodos que ya tenías exactamente igual aquí abajo)
     public void CollectResources(DateTime currentTime)
     {
         var timeDiff = currentTime - LastCollectedTime;
@@ -34,14 +66,11 @@ public class Kingdoms
 
         if (minutesElapsed <= 0) return;
 
-        // LÍMITE DE TIEMPO: Máximo 120 minutos (2 horas) de acumulación pasiva
         int effectiveMinutes = Math.Min(minutesElapsed, 120);
-
         int woodProd = 0, stoneProd = 0, goldProd = 0, foodProd = 0;
 
         foreach (var building in Buildings)
         {
-            // PRODUCCIÓN BAJADA: 5 por nivel en lugar de 10
             switch (building.Type)
             {
                 case BuildingType.Sawmill: woodProd += building.Level * 5; break;
@@ -61,6 +90,26 @@ public class Kingdoms
         LastCollectedTime = currentTime;
     }
 
+    public void UpgradeBuilding(BuildingType type)
+    {
+        var building = Buildings.FirstOrDefault(b => b.Type == type);
+        if (building is null)
+            throw new InvalidOperationException("No tienes ese edificio construido.");
+
+        var cost = GetUpgradeCost(building.Level);
+        if (!Resources.CanAfford(cost))
+            throw new InvalidOperationException("Recursos insuficientes para mejorar el edificio.");
+
+        Resources = Resources.Deduct(cost);
+        building.Upgrade();
+    }
+
+    private Resources GetUpgradeCost(int currentLevel)
+    {
+        int multiplier = currentLevel * 200;
+        return new Resources(multiplier, multiplier / 2, 0, 0);
+    }
+
     public void AddBuilding(BuildingType type)
     {
         if (Buildings.Any(b => b.Type == type))
@@ -71,8 +120,6 @@ public class Kingdoms
             throw new InvalidOperationException("Recursos insuficientes para construir.");
 
         Resources = Resources.Deduct(cost);
-
-        // Cambio aquí: Sin Guid.NewGuid()
         Buildings.Add(new Building(type, 1));
     }
 

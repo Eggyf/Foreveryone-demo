@@ -5,6 +5,8 @@ using ForEveryone.Kingdom.Application.Features.Kingdom.Commands.AddBuilding;
 using ForEveryone.Kingdom.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using ForEveryone.Kingdom.Application.Features.Kingdom.Commands.UpgradeBuilding;
+using ForEveryone.Kingdom.Application.Features.Kingdom.Commands.TrainArmy;
 
 namespace ForEveryone.Kingdom.Api.Controllers;
 
@@ -64,6 +66,48 @@ public class KingdomsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpPost("{userId:guid}/buildings/upgrade")]
+    public async Task<IActionResult> UpgradeBuilding(Guid userId, [FromBody] UpgradeBuildingRequest request)
+    {
+        try
+        {
+            var command = new UpgradeBuildingCommand(userId, (BuildingType)request.BuildingType);
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{userId:guid}/army/train")]
+    public async Task<IActionResult> TrainArmy(Guid userId, [FromBody] TrainArmyRequest request)
+    {
+        try
+        {
+            var command = new TrainArmyCommand(userId, request.Amount);
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    public record TrainArmyRequest(int Amount);
+
+    public record UpgradeBuildingRequest(int BuildingType);
 
     // DTO mínimo para recibir el tipo de edificio del frontend
     public record AddBuildingRequest(int BuildingType);

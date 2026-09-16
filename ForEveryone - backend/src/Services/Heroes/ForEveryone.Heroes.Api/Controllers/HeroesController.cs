@@ -2,6 +2,7 @@ using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;
 using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetHero;
 using Heroes.Application.Features.Heroes.Commands.EmbarkOnAdventure;
+using Heroes.Application.Features.Heroes.Commands.RestHero;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,6 +51,19 @@ public class HeroesController : ControllerBase
         try
         {
             var result = await _mediator.Send(new EmbarkOnAdventureCommand(userId));
+            return Ok(result);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+    [HttpPost("{userId:guid}/rest")]
+    public async Task<IActionResult> RestHero(Guid userId)
+    {
+        try
+        {
+            var result = await _mediator.Send(new RestHeroCommand(userId));
             return Ok(result);
         }
         catch (NotFoundException ex)

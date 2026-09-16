@@ -87,12 +87,54 @@ export const Dashboard = ({ userId, onLogout }: { userId: string, onLogout: () =
     }
   };
 
+  const handleUpgradeBuilding = async (buildingType: number) => {
+    try {
+      await kingdomApi.post(`/api/kingdoms/${userId}/buildings/upgrade`, { 
+        buildingType 
+      });
+      setDashMsg('¡Edificio mejorado con éxito!');
+      
+      // Refrescamos el estado del reino
+      const { data } = await kingdomApi.get(`/api/kingdoms/${userId}`);
+      setKingdom(data);
+    } catch (error: any) {
+      setDashMsg(error.response?.data?.message || 'Error al mejorar');
+    }
+  };
+
+  const handleRest = async () => {
+    try {
+      await heroesApi.post(`/api/heroes/${userId}/rest`);
+      setDashMsg('Tu héroe ha descansado.');
+      
+      // Refrescamos el estado del héroe
+      const { data } = await heroesApi.get(`/api/heroes/${userId}`);
+      setHero(data);
+    } catch (error: any) {
+      setDashMsg(error.response?.data?.message || 'Error al descansar');
+    }
+  };
+
+    // Manejador para entrenar tropas
+  const handleTrainArmy = async (amount: number) => {
+    try {
+      await kingdomApi.post(`/api/kingdoms/${userId}/army/train`, { amount });
+      setDashMsg(`¡${amount} soldados entrenados!`);
+      
+      // Refrescamos el estado del reino
+      const { data } = await kingdomApi.get(`/api/kingdoms/${userId}`);
+      setKingdom(data);
+    } catch (error: any) {
+      setDashMsg(error.response?.data?.message || 'Error al entrenar tropas');
+    }
+  };
+
   return (
     <div className="dashboard">
       <h2>Panel del Jugador</h2>
 
-      <HeroCard hero={hero} onCreate={handleCreateHero} onAdventure={handleAdventure} />
-      <KingdomCard kingdom={kingdom} onCreate={handleCreateKingdom} onBuild={handleAddBuilding} />
+      <HeroCard hero={hero} onCreate={handleCreateHero} onAdventure={handleAdventure} onRest={handleRest}  />
+      <KingdomCard kingdom={kingdom} onCreate={handleCreateKingdom} onBuild={handleAddBuilding} onUpgrade={handleUpgradeBuilding} onTrain={handleTrainArmy} />
 
 
       {dashMsg && <p className="message" style={{ color: '#28a745' }}>{dashMsg}</p>}

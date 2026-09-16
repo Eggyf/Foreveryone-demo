@@ -278,3 +278,97 @@ form button:hover {
 .adventure-btn:hover {
   background: linear-gradient(to bottom, #e74c3c, #c0392b) !important;
 }
+
+.building-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111;
+  padding: 8px;
+  margin: 5px 0;
+  border-left: 3px solid var(--dark-gold);
+  border-radius: 2px;
+}
+
+.upgrade-btn {
+  background: #8e44ad !important;
+  color: white;
+  padding: 5px 10px;
+  border: 1px solid #9b59b6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-size: 0.8rem;
+  transition: 0.2s;
+}
+
+.upgrade-btn:hover {
+  background: #9b59b6 !important;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.hero-actions button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.rest-btn {
+  background: #2c3e50;
+  color: var(--text-light);
+  border: 1px solid #4a6278;
+}
+
+.rest-btn:hover {
+  background: #34495e;
+}
+
+.adventure-btn:disabled,
+.rest-btn:disabled {
+  background: #555 !important;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.military-info {
+  display: flex;
+  justify-content: space-around;
+  background: #2c1c1c;
+  border: 1px solid #4a2c2c;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 15px 0;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+.army-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.army-actions button {
+  flex: 1;
+  padding: 8px;
+  background: #7f8c8d;
+  color: white;
+  border: 1px solid #95a5a6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.army-actions button:hover {
+  background: #95a5a6;
+}

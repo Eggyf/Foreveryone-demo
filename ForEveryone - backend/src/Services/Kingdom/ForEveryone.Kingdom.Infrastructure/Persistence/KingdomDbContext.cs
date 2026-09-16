@@ -17,6 +17,7 @@ public class KingdomDbContext : DbContext
             builder.HasIndex(k => k.UserId).IsUnique();
             builder.Property(k => k.CastleLevel).IsRequired();
             builder.Property(k => k.LastCollectedTime).IsRequired();
+            builder.Property(k => k.ArmySize).IsRequired(); // <-- NUEVO
 
             // Mapear Value Object Resources
             builder.OwnsOne(k => k.Resources, rb =>

@@ -3,6 +3,7 @@ export interface HeroData {
     class: string;
     level: number;
     health: number;
+    currentHealth: number; // NUEVO
     attack: number;
     defense: number;
     mana: number;
@@ -15,5 +16,13 @@ export interface KingdomData {
     stone: number;
     gold: number;
     food: number;
-    buildings: string[];
+    buildings: BuildingData[];
+    armySize: number;      // NUEVO
+    militaryPower: number; // NUEVO
+}
+
+export interface BuildingData {
+    type: number;
+    name: string;
+    level: number;
 }
