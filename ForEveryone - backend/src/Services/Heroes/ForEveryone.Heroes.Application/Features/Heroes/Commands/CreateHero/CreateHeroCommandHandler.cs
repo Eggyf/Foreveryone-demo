@@ -1,6 +1,7 @@
 using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
 using ForEveryone.Heroes.Application.Interfaces;
 using ForEveryone.Heroes.Domain;
+using Heroes.Application.Interfaces;
 using MediatR;
 
 namespace ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;

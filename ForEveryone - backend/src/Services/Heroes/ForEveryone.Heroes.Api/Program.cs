@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;
+using Heroes.Application.Interfaces;
 using ForEveryone.Heroes.Application.Interfaces;
 using ForEveryone.Heroes.Infrastructure.Persistence;
 using ForEveryone.Heroes.Infrastructure.Services;

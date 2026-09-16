@@ -1,5 +1,7 @@
 using ForEveryone.Kingdom.Application.Exceptions;
 using ForEveryone.Kingdom.Application.Features.Kingdom.Commands.CreateKingdom;
+using ForEveryone.Kingdom.Application.Features.Kingdom.Queries.GetKingdom;
+
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,5 +34,13 @@ public class KingdomsController : ControllerBase
         {
             return Conflict(new { message = ex.Message });
         }
+    }
+
+    [HttpGet("{userId:guid}")]
+    public async Task<IActionResult> GetKingdom(Guid userId)
+    {
+        var result = await _mediator.Send(new GetKingdomQuery(userId));
+        if (result is null) return NotFound();
+        return Ok(result);
     }
 }

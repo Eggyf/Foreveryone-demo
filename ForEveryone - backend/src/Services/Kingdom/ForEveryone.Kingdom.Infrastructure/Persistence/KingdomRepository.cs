@@ -23,4 +23,11 @@ public class KingdomRepository : IKingdomRepository
         await _context.Kingdoms.AddAsync(kingdom);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Kingdoms?> GetByUserIdAsync(Guid userId)
+    {
+        return await _context.Kingdoms
+            .Include(k => k.Buildings) // Importante: traer los edificios
+            .FirstOrDefaultAsync(k => k.UserId == userId);
+    }
 }

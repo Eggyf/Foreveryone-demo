@@ -1,5 +1,6 @@
 using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;
+using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetHero;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,5 +33,13 @@ public class HeroesController : ControllerBase
         {
             return Conflict(new { message = ex.Message }); // Devuelve 409
         }
+    }
+
+    [HttpGet("{userId:guid}")]
+    public async Task<IActionResult> GetHero(Guid userId)
+    {
+        var result = await _mediator.Send(new GetHeroQuery(userId));
+        if (result is null) return NotFound();
+        return Ok(result);
     }
 }
