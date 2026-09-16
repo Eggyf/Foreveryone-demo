@@ -73,11 +73,25 @@ export const Dashboard = ({ userId, onLogout }: { userId: string, onLogout: () =
     }
   };
 
+    // Manejador para ir de aventura
+  const handleAdventure = async () => {
+    try {
+      const { data } = await heroesApi.post(`/api/heroes/${userId}/adventure`);
+      setDashMsg(data.message);
+      
+      // Refrescamos el estado del héroe para ver los nuevos stats/nivel
+      const heroRes = await heroesApi.get(`/api/heroes/${userId}`);
+      if (heroRes) setHero(heroRes.data);
+    } catch (error: any) {
+      setDashMsg(error.response?.data?.message || 'Error al ir a la aventura');
+    }
+  };
+
   return (
     <div className="dashboard">
       <h2>Panel del Jugador</h2>
 
-      <HeroCard hero={hero} onCreate={handleCreateHero} />
+      <HeroCard hero={hero} onCreate={handleCreateHero} onAdventure={handleAdventure} />
       <KingdomCard kingdom={kingdom} onCreate={handleCreateKingdom} onBuild={handleAddBuilding} />
 
 

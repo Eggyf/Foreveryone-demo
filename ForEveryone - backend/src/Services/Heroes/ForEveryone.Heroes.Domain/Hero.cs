@@ -23,4 +23,33 @@ public class Hero
         Experience = 0;
         Stats = stats;
     }
+
+    public void GainExperience(int amount)
+    {
+        if (amount <= 0)
+            throw new ArgumentException("Experience must be greater than zero", nameof(amount));
+
+        Experience += amount;
+
+        // Regla de negocio: Se necesita (Nivel * 100) de experiencia para subir de nivel
+        while (Experience >= Level * 100)
+        {
+            Experience -= Level * 100;
+            LevelUp();
+        }
+    }
+
+    private void LevelUp()
+    {
+        Level++;
+
+        // Al subir de nivel, las stats aumentan (usamos la expresión 'with' para crear un nuevo Value Object)
+        Stats = Stats with
+        {
+            Health = Stats.Health + 20,
+            Attack = Stats.Attack + 5,
+            Defense = Stats.Defense + 5,
+            Mana = Stats.Mana + 10
+        };
+    }
 }

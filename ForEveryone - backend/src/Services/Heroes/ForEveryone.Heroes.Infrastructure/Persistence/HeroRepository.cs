@@ -28,4 +28,10 @@ public class HeroRepository : IHeroRepository
     {
         return await _context.Heroes.FirstOrDefaultAsync(h => h.UserId == userId);
     }
+
+    public async Task UpdateAsync(Hero hero)
+    {
+        // EF Core rastrea los cambios automáticamente
+        await _context.SaveChangesAsync();
+    }
 }

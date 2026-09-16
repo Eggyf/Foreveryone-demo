@@ -260,3 +260,21 @@ form button:hover {
   background: #34495e;
   border-color: var(--gold);
 }
+
+.adventure-btn {
+  background: linear-gradient(to bottom, #c0392b, #922b21) !important;
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  color: white;
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.adventure-btn:hover {
+  background: linear-gradient(to bottom, #e74c3c, #c0392b) !important;
+}
