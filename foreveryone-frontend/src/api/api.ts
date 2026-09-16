@@ -9,6 +9,10 @@ export const heroesApi = axios.create({
     baseURL: 'http://localhost:5281', // Cambia por tu puerto de Heroes
 });
 
+export const shopApi = axios.create({
+    baseURL: 'http://localhost:5136', // Cambia el puerto por el de tu Shop.Api
+});
+
 export const kingdomApi = axios.create({
     baseURL: 'http://localhost:5256', // Cambia por tu puerto de Kingdom
 });

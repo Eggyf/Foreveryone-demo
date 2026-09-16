@@ -7,6 +7,7 @@ using Heroes.Application.Interfaces;
 using ForEveryone.Heroes.Application.Interfaces;
 using ForEveryone.Heroes.Infrastructure.Persistence;
 using ForEveryone.Heroes.Infrastructure.Services;
+using Heroes.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,12 @@ builder.Services.AddScoped<IHeroRepository, HeroRepository>();
 builder.Services.AddHttpClient<IUserVerificationService, UserVerificationService>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["IdentityServiceUrl"]!);
+});
+
+// Comunicación con Shop.Api
+builder.Services.AddHttpClient<IShopCatalogService, ShopCatalogService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ShopServiceUrl"]!);
 });
 
 builder.Services.AddControllers();

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { heroesApi } from '../api/api';
+import { heroesApi, shopApi } from '../api/api'; // Importar shopApi
 import type { HeroData, ShopItemData } from '../types';
 
 export const ShopPage = () => {
@@ -12,7 +12,8 @@ export const ShopPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       const heroRes = await heroesApi.get(`/api/heroes/${userId}`).catch(() => null);
-      const shopRes = await heroesApi.get('/api/shop').catch(() => null);
+      // NUEVO: Obtener items de Shop.Api
+      const shopRes = await shopApi.get('/api/shop').catch(() => null); 
       if (heroRes) setHero(heroRes.data);
       if (shopRes) setItems(shopRes.data);
     };
@@ -21,6 +22,7 @@ export const ShopPage = () => {
 
   const handleBuyItem = async (itemId: string) => {
     try {
+      // NUEVO: Comprar sigue yendo a Heroes.Api
       await heroesApi.post(`/api/shop/${userId}/buy`, { itemId });
       setPageMsg('¡Compra exitosa!');
       const { data } = await heroesApi.get(`/api/heroes/${userId}`);
