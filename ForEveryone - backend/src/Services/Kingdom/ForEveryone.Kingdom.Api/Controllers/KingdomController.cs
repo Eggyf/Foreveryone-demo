@@ -1,7 +1,8 @@
 using ForEveryone.Kingdom.Application.Exceptions;
 using ForEveryone.Kingdom.Application.Features.Kingdom.Commands.CreateKingdom;
 using ForEveryone.Kingdom.Application.Features.Kingdom.Queries.GetKingdom;
-
+using ForEveryone.Kingdom.Application.Features.Kingdom.Commands.AddBuilding;
+using ForEveryone.Kingdom.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,4 +44,27 @@ public class KingdomsController : ControllerBase
         if (result is null) return NotFound();
         return Ok(result);
     }
+
+    [HttpPost("{userId:guid}/buildings")]
+    public async Task<IActionResult> AddBuilding(Guid userId, [FromBody] AddBuildingRequest request)
+    {
+        try
+        {
+            var command = new AddBuildingCommand(userId, (BuildingType)request.BuildingType);
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            // 400 Bad Request: Lanzado por el dominio si no hay recursos o el edificio ya existe
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // DTO mínimo para recibir el tipo de edificio del frontend
+    public record AddBuildingRequest(int BuildingType);
 }

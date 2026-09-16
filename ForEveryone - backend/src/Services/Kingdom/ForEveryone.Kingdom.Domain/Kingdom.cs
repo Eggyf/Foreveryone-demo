@@ -21,7 +21,7 @@ public class Kingdoms
         UserId = userId;
         CastleLevel = 1;
         Resources = Resources.Initial;
-        Buildings.Add(new Building(Guid.NewGuid(), BuildingType.Castle, 1));
+        Buildings.Add(new Building(BuildingType.Castle, 1));
     }
 
     public void AddBuilding(BuildingType type)
@@ -34,7 +34,9 @@ public class Kingdoms
             throw new InvalidOperationException("Recursos insuficientes para construir.");
 
         Resources = Resources.Deduct(cost);
-        Buildings.Add(new Building(Guid.NewGuid(), type, 1));
+
+        // Cambio aquí: Sin Guid.NewGuid()
+        Buildings.Add(new Building(type, 1));
     }
 
     private Resources GetBuildingCost(BuildingType type)

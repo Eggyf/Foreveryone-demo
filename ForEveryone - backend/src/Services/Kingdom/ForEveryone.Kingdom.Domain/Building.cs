@@ -1,3 +1,5 @@
+using ForEveryone.Kingdom.Domain;
+
 namespace ForEveryone.Kingdom.Domain;
 
 public class Building
@@ -9,9 +11,9 @@ public class Building
     // Para EF Core
     private Building() { }
 
-    public Building(Guid id, BuildingType type, int level)
+    // Cambio aquí: Sin Guid
+    public Building(BuildingType type, int level)
     {
-        Id = id;
         Type = type;
         Level = level;
     }

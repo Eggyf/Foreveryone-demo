@@ -30,4 +30,10 @@ public class KingdomRepository : IKingdomRepository
             .Include(k => k.Buildings) // Importante: traer los edificios
             .FirstOrDefaultAsync(k => k.UserId == userId);
     }
+
+    public async Task UpdateAsync(Kingdoms kingdom)
+    {
+        // EF Core rastrea automáticamente los cambios en 'kingdom' y sus 'Buildings'
+        await _context.SaveChangesAsync();
+    }
 }

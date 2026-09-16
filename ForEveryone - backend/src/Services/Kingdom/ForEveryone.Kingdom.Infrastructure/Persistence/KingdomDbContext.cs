@@ -28,12 +28,13 @@ public class KingdomDbContext : DbContext
 
             // Mapear la colección de Buildings como Owned Entities (esto ahora funcionará perfecto)
             builder.OwnsMany(k => k.Buildings, bb =>
-            {
-                bb.ToTable("KingdomBuildings");
-                bb.WithOwner().HasForeignKey("KingdomId");
-                bb.HasKey(b => b.Id);
-                bb.Property(b => b.Type).HasConversion<string>();
-            });
+                {
+                    bb.ToTable("KingdomBuildings");
+                    bb.WithOwner().HasForeignKey("KingdomId");
+                    bb.HasKey(b => b.Id);
+                    // EF Core detectará que es un Guid y lo generará automáticamente en la BD
+                    bb.Property(b => b.Type).HasConversion<string>();
+                });
         });
     }
 }

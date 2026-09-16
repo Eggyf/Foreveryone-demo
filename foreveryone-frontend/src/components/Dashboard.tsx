@@ -57,12 +57,29 @@ export const Dashboard = ({ userId, onLogout }: { userId: string, onLogout: () =
     }
   };
 
+  const handleAddBuilding = async (buildingType: number) => {
+    try {
+      await kingdomApi.post(`/api/kingdoms/${userId}/buildings`, { 
+        buildingType 
+      });
+      setDashMsg('¡Edificio construido con éxito!');
+      
+      // Refrescamos el estado del reino
+      const { data } = await kingdomApi.get(`/api/kingdoms/${userId}`);
+      setKingdom(data);
+    } catch (error: any) {
+      // El backend devuelve 400 si no hay recursos
+      setDashMsg(error.response?.data?.message || 'Error al construir');
+    }
+  };
+
   return (
     <div className="dashboard">
       <h2>Panel del Jugador</h2>
-      
+
       <HeroCard hero={hero} onCreate={handleCreateHero} />
-      <KingdomCard kingdom={kingdom} onCreate={handleCreateKingdom} />
+      <KingdomCard kingdom={kingdom} onCreate={handleCreateKingdom} onBuild={handleAddBuilding} />
+
 
       {dashMsg && <p className="message" style={{ color: '#28a745' }}>{dashMsg}</p>}
       <button className="logout-btn" onClick={onLogout}>Cerrar Sesión</button>

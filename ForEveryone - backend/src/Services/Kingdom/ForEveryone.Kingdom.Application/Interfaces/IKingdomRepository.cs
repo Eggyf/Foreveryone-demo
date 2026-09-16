@@ -6,5 +6,6 @@ public interface IKingdomRepository
 {
     Task<bool> ExistsByUserIdAsync(Guid userId);
     Task AddAsync(Kingdoms kingdom);
-    Task<Kingdoms?> GetByUserIdAsync(Guid userId); // <-- NUEVO
+    Task<Kingdoms?> GetByUserIdAsync(Guid userId);
+    Task UpdateAsync(Kingdoms kingdom); // <-- NUEVO
 }

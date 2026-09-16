@@ -1,6 +1,10 @@
 import type { KingdomData } from '../types';
 
-export const KingdomCard = ({ kingdom, onCreate }: { kingdom: KingdomData | null, onCreate: () => void }) => {
+export const KingdomCard = ({ kingdom, onCreate, onBuild }: { 
+    kingdom: KingdomData | null, 
+    onCreate: () => void,
+    onBuild: (type: number) => void 
+}) => {
   if (!kingdom) {
     return (
       <div className="action-box">
@@ -19,10 +23,24 @@ export const KingdomCard = ({ kingdom, onCreate }: { kingdom: KingdomData | null
         <span>🪙 Oro: {kingdom.gold}</span>
         <span>🍖 Comida: {kingdom.food}</span>
       </div>
-      <h4>Edificios:</h4>
+      
+      <h4>Edificios Actuales:</h4>
       <ul>
         {kingdom.buildings.map((b, i) => <li key={i}>{b}</li>)}
       </ul>
+
+      <h4>Menú de Construcción:</h4>
+      <div className="build-menu">
+        <button onClick={() => onBuild(2)} title="Costo: 200🪵 100🪨 50🪙">
+          🌾 Construir Granja
+        </button>
+        <button onClick={() => onBuild(3)} title="Costo: 100🪵 200🪨 50🪙">
+          🪚 Construir Aserradero
+        </button>
+        <button onClick={() => onBuild(4)} title="Costo: 200🪵 100🪨 50🪙">
+          ⛏️ Construir Cantera
+        </button>
+      </div>
     </div>
   );
 };
