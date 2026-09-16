@@ -6,6 +6,7 @@ public class Kingdoms
     public Guid UserId { get; private set; }
     public int CastleLevel { get; private set; }
     public Resources Resources { get; private set; }
+    public DateTime LastCollectedTime { get; private set; }
 
     // Cambio aquí: Usamos una List con setter privado para que EF Core la mapee sin problemas
     public List<Building> Buildings { get; private set; } = new();
@@ -21,7 +22,43 @@ public class Kingdoms
         UserId = userId;
         CastleLevel = 1;
         Resources = Resources.Initial;
+        LastCollectedTime = DateTime.UtcNow;
         Buildings.Add(new Building(BuildingType.Castle, 1));
+    }
+
+    // Lógica de recolección pasiva
+    public void CollectResources(DateTime currentTime)
+    {
+        var timeDiff = currentTime - LastCollectedTime;
+        int minutesElapsed = (int)timeDiff.TotalMinutes;
+
+        if (minutesElapsed <= 0) return;
+
+        // LÍMITE DE TIEMPO: Máximo 120 minutos (2 horas) de acumulación pasiva
+        int effectiveMinutes = Math.Min(minutesElapsed, 120);
+
+        int woodProd = 0, stoneProd = 0, goldProd = 0, foodProd = 0;
+
+        foreach (var building in Buildings)
+        {
+            // PRODUCCIÓN BAJADA: 5 por nivel en lugar de 10
+            switch (building.Type)
+            {
+                case BuildingType.Sawmill: woodProd += building.Level * 5; break;
+                case BuildingType.Quarry: stoneProd += building.Level * 5; break;
+                case BuildingType.Market: goldProd += building.Level * 5; break;
+                case BuildingType.Farm: foodProd += building.Level * 5; break;
+            }
+        }
+
+        Resources = new Resources(
+            Resources.Wood + (woodProd * effectiveMinutes),
+            Resources.Stone + (stoneProd * effectiveMinutes),
+            Resources.Gold + (goldProd * effectiveMinutes),
+            Resources.Food + (foodProd * effectiveMinutes)
+        );
+
+        LastCollectedTime = currentTime;
     }
 
     public void AddBuilding(BuildingType type)

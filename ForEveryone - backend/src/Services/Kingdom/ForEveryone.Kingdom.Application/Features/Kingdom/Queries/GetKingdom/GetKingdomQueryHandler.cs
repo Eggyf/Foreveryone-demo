@@ -17,6 +17,10 @@ public class GetKingdomQueryHandler : IRequestHandler<GetKingdomQuery, GetKingdo
         var kingdom = await _kingdomRepository.GetByUserIdAsync(request.UserId);
         if (kingdom is null) return null;
 
+        // ¡MAGIA! Recolectar recursos pasivos antes de devolver la data
+        kingdom.CollectResources(DateTime.UtcNow);
+        await _kingdomRepository.UpdateAsync(kingdom);
+
         return new GetKingdomResult(
             kingdom.Id,
             kingdom.CastleLevel,
@@ -27,4 +31,5 @@ public class GetKingdomQueryHandler : IRequestHandler<GetKingdomQuery, GetKingdo
             kingdom.Buildings.Select(b => $"{b.Type} (Nv.{b.Level})").ToList()
         );
     }
+
 }
