@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { heroesApi, shopApi } from '../api/api'; // Importar shopApi
@@ -20,15 +21,17 @@ export const ShopPage = () => {
     if (userId) fetchData();
   }, [userId]);
 
-  const handleBuyItem = async (itemId: string) => {
+  const handleBuyItem = async (itemId: number) => {
     try {
-      // NUEVO: Comprar sigue yendo a Heroes.Api
       await heroesApi.post(`/api/shop/${userId}/buy`, { itemId });
       setPageMsg('¡Compra exitosa!');
       const { data } = await heroesApi.get(`/api/heroes/${userId}`);
       setHero(data);
-    } catch (e: any) { 
-      setPageMsg(e.response?.data?.message || 'Error al comprar'); 
+    } catch (error: unknown) {
+      const message = isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : undefined;
+      setPageMsg(message || 'Error al comprar');
     }
   };
 

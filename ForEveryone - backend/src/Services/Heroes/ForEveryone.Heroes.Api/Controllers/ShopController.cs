@@ -45,5 +45,5 @@ public class ShopController : ControllerBase
         }
     }
 
-    public record BuyItemRequest(string ItemId);
+    public record BuyItemRequest(int ItemId);
 }

@@ -21,11 +21,8 @@ public class BuyItemCommandHandler : IRequestHandler<BuyItemCommand, BuyItemResu
         if (hero is null)
             throw new NotFoundException("Héroe no encontrado.");
 
-        if (!int.TryParse(request.ItemId, out int itemId))
-            throw new ArgumentException("ID de item inválido.");
-
-        // ¡AQUÍ ESTÁ LA MAGIA! Heroes le pregunta a Shop por el item
-        var item = await _shopCatalogService.GetItemByIdAsync(itemId);
+        // Heroes consulta a Shop para validar el objeto y aplicar sus efectos.
+        var item = await _shopCatalogService.GetItemByIdAsync(request.ItemId);
         if (item is null)
             throw new NotFoundException("El item no existe en la tienda de Shop.");
 

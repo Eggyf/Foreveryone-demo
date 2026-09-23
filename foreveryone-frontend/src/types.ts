@@ -29,7 +29,7 @@ export interface BuildingData {
 }
 
 export interface ShopItemData {
-    id: string;
+    id: number;
     name: string;
     description: string;
     cost: number;
