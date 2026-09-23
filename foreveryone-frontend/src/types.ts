@@ -1,3 +1,9 @@
+export interface UserSession {
+    userId: string;
+    email: string;
+    displayName: string;
+}
+
 export interface HeroData {
     heroId: string;
     class: string;

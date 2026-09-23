@@ -1,56 +1,174 @@
+import { Link } from 'react-router-dom';
+import heroAvatar from '../assets/hero-avatar.svg';
 import type { HeroData } from '../types';
-import './GameCard.css';
 import './HeroCard.css';
 
-export const HeroCard = ({ hero, onCreate, onAdventure, onRest, onOpenShop }: { 
-    hero: HeroData | null, 
-    onCreate: () => void,
-    onAdventure: () => void,
-    onRest: () => void,
-    onOpenShop: () => void
-}) => {
+const HERO_CLASS_DETAILS: Record<string, { label: string; icon: string; specialty: string }> = {
+  warrior: {
+    label: 'Guerrero',
+    icon: '⚔️',
+    specialty: 'Especialista en combate cuerpo a cuerpo.',
+  },
+  mage: {
+    label: 'Mago',
+    icon: '🔮',
+    specialty: 'Maestro de magia y poder arcano.',
+  },
+  archer: {
+    label: 'Arquero',
+    icon: '🏹',
+    specialty: 'Experto en ataques a distancia.',
+  },
+  priest: {
+    label: 'Sacerdote',
+    icon: '✨',
+    specialty: 'Guardián del poder sagrado y la vida.',
+  },
+};
+
+interface HeroCardProps {
+  hero: HeroData | null;
+  displayName: string;
+  onCreate: () => void;
+  onAdventure: () => void;
+  onRest: () => void;
+}
+
+const getClassDetails = (heroClass: string) =>
+  HERO_CLASS_DETAILS[heroClass.toLowerCase()] ?? {
+    label: heroClass || 'Héroe',
+    icon: '🛡️',
+    specialty: 'Aventurero en servicio del reino.',
+  };
+
+export const HeroCard = ({
+  hero,
+  displayName,
+  onCreate,
+  onAdventure,
+  onRest,
+}: HeroCardProps) => {
+  const safeDisplayName = displayName || 'Aventurero';
+
   if (!hero) {
     return (
-      <div className="action-box">
-        <p>Aún no tienes un héroe.</p>
-        <button onClick={onCreate}>Crear Héroe (Warrior)</button>
-      </div>
+      <section className="hero-empty-card">
+        <div className="hero-avatar-frame hero-avatar-frame-empty">
+          <img src={heroAvatar} alt={`Retrato de ${safeDisplayName}`} />
+        </div>
+        <span className="hero-eyebrow">Tu legado comienza aquí</span>
+        <h2>{safeDisplayName}</h2>
+        <p>Todavía no has creado un héroe para defender el reino de Eldoria.</p>
+        <button type="button" className="create-hero-btn" onClick={onCreate}>
+          ⚔️ Crear mi guerrero
+        </button>
+      </section>
     );
   }
 
+  const classDetails = getClassDetails(hero.class);
+  const healthPercentage = hero.health === 0
+    ? 0
+    : Math.min(100, Math.max(0, Math.round((hero.currentHealth / hero.health) * 100)));
+  const isDefeated = hero.currentHealth === 0;
+  const isFullyRested = hero.currentHealth === hero.health;
+  const statusLabel = isDefeated ? 'Derrotado' : isFullyRested ? 'Descansado' : 'Listo para aventurearse';
+
   return (
-    <div className="stats-card">
-      <h3>⚔️ Héroe: {hero.class}</h3>
-      <p>🧡 Nivel: {hero.level} | 🪙 Oro: {hero.gold}</p>
-      <ul>
-        <li style={{ color: hero.currentHealth > 0 ? '#e74c3c' : '#888' }}>
-          ❤️ Vida: {hero.currentHealth} / {hero.health} {hero.currentHealth === 0 && ' (DERROTADO)'}
-        </li>
-        <li>💥 Ataque: {hero.attack}</li>
-        <li>🛡️ Defensa: {hero.defense}</li>
-        <li>🔮 Maná: {hero.mana}</li>
-      </ul>
-      
+    <section className="hero-profile-card">
+      <div className="hero-profile-header">
+        <div className="hero-avatar-frame">
+          <img src={heroAvatar} alt={`Retrato de ${safeDisplayName}, ${classDetails.label}`} />
+          <span className="hero-level-badge">Nv. {hero.level}</span>
+        </div>
+
+        <div className="hero-profile-copy">
+          <span className="hero-eyebrow">Héroe de Eldoria</span>
+          <h2>{safeDisplayName}</h2>
+          <div className="hero-class-badge">
+            <span aria-hidden="true">{classDetails.icon}</span>
+            {classDetails.label}
+          </div>
+          <p>{classDetails.specialty}</p>
+          <span className={`hero-status ${isDefeated ? 'is-defeated' : ''}`}>
+            <i aria-hidden="true" />
+            {statusLabel}
+          </span>
+        </div>
+      </div>
+
+      <div className={`hero-health-panel ${isDefeated ? 'is-defeated' : ''}`}>
+        <div className="hero-health-header">
+          <span>❤️ Vida</span>
+          <strong>{hero.currentHealth} / {hero.health}</strong>
+        </div>
+        <div
+          className="hero-health-track"
+          role="progressbar"
+          aria-label="Vida del héroe"
+          aria-valuemin={0}
+          aria-valuemax={hero.health}
+          aria-valuenow={hero.currentHealth}
+        >
+          <span style={{ width: `${healthPercentage}%` }} />
+        </div>
+      </div>
+
+      <div className="hero-stats-grid" aria-label="Estadísticas del héroe">
+        <div className="hero-stat">
+          <span aria-hidden="true">💥</span>
+          <div><small>Ataque</small><strong>{hero.attack}</strong></div>
+        </div>
+        <div className="hero-stat">
+          <span aria-hidden="true">🛡️</span>
+          <div><small>Defensa</small><strong>{hero.defense}</strong></div>
+        </div>
+        <div className="hero-stat">
+          <span aria-hidden="true">🔮</span>
+          <div><small>Maná</small><strong>{hero.mana}</strong></div>
+        </div>
+        <div className="hero-stat">
+          <span aria-hidden="true">🪙</span>
+          <div><small>Oro</small><strong>{hero.gold}</strong></div>
+        </div>
+      </div>
+
       <div className="hero-actions">
-        <button 
-            className="adventure-btn" 
-            onClick={onAdventure}
-            disabled={hero.currentHealth === 0}
+        <button
+          type="button"
+          className="adventure-btn"
+          onClick={onAdventure}
+          disabled={isDefeated}
         >
           🗡️ Aventura
         </button>
-        <button 
-            className="rest-btn" 
-            onClick={onRest}
-            disabled={hero.currentHealth === hero.health}
+        <button
+          type="button"
+          className="rest-btn"
+          onClick={onRest}
+          disabled={isFullyRested}
         >
           🛏️ Descansar
         </button>
       </div>
-      
-      <button className="shop-btn" onClick={onOpenShop}>
-        🏪 Abrir Tienda
-      </button>
-    </div>
+
+      <Link className="shop-btn" to="/shop">
+        🏪 Visitar la tienda
+      </Link>
+    </section>
   );
 };
+
+export const HeroLoadingCard = ({ displayName }: { displayName: string }) => (
+  <section className="hero-loading-card" aria-label="Cargando información del héroe">
+    <div className="hero-loading-avatar">
+      <img src={heroAvatar} alt="" />
+    </div>
+    <div className="hero-loading-copy">
+      <span className="hero-loading-line hero-loading-line-short" />
+      <strong>{displayName || 'Aventurero'}</strong>
+      <span className="hero-loading-line" />
+      <span className="hero-loading-line hero-loading-line-medium" />
+    </div>
+  </section>
+);

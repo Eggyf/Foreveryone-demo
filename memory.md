@@ -28,7 +28,10 @@ Last verified: 2026-09-23
 - `foreveryone-frontend/src/App.css` is limited to global theme variables, global body/reset concerns, and the application root layout.
 - Shared card rules live in `foreveryone-frontend/src/components/GameCard.css`; component-specific rules live in their respective CSS files.
 - The shop is presented as a separate frontend route/page rather than only a hero-page modal.
-- Page identity data currently comes from React Router outlet context in the page components; avoid reintroducing duplicate `userId` props without a deliberate architecture change.
+- The Castle view treats the castle as its primary section and renders every additional constructed building with `BuildingCard`; construction and army training remain dedicated sections.
+- The Hero view uses a profile-card layout with a local illustrated avatar, the user's derived display name, class, health, level, and combat stats.
+- Authenticated page identity is decoded from the JWT into a typed `UserSession` and provided through React Router outlet context; avoid reintroducing duplicate page props.
+- Because Identity currently stores only an email, the frontend derives a readable display name from the email local part until a real name claim or profile field exists.
 - Project-specific OpenCode subagents exist under `.opencode/agents/`: `code-explorer`, `reviewer`, `tester`, and `documentation-writer`.
 
 ## Durable validation requirements
@@ -44,13 +47,10 @@ Last verified: 2026-09-23
 
 Observed on 2026-09-23:
 
-- `npm run build` is blocked by route/page prop mismatches: `App.tsx` passes `userId` to pages that obtain it from outlet context and do not declare that prop.
-- `HeroPage.tsx` contains an invalid leftover prop/comment (`Vacío porque la tienda ahora es otra página`) and does not currently provide the `onOpenShop` callback expected by `HeroCard`.
-- `npm run lint` currently reports existing `no-explicit-any` and unused error-variable violations across frontend/API files.
+- `npm run build` now passes, including `tsc -b` and the Vite production bundle.
+- `npm run lint` still reports seven pre-existing `no-explicit-any` and unused error-variable violations in `src/api/api.ts`, `src/components/Auth.tsx`, and `src/pages/CastlePage.tsx`.
 - The repository has no automated frontend test suite.
 - API URLs remain fixed in `src/api/api.ts`; frontend environment variables are not yet consumed.
-
-A direct `npx vite build` succeeded while `tsc -b` remained blocked, so the JavaScript bundle could be produced but the full TypeScript build was not healthy.
 
 ### Backend and security
 
@@ -65,6 +65,7 @@ Documented project risks that still require verification before production use:
 ## Recent durable work
 
 - 2026-09-23: split the former monolithic `App.css` rules into co-located component/page stylesheets and shared `GameCard.css`.
+- 2026-09-23: redesigned the Castle and Hero views, added individual building cards and a local hero profile avatar, and replaced duplicate route props with typed outlet context.
 - 2026-09-23: pushed commit `f1e06cd` (`refactor: split component styles into dedicated files`) to branch `Eggyfh-dev`.
 
 Git history is the source of truth for older changes; only add future entries here when they provide persistent context that is not already obvious from the repository.

@@ -4,7 +4,7 @@ ForEveryone es un RPG web de gestión y progresión idle (*management/idle game*
 
 El repositorio contiene una SPA React y cuatro servicios ASP.NET Core independientes. Cada servicio aplica una separación por contextos con capas `Api`, `Application`, `Domain` e `Infrastructure`, y utiliza su propio contexto de persistencia PostgreSQL.
 
-> **Estado actual:** el proyecto es un MVP funcional en desarrollo. El backend compila, pero todavía no debe exponerse públicamente sin resolver la autenticación/autorización, la configuración de producción y los bloqueos de compilación del frontend descritos más abajo.
+> **Estado actual:** el proyecto es un MVP funcional en desarrollo. El backend y el frontend compilan, pero la aplicación todavía no debe exponerse públicamente sin resolver la autenticación/autorización, la configuración de producción y los riesgos descritos más abajo.
 
 ## 📑 Tabla de contenido
 
@@ -409,7 +409,7 @@ Usa el agente reviewer para revisar los cambios actuales sin modificar archivos.
 
 - **Autorización pendiente:** Identity emite JWT, pero Heroes, Kingdom y Shop no configuran actualmente `AddJwtBearer`, `UseAuthentication` ni `[Authorize]`. No confíes en el `userId` enviado por el cliente hasta resolverlo.
 - **Endpoint interno público:** `/internal/users/{id}/exists` no requiere autenticación entre servicios.
-- **Build frontend bloqueado:** `npm run build` detecta actualmente props inconsistentes en `src/App.tsx` y `src/pages/HeroPage.tsx`.
+- **Lint frontend pendiente:** `npm run lint` conserva errores existentes de tipos `any` y parámetros sin usar en `src/api/api.ts`, `src/components/Auth.tsx` y `src/pages/CastlePage.tsx`.
 - **Configuración frontend desacoplada:** las variables del archivo `.env` todavía no se utilizan y las URL de API están fijadas en `src/api/api.ts`.
 - **Sin pruebas automatizadas:** no hay proyectos de tests .NET ni una suite de frontend.
 - **Sin CI/CD ni contenedores:** todavía no hay Dockerfiles, Docker Compose ni workflows de despliegue.
@@ -463,7 +463,7 @@ ShopServiceUrl=http://localhost:5136/
 
 ## 🗺️ Roadmap
 
-1. Corregir el build del frontend y unificar el uso de props/contexto.
+1. Eliminar los errores de lint restantes y ampliar la cobertura de pruebas.
 2. Implementar validación JWT y autorización en todos los servicios.
 3. Obtener `userId` desde claims en lugar de confiar en el cuerpo o la URL.
 4. Sustituir URLs fijas por configuración validada para Vite.

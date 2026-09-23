@@ -1,7 +1,8 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import type { UserSession } from '../types';
 import './GameLayout.css';
 
-export const GameLayout = ({ userId, onLogout }: { userId: string, onLogout: () => void }) => {
+export const GameLayout = ({ user, onLogout }: { user: UserSession, onLogout: () => void }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -20,7 +21,7 @@ export const GameLayout = ({ userId, onLogout }: { userId: string, onLogout: () 
       
       <main className="page-content">
         {/* Outlet renderiza la página activa (HeroPage, CastlePage, etc.) */}
-        <Outlet context={userId} /> 
+        <Outlet context={user} />
       </main>
     </div>
   );

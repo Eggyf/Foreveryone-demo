@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { kingdomApi } from '../api/api';
-import type { KingdomData } from '../types';
+import type { KingdomData, UserSession } from '../types';
 import { KingdomCard } from '../components/KingdomCard';
 
 export const CastlePage = () => {
-  const userId = useOutletContext<string>();
+  const { userId } = useOutletContext<UserSession>();
   const [kingdom, setKingdom] = useState<KingdomData | null>(null);
   const [pageMsg, setPageMsg] = useState('');
 

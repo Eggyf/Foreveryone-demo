@@ -2,12 +2,12 @@ import { isAxiosError } from 'axios';
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { heroesApi, shopApi } from '../api/api'; // Importar shopApi
-import type { HeroData, ShopItemData } from '../types';
+import type { HeroData, ShopItemData, UserSession } from '../types';
 import '../components/GameCard.css';
 import './ShopPage.css';
 
 export const ShopPage = () => {
-  const userId = useOutletContext<string>();
+  const { userId } = useOutletContext<UserSession>();
   const [hero, setHero] = useState<HeroData | null>(null);
   const [items, setItems] = useState<ShopItemData[]>([]);
   const [pageMsg, setPageMsg] = useState('');

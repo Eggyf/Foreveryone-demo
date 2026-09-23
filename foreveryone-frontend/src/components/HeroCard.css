@@ -1,14 +1,258 @@
-.hero-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
+.hero-profile-card,
+.hero-empty-card,
+.hero-loading-card {
+  position: relative;
+  overflow: hidden;
+  margin-top: 24px;
+  border: 1px solid #4a3a1b;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(212, 175, 55, 0.14), transparent 32%),
+    linear-gradient(145deg, #24211b, #171717 62%);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.4);
 }
 
-.hero-actions button {
-  flex: 1;
+.hero-profile-card {
+  padding: 24px;
+  border-top: 2px solid var(--gold);
+  text-align: left;
+}
+
+.hero-profile-card::after {
+  position: absolute;
+  right: -30px;
+  bottom: -65px;
+  color: rgba(212, 175, 55, 0.045);
+  content: "⚔";
+  font-size: 13rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.hero-profile-header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 142px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+}
+
+.hero-avatar-frame {
+  position: relative;
+  width: 142px;
+  height: 142px;
+  padding: 5px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  background: #111;
+  box-shadow:
+    0 0 0 4px rgba(212, 175, 55, 0.12),
+    0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+.hero-avatar-frame::after {
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.hero-avatar-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hero-level-badge {
+  position: absolute;
+  right: -7px;
+  bottom: 5px;
+  z-index: 2;
+  padding: 5px 9px;
+  border: 2px solid #171717;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #17130a;
+  font-family: "Cinzel", serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.hero-profile-copy {
+  min-width: 0;
+}
+
+.hero-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #b8a16a;
+  font-family: "Cinzel", serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-profile-copy h2,
+.hero-empty-card h2 {
+  overflow: hidden;
+  margin: 0;
+  color: var(--gold);
+  font-family: "MedievalSharp", cursive;
+  font-size: 2rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-class-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  padding: 5px 10px;
+  border: 1px solid #6f5720;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.72);
+  color: #e2cc88;
+  font-family: "Cinzel", serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hero-profile-copy p {
+  margin: 10px 0 8px;
+  color: #aaa;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #7bd88f;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.hero-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentcolor;
+  box-shadow: 0 0 8px currentcolor;
+}
+
+.hero-status.is-defeated {
+  color: #e06c75;
+}
+
+.hero-health-panel {
+  position: relative;
+  z-index: 1;
+  margin-top: 22px;
+  padding: 13px;
+  border: 1px solid #4a2c2c;
+  border-radius: 7px;
+  background: rgba(44, 28, 28, 0.72);
+}
+
+.hero-health-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #ddd;
+  font-size: 0.82rem;
+}
+
+.hero-health-header strong {
+  color: #f0c3bf;
+}
+
+.hero-health-track {
+  overflow: hidden;
+  height: 9px;
+  border: 1px solid #5a3434;
+  border-radius: 999px;
+  background: #1b1111;
+}
+
+.hero-health-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8e2b24, #e74c3c);
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.45);
+  transition: width 0.3s ease;
+}
+
+.hero-health-panel.is-defeated .hero-health-track span {
+  background: #555;
+  box-shadow: none;
+}
+
+.hero-stats-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.hero-stat {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #3a3425;
+  border-radius: 6px;
+  background: rgba(17, 17, 17, 0.78);
+}
+
+.hero-stat > span {
+  font-size: 1.15rem;
+}
+
+.hero-stat div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.hero-stat small {
+  overflow: hidden;
+  color: #999;
+  font-size: 0.65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-stat strong {
+  color: #eee;
+  font-size: 0.95rem;
+}
+
+.hero-actions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.hero-actions button,
+.create-hero-btn {
   padding: 12px;
-  border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   font-family: "Cinzel", serif;
   font-weight: 700;
@@ -16,11 +260,14 @@
 }
 
 .adventure-btn {
-  background: linear-gradient(to bottom, #c0392b, #922b21) !important;
+  border: 1px solid #e74c3c;
+  background: linear-gradient(to bottom, #c0392b, #922b21);
+  color: white;
 }
 
-.adventure-btn:hover {
-  background: linear-gradient(to bottom, #e74c3c, #c0392b) !important;
+.adventure-btn:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #e74c3c, #c0392b);
+  transform: translateY(-2px);
 }
 
 .rest-btn {
@@ -29,31 +276,175 @@
   color: var(--text-light);
 }
 
-.rest-btn:hover {
+.rest-btn:hover:not(:disabled) {
   background: #34495e;
+  transform: translateY(-2px);
 }
 
 .adventure-btn:disabled,
 .rest-btn:disabled {
-  background: #555 !important;
-  color: #999;
+  border-color: #555;
+  background: #3f3f3f;
+  color: #888;
   cursor: not-allowed;
+  transform: none;
 }
 
 .shop-btn {
+  position: relative;
+  z-index: 1;
+  display: block;
   width: 100%;
-  margin-top: 15px;
-  padding: 12px;
+  margin-top: 10px;
+  padding: 11px;
   border: 1px solid #e67e22;
-  border-radius: 4px;
-  background: #f39c12 !important;
+  border-radius: 5px;
+  background: linear-gradient(to bottom, #f39c12, #d87f08);
   color: white;
-  cursor: pointer;
   font-family: "Cinzel", serif;
   font-weight: 700;
+  text-align: center;
+  text-decoration: none;
   transition: 0.2s;
 }
 
 .shop-btn:hover {
-  background: #e67e22 !important;
+  background: linear-gradient(to bottom, #f7b843, #e58c0b);
+  transform: translateY(-2px);
+}
+
+.hero-actions button:focus-visible,
+.create-hero-btn:focus-visible,
+.shop-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.hero-empty-card {
+  padding: 30px 24px;
+  border-style: dashed;
+  text-align: center;
+}
+
+.hero-avatar-frame-empty {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto 20px;
+  filter: saturate(0.65);
+}
+
+.hero-empty-card p {
+  max-width: 360px;
+  margin: 10px auto 20px;
+  color: #aaa;
+  line-height: 1.5;
+}
+
+.create-hero-btn {
+  border: 1px solid #e74c3c;
+  background: linear-gradient(to bottom, #c0392b, #922b21);
+  color: white;
+}
+
+.create-hero-btn:hover {
+  background: linear-gradient(to bottom, #e74c3c, #c0392b);
+  transform: translateY(-2px);
+}
+
+.hero-loading-card {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+}
+
+.hero-loading-avatar {
+  overflow: hidden;
+  width: 110px;
+  height: 110px;
+  border: 2px solid #4a3a1b;
+  border-radius: 50%;
+  background: #111;
+}
+
+.hero-loading-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.45;
+}
+
+.hero-loading-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hero-loading-copy strong {
+  color: var(--gold);
+  font-family: "MedievalSharp", cursive;
+  font-size: 1.6rem;
+}
+
+.hero-loading-line {
+  display: block;
+  width: 100%;
+  height: 11px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2a2a2a, #3c3c3c, #2a2a2a);
+  background-size: 200% 100%;
+  animation: hero-loading-shimmer 1.4s infinite;
+}
+
+.hero-loading-line-short {
+  width: 28%;
+}
+
+.hero-loading-line-medium {
+  width: 68%;
+}
+
+@keyframes hero-loading-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (max-width: 480px) {
+  .hero-profile-card {
+    padding: 18px;
+  }
+
+  .hero-profile-header {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .hero-profile-copy h2,
+  .hero-empty-card h2 {
+    max-width: 100%;
+    font-size: 1.75rem;
+  }
+
+  .hero-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-actions button,
+  .shop-btn,
+  .create-hero-btn,
+  .hero-health-track span {
+    transition: none;
+  }
+
+  .hero-loading-line {
+    animation: none;
+  }
 }
