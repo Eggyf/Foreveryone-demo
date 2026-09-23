@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import './GameLayout.css';
 
 export const GameLayout = ({ userId, onLogout }: { userId: string, onLogout: () => void }) => {
   const navigate = useNavigate();

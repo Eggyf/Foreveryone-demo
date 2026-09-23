@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { heroesApi, shopApi } from '../api/api'; // Importar shopApi
 import type { HeroData, ShopItemData } from '../types';
+import '../components/GameCard.css';
+import './ShopPage.css';
 
 export const ShopPage = () => {
   const userId = useOutletContext<string>();

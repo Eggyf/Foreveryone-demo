@@ -1,4 +1,6 @@
 import type { KingdomData } from '../types';
+import './GameCard.css';
+import './KingdomCard.css';
 
 export const KingdomCard = ({ kingdom, onCreate, onBuild, onUpgrade, onTrain }: { 
     kingdom: KingdomData | null, 

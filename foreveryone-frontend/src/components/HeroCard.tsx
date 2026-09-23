@@ -1,4 +1,6 @@
 import type { HeroData } from '../types';
+import './GameCard.css';
+import './HeroCard.css';
 
 export const HeroCard = ({ hero, onCreate, onAdventure, onRest, onOpenShop }: { 
     hero: HeroData | null, 

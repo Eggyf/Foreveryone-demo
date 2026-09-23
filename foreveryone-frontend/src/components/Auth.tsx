@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { identityApi } from '../api/api';
+import './Auth.css';
 
 export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
   const [isLogin, setIsLogin] = useState(true);

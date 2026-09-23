@@ -1,0 +1,102 @@
+.resources {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.resources span {
+  padding: 8px 12px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #111;
+  font-size: 0.9rem;
+}
+
+.military-info {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #4a2c2c;
+  border-radius: 4px;
+  background: #2c1c1c;
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.army-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.army-actions button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #95a5a6;
+  border-radius: 4px;
+  background: #7f8c8d;
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.army-actions button:hover {
+  background: #95a5a6;
+}
+
+.building-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 5px 0;
+  padding: 8px;
+  border-left: 3px solid var(--dark-gold);
+  border-radius: 2px;
+  background: #111;
+}
+
+.upgrade-btn {
+  padding: 5px 10px;
+  border: 1px solid #9b59b6;
+  border-radius: 4px;
+  background: #8e44ad !important;
+  color: white;
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-size: 0.8rem;
+  transition: 0.2s;
+}
+
+.upgrade-btn:hover {
+  background: #9b59b6 !important;
+}
+
+.build-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.build-menu button {
+  flex: 1;
+  min-width: 45%;
+  padding: 10px;
+  border: 1px solid #4a6278;
+  border-radius: 4px;
+  background: #2c3e50;
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+
+.build-menu button:hover {
+  border-color: var(--gold);
+  background: #34495e;
+}
