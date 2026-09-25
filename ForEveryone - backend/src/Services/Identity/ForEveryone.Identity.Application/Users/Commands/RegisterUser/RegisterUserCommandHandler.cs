@@ -24,18 +24,26 @@ public sealed class RegisterUserCommandHandler
         RegisterUserCommand request,
         CancellationToken cancellationToken)
     {
+        var usernameResult = Username.Create(request.Username);
+        if (usernameResult.IsFailure)
+            return Result.Failure<RegisterUserResponse>(usernameResult.Error);
+
         var emailResult = Email.Create(request.Email);
         if (emailResult.IsFailure)
             return Result.Failure<RegisterUserResponse>(emailResult.Error);
 
+        var username = usernameResult.Value;
         var email = emailResult.Value;
+
+        if (await _userRepository.ExistsByUsernameAsync(username, cancellationToken))
+            return Result.Failure<RegisterUserResponse>(DomainErrors.User.UsernameAlreadyInUse);
 
         if (await _userRepository.ExistsByEmailAsync(email, cancellationToken))
             return Result.Failure<RegisterUserResponse>(DomainErrors.User.EmailAlreadyInUse);
 
         var passwordHash = _passwordHasher.Hash(request.Password);
 
-        var userResult = User.Register(email, passwordHash);
+        var userResult = User.Register(username, email, passwordHash);
         if (userResult.IsFailure)
             return Result.Failure<RegisterUserResponse>(userResult.Error);
 
@@ -43,6 +51,6 @@ public sealed class RegisterUserCommandHandler
         _userRepository.Add(user);
 
         // El SaveChanges lo dispara el UnitOfWorkBehavior automaticamente si esto es exitoso.
-        return Result.Success(new RegisterUserResponse(user.Id, user.Email.Value));
+        return Result.Success(new RegisterUserResponse(user.Id, user.Username.Value, user.Email.Value));
     }
 }

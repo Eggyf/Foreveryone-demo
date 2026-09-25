@@ -6,7 +6,10 @@ public sealed class LoginUserCommandValidator : AbstractValidator<LoginUserComma
 {
     public LoginUserCommandValidator()
     {
-        RuleFor(x => x.Email).NotEmpty().EmailAddress();
-        RuleFor(x => x.Password).NotEmpty();
+        RuleFor(x => x.Identifier)
+            .NotEmpty().WithMessage("El email o nombre de usuario es obligatorio.")
+            .MaximumLength(256).WithMessage("El email o nombre de usuario es demasiado largo.");
+
+        RuleFor(x => x.Password).NotEmpty().WithMessage("La contrasena es obligatoria.");
     }
 }

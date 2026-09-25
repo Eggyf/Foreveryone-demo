@@ -10,6 +10,12 @@ namespace ForEveryone.Identity.Infrastructure.Security;
 
 public sealed class JwtTokenGenerator : IJwtTokenGenerator
 {
+    /// <summary>
+    /// Claim estandar OIDC. JwtRegisteredClaimNames no lo expone, asi que se
+    /// declara aqui para que el nombre no quede repetido en el generador.
+    /// </summary>
+    public const string PreferredUserNameClaim = "preferred_username";
+
     private readonly JwtSettings _settings;
 
     public JwtTokenGenerator(IOptions<JwtSettings> settings) => _settings = settings.Value;
@@ -20,6 +26,7 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email.Value),
+            new Claim(PreferredUserNameClaim, user.Username.Value),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

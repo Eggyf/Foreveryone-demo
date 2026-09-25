@@ -22,6 +22,7 @@ public class GetHeroQueryHandler : IRequestHandler<GetHeroQuery, GetHeroResult?>
 
         return new GetHeroResult(
     hero.Id,
+    hero.Race.ToString(),
     hero.Class.ToString(),
     hero.Level,
     hero.Stats.Health,

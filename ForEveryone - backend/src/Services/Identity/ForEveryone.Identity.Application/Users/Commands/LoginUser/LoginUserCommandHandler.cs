@@ -1,5 +1,6 @@
 using ForEveryone.Identity.Application.Common.Interfaces;
 using ForEveryone.Identity.Domain;
+using ForEveryone.Identity.Domain.Entities;
 using ForEveryone.Identity.Domain.Repositories;
 using ForEveryone.Identity.Domain.ValueObjects;
 using ForEveryone.SharedKernel;
@@ -27,11 +28,7 @@ public sealed class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, 
         LoginUserCommand request,
         CancellationToken cancellationToken)
     {
-        var emailResult = Email.Create(request.Email);
-        if (emailResult.IsFailure)
-            return Result.Failure<LoginUserResponse>(DomainErrors.User.InvalidCredentials);
-
-        var user = await _userRepository.GetByEmailAsync(emailResult.Value, cancellationToken);
+        var user = await FindUserAsync(request.Identifier, cancellationToken);
         if (user is null)
             return Result.Failure<LoginUserResponse>(DomainErrors.User.InvalidCredentials);
 
@@ -43,6 +40,30 @@ public sealed class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, 
 
         var token = _jwtTokenGenerator.GenerateToken(user);
 
-        return Result.Success(new LoginUserResponse(token, user.Id, user.Email.Value));
+        return Result.Success(
+            new LoginUserResponse(token, user.Id, user.Username.Value, user.Email.Value));
+    }
+
+    /// <summary>
+    /// Resuelve el usuario por email o por nombre de usuario segun el formato
+    /// recibido. Cualquier formato invalido devuelve null en lugar de un error
+    /// especifico, para no revelar que dato fallo en el login.
+    /// </summary>
+    private async Task<User?> FindUserAsync(string identifier, CancellationToken cancellationToken)
+    {
+        identifier = identifier.Trim();
+
+        if (identifier.Contains('@'))
+        {
+            var emailResult = Email.Create(identifier);
+            return emailResult.IsFailure
+                ? null
+                : await _userRepository.GetByEmailAsync(emailResult.Value, cancellationToken);
+        }
+
+        var usernameResult = Username.Create(identifier);
+        return usernameResult.IsFailure
+            ? null
+            : await _userRepository.GetByUsernameAsync(usernameResult.Value, cancellationToken);
     }
 }

@@ -17,8 +17,14 @@ public sealed class UserRepository : IUserRepository
     public Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken = default) =>
         _context.Users.FirstOrDefaultAsync(u => u.Email.Value == email.Value, cancellationToken);
 
+    public Task<User?> GetByUsernameAsync(Username username, CancellationToken cancellationToken = default) =>
+        _context.Users.FirstOrDefaultAsync(u => u.Username.Value == username.Value, cancellationToken);
+
     public Task<bool> ExistsByEmailAsync(Email email, CancellationToken cancellationToken = default) =>
         _context.Users.AnyAsync(u => u.Email.Value == email.Value, cancellationToken);
+
+    public Task<bool> ExistsByUsernameAsync(Username username, CancellationToken cancellationToken = default) =>
+        _context.Users.AnyAsync(u => u.Username.Value == username.Value, cancellationToken);
 
     public void Add(User user) => _context.Users.Add(user);
 }

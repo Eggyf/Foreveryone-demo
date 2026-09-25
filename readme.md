@@ -1,6 +1,6 @@
-# 🛡️ ForEveryone — Eldoria RPG Engine
+# 🛡️ Foreveryone
 
-ForEveryone es un RPG web de gestión y progresión idle (*management/idle game*). Los jugadores pueden registrarse, crear héroes, combatir, fundar reinos, producir recursos, mejorar edificios, entrenar tropas y comprar equipo.
+Foreveryone es un RPG web de gestión y progresión idle (*management/idle game*). Los jugadores pueden registrarse, crear héroes, combatir, fundar reinos, producir recursos, mejorar edificios, entrenar tropas y comprar equipo.
 
 El repositorio contiene una SPA React y cuatro servicios ASP.NET Core independientes. Cada servicio aplica una separación por contextos con capas `Api`, `Application`, `Domain` e `Infrastructure`, y utiliza su propio contexto de persistencia PostgreSQL.
 
@@ -27,8 +27,9 @@ El repositorio contiene una SPA React y cuatro servicios ASP.NET Core independie
 
 ## ✨ Características
 
-- Registro e inicio de sesión con JWT.
-- Creación de héroes de distintas clases.
+- Registro e inicio de sesión con JWT, usando nombre de usuario o email.
+- Elección de raza y clase obligatoria antes de entrar al juego.
+- Creación de héroes de cuatro clases combinables con cuatro razas.
 - Combate por turnos con daño basado en ataque y defensa.
 - Experiencia, niveles y estadísticas permanentes.
 - Descanso y recuperación de vida.
@@ -313,16 +314,95 @@ El frontend actual usa las URLs locales definidas en `foreveryone-frontend/src/a
 | `POST` | `/api/auth/login` | Inicia sesión y devuelve un JWT |
 | `GET` | `/internal/users/{id}/exists` | Comprueba la existencia de un usuario |
 
+Cuerpos de	request y respuestas:
+
+```jsonc
+// POST /api/auth/register
+// { "username": "ainz.ooal", "email": "gmail@example.com", "password": "Password1" }
+// 201 -> { "userId": "...", "username": "ainz.ooal", "email": "gmail@example.com" }
+
+// POST /api/auth/login
+// { "identifier": "ainz.ooal", "password": "Password1" }
+// 200 -> { "token": "...", "userId": "...", "username": "ainz.ooal", "email": "gmail@example.com" }
+```
+
+`identifier` admite email o nombre de usuario. El backend decide cuál usar según
+el formato recibido: si contiene `@` se busca por email, en caso contrario por
+nombre de usuario. El nombre de usuario se normaliza a minúsculas, por lo que
+`Ainz.Ooal` y `ainz.ooal` son la misma cuenta.
+
+Reglas del nombre de usuario:
+
+- Entre 3 y 24 caracteres.
+- Solo letras, números, punto, guion y guion bajo.
+- Debe empezar y terminar en letra o número.
+- Es único y da lugar a un `409 Conflict` si ya está en uso.
+
+El JWT incluye el claim estándar `preferred_username` con el nombre de usuario,
+además de `sub` y `email`. El frontend lo decodifica en `UserSession` para mostrar
+el nombre del jugador.
+
 ### Heroes — `http://localhost:5281`
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| `POST` | `/api/heroes` | Crea un héroe |
-| `GET` | `/api/heroes/{userId}` | Obtiene el héroe de un usuario |
+| `POST` | `/api/heroes` | Crea un héroe con su raza y clase |
+| `GET` | `/api/heroes/options` | Catálogo de razas y clases con sus estadísticas |
+| `GET` | `/api/heroes/{userId}` | Obtiene el héroe de un usuario. Devuelve `404` si todavía no tiene |
 | `POST` | `/api/heroes/{userId}/adventure` | Ejecuta una aventura |
 | `POST` | `/api/heroes/{userId}/rest` | Recupera la vida del héroe |
 | `GET` | `/api/shop` | Catálogo legado mantenido en Heroes |
 | `POST` | `/api/shop/{userId}/buy` | Compra un objeto desde el servicio Heroes |
+
+#### Creación del personaje
+
+Tras iniciar sesión, un usuario sin héroe ve un asistente a pantalla completa
+donde elige primero la raza y después la clase. La navegación del juego no
+aparece hasta que el personaje existe. `GameGate` es el componente que hace
+esta comprobación en el frontend: consulta únicamente a Heroes
+(`GET /api/heroes/{userId}`) y deriva al asistente si responde `404`.
+
+Deliberadamente **no** consulta a Identity en este punto. Hacerlo obligaba a que
+el login dependiera de dos servicios a la vez, y cualquier fallo transitorio de
+Identity bloqueaba el juego con un mensaje de sesión inválida justo después de
+iniciar sesión. Si la cuenta realmente no existe, el propio `POST /api/heroes`
+devuelve `404` y el asistente ofrece cerrar sesión.
+
+```jsonc
+// POST /api/heroes
+// { "userId": "...", "race": 3, "class": 1 }
+// 201 -> { "heroId": "...", "userId": "...", "race": "Enano", "class": "Warrior" }
+```
+
+Cada usuario tiene como máximo un héroe. La elección es inmutable: no existe
+endpoint para cambiarla, y un segundo `POST` devuelve `409`.
+
+**Estadísticas base por clase** (`ClassBonus.For`):
+
+| Clase | Vida | Ataque | Defensa | Maná |
+| --- | --- | --- | --- | --- |
+| `Warrior` | 150 | 15 | 20 | 10 |
+| `Hunter` | 100 | 20 | 10 | 20 |
+| `Wizard` | 80 | 25 | 5 | 50 |
+| `Rogue` | 90 | 18 | 12 | 15 |
+
+**Modificadores por raza** (`RaceBonus.For`), en porcentaje sobre la clase:
+
+| Raza | Vida | Ataque | Defensa | Maná |
+| --- | --- | --- | --- | --- |
+| `Humano` | 0% | 0% | 0% | 0% |
+| `Elfo` | 0% | +10% | -10% | +10% |
+| `Enano` | +20% | -10% | +20% | 0% |
+| `Orco` | +15% | +15% | -15% | -20% |
+
+El cálculo se aplica una sola vez, dentro del constructor de `Hero`, de modo
+que ningún héroe puede existir sin el bonus de su raza. El porcentaje usa
+división entera truncada hacia cero y nunca baja de 1 punto, así que un
+penalizador no deja una estadística inutilizable.
+
+Las dos tablas de balance viven solo en el dominio. El frontend las recibe de
+`GET /api/heroes/options` y reproduce el mismo cálculo para la vista previa, en
+lugar de duplicar los números.
 
 ### Kingdom — `http://localhost:5256`
 
@@ -409,14 +489,14 @@ Usa el agente reviewer para revisar los cambios actuales sin modificar archivos.
 
 - **Autorización pendiente:** Identity emite JWT, pero Heroes, Kingdom y Shop no configuran actualmente `AddJwtBearer`, `UseAuthentication` ni `[Authorize]`. No confíes en el `userId` enviado por el cliente hasta resolverlo.
 - **Endpoint interno público:** `/internal/users/{id}/exists` no requiere autenticación entre servicios.
-- **Lint frontend pendiente:** `npm run lint` conserva errores existentes de tipos `any` y parámetros sin usar en `src/api/api.ts`, `src/components/Auth.tsx` y `src/pages/CastlePage.tsx`.
+- **Lint frontend pendiente:** `npm run lint` conserva errores existentes de tipos `any` y parámetros sin usar en `src/api/api.ts` y `src/pages/CastlePage.tsx`.
 - **Configuración frontend desacoplada:** las variables del archivo `.env` todavía no se utilizan y las URL de API están fijadas en `src/api/api.ts`.
 - **Sin pruebas automatizadas:** no hay proyectos de tests .NET ni una suite de frontend.
 - **Sin CI/CD ni contenedores:** todavía no hay Dockerfiles, Docker Compose ni workflows de despliegue.
 - **Sin health checks ni observabilidad:** no hay endpoints de salud, métricas, trazas distribuidas ni correlación de requests.
-- **Manejo global de errores pendiente:** algunos errores de dominio pueden terminar como respuestas HTTP 500.
+- **Manejo global de errores pendiente:** algunos errores de dominio pueden terminar como respuestas HTTP 500. En Heroes solo se traducen `NotFoundException`, `ConflictException` y `ValidationException` desde los controladores; otras excepciones, como la falta de oro en una compra, siguen escapando sin manejar.
 - **Concurrencia pendiente:** las operaciones de compra, recursos y entrenamiento no tienen tokens de concurrencia optimista.
-- **CORS local:** actualmente solo se permite `http://localhost:5173`.
+- **CORS local:** los orígenes permitidos se configuran por servicio en `Cors:AllowedOrigins` dentro de `appsettings.json`. Por defecto se admiten `localhost` y `127.0.0.1` en los puertos `5173` y `5174`.
 
 ## 🛠️ Solución de problemas
 
@@ -451,7 +531,24 @@ Comprueba que:
 
 ### CORS desde el frontend
 
-La política actual está configurada para `http://localhost:5173`. Si Vite usa otro puerto, actualiza temporalmente el origen o configura las variables de entorno antes de preparar un despliegue.
+Los orígenes permitidos se leen de `Cors:AllowedOrigins` en el `appsettings.json` de cada API. Por defecto se admiten `localhost` y `127.0.0.1` en los puertos `5173` y `5174`:
+
+```jsonc
+"Cors": {
+  "AllowedOrigins": [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174"
+  ]
+}
+```
+
+Si el navegador muestra un error de CORS, comprueba primero en qué puerto está
+sirviendo Vite. `foreveryone-frontend/vite.config.ts` fija el puerto `5173` con
+`strictPort`, de modo que si está ocupado Vite avisa en lugar de arrancar en
+otro puerto. Para permitir un origen adicional, edita la lista en el
+`appsettings.json` del servicio correspondiente y reinícialo.
 
 ### La tienda no conecta con Shop
 
@@ -478,4 +575,4 @@ ShopServiceUrl=http://localhost:5136/
 
 ---
 
-ForEveryone es un proyecto activo y en evolución. Las funcionalidades no deben marcarse como aptas para producción hasta completar la autenticación, las pruebas y el endurecimiento operativo.
+Foreveryone es un proyecto activo y en evolución. Las funcionalidades no deben marcarse como aptas para producción hasta completar la autenticación, las pruebas y el endurecimiento operativo.

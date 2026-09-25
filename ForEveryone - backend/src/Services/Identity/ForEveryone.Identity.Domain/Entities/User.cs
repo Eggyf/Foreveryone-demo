@@ -14,15 +14,18 @@ public sealed class User : AggregateRoot
     // Constructor privado sin parametros requerido por EF Core.
     private User() { }
 
-    private User(Guid id, Email email, string passwordHash, Role role, DateTime createdAtUtc)
+    private User(Guid id, Username username, Email email, string passwordHash, Role role, DateTime createdAtUtc)
         : base(id)
     {
+        Username = username;
         Email = email;
         PasswordHash = passwordHash;
         Role = role;
         CreatedAtUtc = createdAtUtc;
         IsActive = true;
     }
+
+    public Username Username { get; private set; } = null!;
 
     public Email Email { get; private set; } = null!;
 
@@ -35,21 +38,22 @@ public sealed class User : AggregateRoot
     public bool IsActive { get; private set; }
 
     /// <summary>
-    /// Unica forma de crear un usuario valido. La unicidad del email
-    /// se valida en la capa de Application (requiere consultar el repositorio).
+    /// Unica forma de crear un usuario valido. La unicidad del nombre de usuario
+    /// y del email se valida en la capa de Application (requiere consultar el repositorio).
     /// </summary>
-    public static Result<User> Register(Email email, string passwordHash)
+    public static Result<User> Register(Username username, Email email, string passwordHash)
     {
         Guard.AgainstNullOrWhiteSpace(passwordHash, nameof(passwordHash));
 
         var user = new User(
             Guid.NewGuid(),
+            username,
             email,
             passwordHash,
             Role.Player,
             DateTime.UtcNow);
 
-        user.RaiseDomainEvent(new UserRegisteredDomainEvent(user.Id, email.Value));
+        user.RaiseDomainEvent(new UserRegisteredDomainEvent(user.Id, username.Value, email.Value));
 
         return Result.Success(user);
     }

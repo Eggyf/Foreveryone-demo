@@ -19,9 +19,10 @@ const getErrorMessage = (error: unknown, fallback: string): string => (
 export const HeroPage = () => {
   const { userId, displayName } = useOutletContext<UserSession>();
   const [heroResult, setHeroResult] = useState<HeroResultState | null>(null);
+  const [loadError, setLoadError] = useState('');
   const [pageMsg, setPageMsg] = useState('');
   const hero = heroResult?.userId === userId ? heroResult.hero : null;
-  const isLoading = Boolean(userId) && heroResult?.userId !== userId;
+  const isLoading = Boolean(userId) && !loadError && !hero;
 
   useEffect(() => {
     if (!userId) {
@@ -36,9 +37,9 @@ export const HeroPage = () => {
         if (isActive) {
           setHeroResult({ userId, hero: response.data as HeroData });
         }
-      } catch {
+      } catch (error: unknown) {
         if (isActive) {
-          setHeroResult({ userId, hero: null });
+          setLoadError(getErrorMessage(error, 'No se pudo cargar tu héroe.'));
         }
       }
     };
@@ -49,17 +50,6 @@ export const HeroPage = () => {
       isActive = false;
     };
   }, [userId]);
-
-  const handleCreateHero = async () => {
-    setPageMsg('');
-    try {
-      await heroesApi.post('/api/heroes', { userId, class: 1 });
-      const { data } = await heroesApi.get(`/api/heroes/${userId}`);
-      setHeroResult({ userId, hero: data as HeroData });
-    } catch (error: unknown) {
-      setPageMsg(getErrorMessage(error, 'Error al crear héroe'));
-    }
-  };
 
   const handleAdventure = async () => {
     setPageMsg('');
@@ -87,16 +77,19 @@ export const HeroPage = () => {
 
   return (
     <div className="hero-page">
-      {isLoading ? (
+      {loadError ? (
+        <p className="message">{loadError}</p>
+      ) : isLoading ? (
         <HeroLoadingCard displayName={displayName} />
       ) : (
-        <HeroCard
-          hero={hero}
-          displayName={displayName}
-          onCreate={handleCreateHero}
-          onAdventure={handleAdventure}
-          onRest={handleRest}
-        />
+        hero && (
+          <HeroCard
+            hero={hero}
+            displayName={displayName}
+            onAdventure={handleAdventure}
+            onRest={handleRest}
+          />
+        )
       )}
       {pageMsg && <p className="message">{pageMsg}</p>}
     </div>

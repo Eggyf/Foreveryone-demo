@@ -2,43 +2,47 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: linear-gradient(145deg, #252525, #181818);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-  transition: border-color 0.2s, transform 0.2s;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.22s var(--ease);
 }
 
 .building-card:hover {
-  border-color: var(--dark-gold);
-  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  transform: translateY(-3px);
 }
 
 .building-icon {
   display: grid;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 12px;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 14px;
   place-items: center;
-  border: 1px solid var(--dark-gold);
-  border-radius: 8px;
-  background: #111;
-  font-size: 1.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  font-size: 1.5rem;
 }
 
 .building-card h4 {
   margin: 0;
   color: var(--gold);
   font-family: "Cinzel", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .building-card p {
   min-height: 42px;
-  margin: 8px 0 16px;
-  color: #aaa;
-  font-size: 0.85rem;
-  line-height: 1.45;
+  margin: 8px 0 18px;
+  color: var(--text-muted);
+  font-size: 0.83rem;
+  line-height: 1.55;
 }
 
 .building-card-footer {
@@ -50,25 +54,29 @@
 }
 
 .building-level {
-  color: #ddd;
-  font-size: 0.8rem;
-  font-weight: bold;
+  color: var(--text-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .upgrade-btn {
-  padding: 6px 10px;
-  border: 1px solid #9b59b6;
-  border-radius: 4px;
-  background: #8e44ad !important;
-  color: white;
+  padding: 7px 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft) !important;
+  color: var(--gold);
   cursor: pointer;
   font-family: "Cinzel", serif;
-  font-size: 0.75rem;
-  transition: 0.2s;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: all 0.2s var(--ease);
 }
 
 .upgrade-btn:hover {
-  background: #9b59b6 !important;
+  background: rgba(212, 175, 55, 0.2) !important;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 480px) {

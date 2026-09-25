@@ -1,0 +1,302 @@
+.creation-shell {
+  width: 100%;
+  max-width: 1000px;
+  margin: 32px auto;
+  padding: 34px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 40%), var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.creation-eyebrow {
+  color: var(--dark-gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.creation-header h1 {
+  margin: 10px 0 12px;
+  overflow-wrap: break-word;
+  font-family: "Cinzel", serif;
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, var(--gold-bright), var(--dark-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.creation-header p {
+  max-width: 460px;
+  margin: 0 auto 32px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.creation-steps {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 32px;
+  padding: 0;
+  list-style: none;
+}
+
+.creation-steps li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.25s var(--ease);
+}
+
+.creation-steps li span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  color: var(--text-faint);
+  font-size: 0.7rem;
+}
+
+.creation-steps li.is-active {
+  border-color: var(--border-strong);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.creation-steps li.is-active span {
+  background: var(--gold);
+  color: #14100a;
+}
+
+.creation-steps li.is-done {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.creation-steps li.is-done span {
+  background: rgba(92, 179, 119, 0.2);
+  color: var(--success);
+}
+
+/* Razas y clases son siempre 4. Con auto-fit el cuarto elemento caia a una
+   segunda fila y dejaba un hueco enorme, asi que se fijan 4 columnas. */
+.creation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .creation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.creation-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 24px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-deep);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: all 0.22s var(--ease);
+}
+
+.creation-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  transform: translateY(-3px);
+}
+
+.creation-card.is-selected {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  box-shadow: 0 0 0 1px var(--border-strong), 0 10px 30px rgba(212, 175, 55, 0.14);
+}
+
+.creation-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.creation-card-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 1.7rem;
+  line-height: 1;
+  transition: all 0.22s var(--ease);
+}
+
+.creation-card.is-selected .creation-card-icon {
+  background: var(--gold-soft);
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+
+.creation-card-title {
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.creation-card-text {
+  color: var(--text-muted);
+  font-size: 0.79rem;
+  line-height: 1.5;
+}
+
+.creation-card-mods,
+.creation-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.creation-card-mods i,
+.creation-card-stats i {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.creation-card-stats i {
+  color: var(--text-light);
+}
+
+.creation-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 28px auto 0;
+  padding: 16px 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--gold-soft);
+}
+
+.creation-preview strong {
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+}
+
+.creation-preview span {
+  color: var(--text-light);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.creation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.creation-actions button {
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.2s var(--ease);
+}
+
+.creation-back {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.creation-back:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--gold);
+}
+
+.creation-next {
+  border: none;
+  background: linear-gradient(135deg, var(--gold-bright), var(--dark-gold));
+  color: #14100a;
+}
+
+.creation-next:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.28);
+  transform: translateY(-2px);
+}
+
+.creation-actions button:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-faint);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.creation-loading,
+.creation-error {
+  margin: 48px 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.creation-error {
+  color: var(--danger);
+}
+
+@media (max-width: 600px) {
+  .creation-shell {
+    margin: 20px 0;
+    padding: 28px 18px;
+  }
+
+  .creation-actions {
+    flex-direction: column-reverse;
+  }
+
+  .creation-actions button {
+    width: 100%;
+  }
+}

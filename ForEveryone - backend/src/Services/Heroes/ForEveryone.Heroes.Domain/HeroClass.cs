@@ -3,7 +3,7 @@
 public enum HeroClass
 {
     Warrior = 1,
-    Mage = 2,
-    Archer = 3,
-    Priest = 4
+    Hunter = 2,
+    Wizard = 3,
+    Rogue = 4
 }

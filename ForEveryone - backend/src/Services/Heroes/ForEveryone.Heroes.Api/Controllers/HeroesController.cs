@@ -1,5 +1,6 @@
 using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;
+using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetCharacterOptions;
 using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetHero;
 using Heroes.Application.Features.Heroes.Commands.EmbarkOnAdventure;
 using Heroes.Application.Features.Heroes.Commands.RestHero;
@@ -27,6 +28,10 @@ public class HeroesController : ControllerBase
             var result = await _mediator.Send(command);
             return CreatedAtAction(nameof(CreateHero), new { id = result.HeroId }, result);
         }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new { message = ex.Message, errors = ex.Errors }); // Devuelve 400
+        }
         catch (NotFoundException ex)
         {
             return NotFound(new { message = ex.Message }); // Devuelve 404
@@ -35,6 +40,15 @@ public class HeroesController : ControllerBase
         {
             return Conflict(new { message = ex.Message }); // Devuelve 409
         }
+    }
+
+    [HttpGet("options")]
+    public async Task<IActionResult> GetCharacterOptions()
+    {
+        var result = await _mediator.Send(new GetCharacterOptionsResult(
+            Array.Empty<CharacterRaceOption>(),
+            Array.Empty<CharacterClassOption>()));
+        return Ok(result);
     }
 
     [HttpGet("{userId:guid}")]

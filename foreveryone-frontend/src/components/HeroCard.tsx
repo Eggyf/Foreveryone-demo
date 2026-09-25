@@ -9,27 +9,33 @@ const HERO_CLASS_DETAILS: Record<string, { label: string; icon: string; specialt
     icon: '⚔️',
     specialty: 'Especialista en combate cuerpo a cuerpo.',
   },
-  mage: {
+  hunter: {
+    label: 'Cazador',
+    icon: '🏹',
+    specialty: 'Experto en ataques a distancia.',
+  },
+  wizard: {
     label: 'Mago',
     icon: '🔮',
     specialty: 'Maestro de magia y poder arcano.',
   },
-  archer: {
-    label: 'Arquero',
-    icon: '🏹',
-    specialty: 'Experto en ataques a distancia.',
-  },
-  priest: {
-    label: 'Sacerdote',
-    icon: '✨',
-    specialty: 'Guardián del poder sagrado y la vida.',
+  rogue: {
+    label: 'Pícaro',
+    icon: '🗡️',
+    specialty: 'Acero veloz y golpes certeros.',
   },
 };
 
+const RACE_DETAILS: Record<string, { label: string; icon: string }> = {
+  humano: { label: 'Humano', icon: '🧑' },
+  elfo: { label: 'Elfo', icon: '🧝' },
+  enano: { label: 'Enano', icon: '🧔' },
+  orco: { label: 'Orco', icon: '👹' },
+};
+
 interface HeroCardProps {
-  hero: HeroData | null;
+  hero: HeroData;
   displayName: string;
-  onCreate: () => void;
   onAdventure: () => void;
   onRest: () => void;
 }
@@ -41,32 +47,18 @@ const getClassDetails = (heroClass: string) =>
     specialty: 'Aventurero en servicio del reino.',
   };
 
+const getRaceDetails = (race: string) => RACE_DETAILS[race.toLowerCase()] ?? null;
+
 export const HeroCard = ({
   hero,
   displayName,
-  onCreate,
   onAdventure,
   onRest,
 }: HeroCardProps) => {
   const safeDisplayName = displayName || 'Aventurero';
 
-  if (!hero) {
-    return (
-      <section className="hero-empty-card">
-        <div className="hero-avatar-frame hero-avatar-frame-empty">
-          <img src={heroAvatar} alt={`Retrato de ${safeDisplayName}`} />
-        </div>
-        <span className="hero-eyebrow">Tu legado comienza aquí</span>
-        <h2>{safeDisplayName}</h2>
-        <p>Todavía no has creado un héroe para defender el reino de Eldoria.</p>
-        <button type="button" className="create-hero-btn" onClick={onCreate}>
-          ⚔️ Crear mi guerrero
-        </button>
-      </section>
-    );
-  }
-
   const classDetails = getClassDetails(hero.class);
+  const raceDetails = getRaceDetails(hero.race);
   const healthPercentage = hero.health === 0
     ? 0
     : Math.min(100, Math.max(0, Math.round((hero.currentHealth / hero.health) * 100)));
@@ -83,11 +75,19 @@ export const HeroCard = ({
         </div>
 
         <div className="hero-profile-copy">
-          <span className="hero-eyebrow">Héroe de Eldoria</span>
+          <span className="hero-eyebrow">Héroe de Foreveryone</span>
           <h2>{safeDisplayName}</h2>
-          <div className="hero-class-badge">
-            <span aria-hidden="true">{classDetails.icon}</span>
-            {classDetails.label}
+          <div className="hero-badges">
+            {raceDetails && (
+              <span className="hero-class-badge">
+                <span aria-hidden="true">{raceDetails.icon}</span>
+                {raceDetails.label}
+              </span>
+            )}
+            <span className="hero-class-badge">
+              <span aria-hidden="true">{classDetails.icon}</span>
+              {classDetails.label}
+            </span>
           </div>
           <p>{classDetails.specialty}</p>
           <span className={`hero-status ${isDefeated ? 'is-defeated' : ''}`}>

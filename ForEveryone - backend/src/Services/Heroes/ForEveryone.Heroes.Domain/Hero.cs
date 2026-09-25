@@ -4,10 +4,14 @@ public class Hero
 {
     public Guid Id { get; private set; }
     public Guid UserId { get; private set; }
+    public Race Race { get; private set; }
     public HeroClass Class { get; private set; }
     public int Level { get; private set; }
     public int Experience { get; private set; }
-    public HeroStats Stats { get; private set; }
+
+    // null! solo para el constructor privado que exige EF Core: la otra
+    // forma de crear un heroe siempre recibe unas estadisticas ya calculadas.
+    public HeroStats Stats { get; private set; } = null!;
     public int CurrentHealth { get; private set; }
     public int Gold { get; private set; } // NUEVO: Oro del héroe
 
@@ -15,15 +19,21 @@ public class Hero
 
     private Hero() { }
 
-    public Hero(Guid id, Guid userId, HeroClass heroClass, HeroStats stats)
+    /// <summary>
+    /// Crea un heroe de nivel 1. Recibe las estadisticas base de la clase y
+    /// aplica aqui el bonus de la raza, de forma que ningun heroe pueda
+    /// existir sin el modificador de su raza aplicado.
+    /// </summary>
+    public Hero(Guid id, Guid userId, Race race, HeroClass heroClass, HeroStats baseStats)
     {
         Id = id;
         UserId = userId;
+        Race = race;
         Class = heroClass;
         Level = 1;
         Experience = 0;
-        Stats = stats;
-        CurrentHealth = stats.Health;
+        Stats = RaceBonus.For(race).Apply(baseStats);
+        CurrentHealth = Stats.Health;
         Gold = 0; // Empieza sin oro
     }
 

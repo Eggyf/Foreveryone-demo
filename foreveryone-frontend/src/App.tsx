@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { decodeUserSession } from './auth/session';
 import { Auth } from './components/Auth';
+import { GameGate } from './components/GameGate';
 import { GameLayout } from './components/GameLayout';
 import { HeroPage } from './pages/HeroPage';
 import { CastlePage } from './pages/CastlePage';
@@ -27,20 +28,22 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-container">
-        <h1>ForEveryone</h1>
-        <p>Bienvenido al reino de Eldoria</p>
+        <h1>Foreveryone</h1>
+        <p>Bienvenido a Foreveryone</p>
         
         {!token ? (
           <Auth onSuccess={handleAuthSuccess} />
         ) : (
-          <Routes>
-            <Route path="/" element={<GameLayout user={user} onLogout={handleLogout} />}>
-              <Route index element={<Navigate to="/hero" replace />} />
-              <Route path="hero" element={<HeroPage />} />
-              <Route path="castle" element={<CastlePage />} />
-              <Route path="shop" element={<ShopPage />} />
-            </Route>
-          </Routes>
+          <GameGate user={user} onSessionExpired={handleLogout}>
+            <Routes>
+              <Route path="/" element={<GameLayout user={user} onLogout={handleLogout} />}>
+                <Route index element={<Navigate to="/hero" replace />} />
+                <Route path="hero" element={<HeroPage />} />
+                <Route path="castle" element={<CastlePage />} />
+                <Route path="shop" element={<ShopPage />} />
+              </Route>
+            </Routes>
+          </GameGate>
         )}
       </div>
     </BrowserRouter>

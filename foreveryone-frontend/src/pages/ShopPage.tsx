@@ -42,7 +42,7 @@ export const ShopPage = () => {
   return (
     <div className="stats-card">
       <div className="shop-header">
-        <h3>🏪 Tienda de Eldoria</h3>
+        <h3>🏪 Tienda de Foreveryone</h3>
         <span className="gold-display">🪙 Oro: {hero.gold}</span>
       </div>
 

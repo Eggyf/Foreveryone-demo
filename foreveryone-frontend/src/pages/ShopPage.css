@@ -2,30 +2,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--border);
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
 }
 
 .shop-header h3 {
   margin: 0;
   color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 .gold-display {
-  color: #f39c12;
-  font-weight: bold;
+  color: var(--gold);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .shop-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 14px;
   margin-bottom: 10px;
-  padding: 10px;
-  border-left: 3px solid #f39c12;
-  border-radius: 4px;
-  background: #111;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  transition: all 0.2s var(--ease);
+}
+
+.shop-item:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
 }
 
 .item-info {
@@ -34,13 +47,15 @@
 
 .item-info h4 {
   margin: 0 0 5px;
-  color: #eee;
+  color: var(--text-light);
+  font-size: 0.95rem;
 }
 
 .item-info p {
   margin: 0;
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 0.8rem;
+  line-height: 1.5;
 }
 
 .item-action {
@@ -49,21 +64,51 @@
 
 .item-cost {
   display: block;
-  margin-bottom: 5px;
-  color: #f39c12;
-  font-weight: bold;
+  margin-bottom: 7px;
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .item-action button {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 4px;
-  background: #28a745;
-  color: white;
+  padding: 8px 16px;
+  border: 1px solid rgba(92, 179, 119, 0.4);
+  border-radius: var(--radius-sm);
+  background: rgba(92, 179, 119, 0.14);
+  color: var(--success);
   cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: all 0.2s var(--ease);
+}
+
+.item-action button:hover:not(:disabled) {
+  border-color: var(--success);
+  background: rgba(92, 179, 119, 0.24);
+  transform: translateY(-1px);
 }
 
 .item-action button:disabled {
-  background: #555;
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-faint);
   cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .shop-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .item-action {
+    text-align: left;
+  }
+
+  .item-action button {
+    width: 100%;
+  }
 }

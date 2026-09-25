@@ -7,4 +7,4 @@ namespace ForEveryone.Identity.Domain.Events;
 /// En el futuro, el microservicio Heroes podra escuchar este evento
 /// (via un message broker) para crear automaticamente el heroe inicial.
 /// </summary>
-public sealed record UserRegisteredDomainEvent(Guid UserId, string Email) : IDomainEvent;
+public sealed record UserRegisteredDomainEvent(Guid UserId, string Username, string Email) : IDomainEvent;

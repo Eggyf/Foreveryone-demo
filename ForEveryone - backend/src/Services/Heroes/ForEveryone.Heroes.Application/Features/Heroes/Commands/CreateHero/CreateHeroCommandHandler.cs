@@ -28,22 +28,16 @@ public class CreateHeroCommandHandler : IRequestHandler<CreateHeroCommand, Creat
         if (await _heroRepository.ExistsByUserIdAsync(request.UserId))
             throw new ConflictException("El usuario ya posee un héroe.");
 
-        // 3. Domain Service
-        var stats = request.Class switch
-        {
-            HeroClass.Warrior => new HeroStats(150, 15, 20, 10),
-            HeroClass.Mage => new HeroStats(80, 25, 5, 50),
-            HeroClass.Archer => new HeroStats(100, 20, 10, 20),
-            HeroClass.Priest => new HeroStats(90, 10, 8, 60),
-            _ => throw new ArgumentOutOfRangeException(nameof(request.Class))
-        };
+        // 3. Estadísticas base de la clase. El bonus de la raza lo aplica
+        //    el propio Hero en su constructor.
+        var baseStats = ClassBonus.For(request.Class);
 
         // 4. Crear Aggregate
-        var hero = new Hero(Guid.NewGuid(), request.UserId, request.Class, stats);
+        var hero = new Hero(Guid.NewGuid(), request.UserId, request.Race, request.Class, baseStats);
 
         // 5. Persistencia
         await _heroRepository.AddAsync(hero);
 
-        return new CreateHeroResult(hero.Id, hero.UserId, hero.Class.ToString());
+        return new CreateHeroResult(hero.Id, hero.UserId, hero.Race.ToString(), hero.Class.ToString());
     }
 }

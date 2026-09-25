@@ -29,7 +29,7 @@ export const KingdomCard = ({ kingdom, onCreate, onBuild, onUpgrade, onTrain }: 
           <div className="castle-emblem" aria-hidden="true">🏰</div>
           <div>
             <span className="section-kicker">Tu fortaleza principal</span>
-            <h3 id="castle-title">Castillo de Eldoria</h3>
+            <h3 id="castle-title">Castillo de Foreveryone</h3>
             <span className="castle-level">Nivel {kingdom.castleLevel}</span>
           </div>
         </div>

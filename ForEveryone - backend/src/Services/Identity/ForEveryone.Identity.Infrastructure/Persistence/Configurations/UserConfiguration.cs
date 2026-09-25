@@ -30,6 +30,17 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.IsActive)
             .IsRequired();
 
+        // Username es un Value Object: se mapea como Owned Entity dentro de la misma tabla.
+        builder.OwnsOne(u => u.Username, username =>
+        {
+            username.Property(x => x.Value)
+                .HasColumnName("username")
+                .HasMaxLength(24)
+                .IsRequired();
+
+            username.HasIndex(x => x.Value).IsUnique();
+        });
+
         // Email es un Value Object: se mapea como Owned Entity dentro de la misma tabla.
         builder.OwnsOne(u => u.Email, email =>
         {

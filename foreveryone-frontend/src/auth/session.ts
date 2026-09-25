@@ -21,20 +21,22 @@ const formatDisplayName = (value: string): string => {
 
 export const decodeUserSession = (token: string | null): UserSession => {
   if (!token) {
-    return { userId: '', email: '', displayName: '' };
+    return { userId: '', username: '', email: '', displayName: '' };
   }
 
   try {
     const claims = jwtDecode<TokenClaims>(token);
     const email = claims.email ?? '';
-    const nameSource = claims.name ?? claims.preferred_username ?? email.split('@')[0] ?? '';
+    const username = claims.preferred_username ?? '';
+    const nameSource = claims.name ?? username ?? email.split('@')[0] ?? '';
 
     return {
       userId: claims.sub ?? claims.nameid ?? '',
+      username,
       email,
       displayName: formatDisplayName(nameSource),
     };
   } catch {
-    return { userId: '', email: '', displayName: '' };
+    return { userId: '', username: '', email: '', displayName: '' };
   }
 };

@@ -16,12 +16,21 @@ builder.Services.AddValidatorsFromAssembly(Assembly.Load("ForEveryone.Shop.Appli
 
 builder.Services.AddScoped<IShopRepository, ShopRepository>();
 
+// Orígenes permitidos por CORS. Se lee de "Cors:AllowedOrigins" en appsettings
+// y, si no está definido, se usan los puertos habituales de Vite (5173 y 5174).
+// Vite puede arrancar en 5174 si el 5173 está ocupado, así que se aceptan ambos
+// para no romper el desarrollo local.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    is { Length: > 0 } configuredOrigins
+        ? configuredOrigins
+        : ["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174"];
+
 // CORS para React
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
+        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
     });
 });
 

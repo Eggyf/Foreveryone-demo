@@ -30,7 +30,8 @@ namespace ForEveryone.Heroes.Infrastructure.Migrations
 
                     b.Property<string>("Class")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int>("CurrentHealth")
                         .HasColumnType("integer");
@@ -43,6 +44,11 @@ namespace ForEveryone.Heroes.Infrastructure.Migrations
 
                     b.Property<int>("Level")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Race")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
