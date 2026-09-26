@@ -36,7 +36,6 @@ const RACE_DETAILS: Record<string, { label: string; icon: string }> = {
 interface HeroCardProps {
   hero: HeroData;
   displayName: string;
-  onAdventure: () => void;
   onRest: () => void;
 }
 
@@ -52,7 +51,6 @@ const getRaceDetails = (race: string) => RACE_DETAILS[race.toLowerCase()] ?? nul
 export const HeroCard = ({
   hero,
   displayName,
-  onAdventure,
   onRest,
 }: HeroCardProps) => {
   const safeDisplayName = displayName || 'Aventurero';
@@ -134,14 +132,6 @@ export const HeroCard = ({
       </div>
 
       <div className="hero-actions">
-        <button
-          type="button"
-          className="adventure-btn"
-          onClick={onAdventure}
-          disabled={isDefeated}
-        >
-          🗡️ Aventura
-        </button>
         <button
           type="button"
           className="rest-btn"

@@ -277,14 +277,28 @@ dotnet run --project src/Services/Shop/ForEveryone.Shop.Api --launch-profile htt
 
 #### Script de arranque
 
-También existe `start-all.ps1`:
+También existe `start-all.ps1`, que abre las cuatro APIs y el frontend:
 
 ```powershell
 cd "ForEveryone - backend"
 .\start-all.ps1
 ```
 
-> El script abre cada proceso en una ventana de PowerShell y contiene una ruta absoluta para el frontend. Revísala antes de utilizarla en otro equipo.
+> El script abre cada proceso en su propia ventana de PowerShell y **espera a que
+> cada API responda** antes de lanzar la siguiente, porque Identity debe existir
+> antes que Heroes: al crear un héroe, Heroes llama a Identity para comprobar
+> que la cuenta existe. Resuelve las rutas del repositorio de forma relativa, así
+> que funciona en cualquier equipo sin editar nada. Si una API no responde en 60
+> segundos, avisa y continúa. Si un puerto ya está ocupado, indica qué proceso lo
+> tiene con su PID y lo reutiliza en vez de esperar.
+
+> Los servicios se lanzan con `dotnet <dll>` y no con `dotnet run`. `dotnet run`
+> intenta ejecutar el `.exe` generado, y si ese archivo queda bloqueado por otro
+> proceso el arranque falla con *"The process cannot access the file because it
+> is being used by another process"*. Ejecutando el `.dll` se evita ese bloqueo.
+> El script replica el perfil `http` de cada `launchSettings.json`, incluido
+> `ASPNETCORE_ENVIRONMENT=Development`, que es lo que hace que las APIs apliquen
+> las migraciones pendientes al arrancar.
 
 ### 4. Ejecutar el frontend
 
@@ -348,6 +362,8 @@ el nombre del jugador.
 | --- | --- | --- |
 | `POST` | `/api/heroes` | Crea un héroe con su raza y clase |
 | `GET` | `/api/heroes/options` | Catálogo de razas y clases con sus estadísticas |
+| `GET` | `/api/heroes/enemies` | Catálogo de enemigos con estadísticas y recompensas |
+| `POST` | `/api/heroes/{userId}/battle` | Pelatea por turnos contra el enemigo del cuerpo |
 | `GET` | `/api/heroes/{userId}` | Obtiene el héroe de un usuario. Devuelve `404` si todavía no tiene |
 | `POST` | `/api/heroes/{userId}/adventure` | Ejecuta una aventura |
 | `POST` | `/api/heroes/{userId}/rest` | Recupera la vida del héroe |
@@ -403,6 +419,36 @@ penalizador no deja una estadística inutilizable.
 Las dos tablas de balance viven solo en el dominio. El frontend las recibe de
 `GET /api/heroes/options` y reproduce el mismo cálculo para la vista previa, en
 lugar de duplicar los números.
+
+#### Batallas por turnos
+
+El combate vive en el servicio Heroes, no en un microservicio aparte. Es lógica
+de dominio pura sobre las estadísticas que Heroes ya posee, así que separarla
+añadiría una base de datos, migraciones, configuración de CORS y una latencia de
+red en cada batalla sin aportar nada. Si el sistema crece (habilidades, botín,
+mapa), el modelo está aislado en `BattleEngine` y `EnemyCatalog` para poder
+extraerlo después.
+
+El jugador elige enemigo y la pelea se resuelve turno a turno. El héroe ataca
+primero, el daño nunca baja de 1 punto (así un enemigo muy defensivo no
+eterniza el combate) y no hay azar: el resultado depende solo de las
+estadísticas, lo que lo hace predecible. La respuesta incluye el historial
+completo de turnos para que el cliente muestre la pelea sin simularla.
+
+```jsonc
+// POST /api/heroes/{userId}/battle
+// { "enemyKey": "ogre" }
+// 200 -> { "victory": true, "enemyName": "Ogro", "rounds": [ ... ],
+//         "experienceGained": 150, "goldGained": 90, "message": "..." }
+```
+
+| Enemigo | Vida | Ataque | Defensa | Experiencia | Oro |
+| --- | --- | --- | --- | --- | --- |
+| `goblin` | 50 | 12 | 5 | 40 | 20 |
+| `wolf` | 90 | 20 | 8 | 80 | 45 |
+| `ogre` | 150 | 30 | 14 | 150 | 90 |
+
+Un héroe derrotado responde `409` y no puede iniciar combate hasta descansar.
 
 ### Kingdom — `http://localhost:5256`
 

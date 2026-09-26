@@ -1,5 +1,6 @@
 using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;
+using ForEveryone.Heroes.Application.Features.Heroes.Commands.FightBattle;
 using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetCharacterOptions;
 using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetHero;
 using Heroes.Application.Features.Heroes.Commands.EmbarkOnAdventure;
@@ -51,6 +52,56 @@ public class HeroesController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Enemigos disponibles. Se expone desde el dominio para que el cliente
+    /// no duplique las recompensas ni las estadisticas de combate.
+    /// </summary>
+    [HttpGet("enemies")]
+    public IActionResult GetEnemies()
+    {
+        var enemies = ForEveryone.Heroes.Domain.EnemyCatalog.All
+            .Select(enemy => new
+            {
+                key = enemy.Key,
+                name = enemy.Name,
+                health = enemy.Health,
+                attack = enemy.Attack,
+                defense = enemy.Defense,
+                experienceReward = enemy.ExperienceReward,
+                goldReward = enemy.GoldReward
+            })
+            .ToList();
+
+        return Ok(enemies);
+    }
+
+    /// <summary>
+    /// Pelatea por turnos contra el enemigo indicado en el cuerpo.
+    /// </summary>
+    [HttpPost("{userId:guid}/battle")]
+    public async Task<IActionResult> FightBattle(Guid userId, [FromBody] FightBattleCommand command)
+    {
+        try
+        {
+            var result = await _mediator.Send(command with { UserId = userId });
+            return Ok(result);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new { message = ex.Message, errors = ex.Errors });
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            // El heroe esta derrotado: no es un fallo del servidor sino un
+            // estado del juego, asi que responde 409 y no 500.
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("{userId:guid}")]
     public async Task<IActionResult> GetHero(Guid userId)
     {
@@ -70,6 +121,10 @@ public class HeroesController : ControllerBase
         catch (NotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
         }
     }
     [HttpPost("{userId:guid}/rest")]

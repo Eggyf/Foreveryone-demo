@@ -2,6 +2,7 @@ import { isAxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { heroesApi } from '../api/api';
+import { BattlePanel } from '../components/BattlePanel';
 import { HeroCard, HeroLoadingCard } from '../components/HeroCard';
 import type { HeroData, UserSession } from '../types';
 
@@ -51,18 +52,6 @@ export const HeroPage = () => {
     };
   }, [userId]);
 
-  const handleAdventure = async () => {
-    setPageMsg('');
-    try {
-      const { data: adventureData } = await heroesApi.post(`/api/heroes/${userId}/adventure`);
-      setPageMsg(adventureData.message);
-      const { data } = await heroesApi.get(`/api/heroes/${userId}`);
-      setHeroResult({ userId, hero: data as HeroData });
-    } catch (error: unknown) {
-      setPageMsg(getErrorMessage(error, 'No se pudo completar la aventura'));
-    }
-  };
-
   const handleRest = async () => {
     setPageMsg('');
     try {
@@ -75,6 +64,12 @@ export const HeroPage = () => {
     }
   };
 
+  // Tras una batalla el heroe puede haber cambiado de vida, nivel u oro.
+  const refreshHero = async () => {
+    const { data } = await heroesApi.get(`/api/heroes/${userId}`);
+    setHeroResult({ userId, hero: data as HeroData });
+  };
+
   return (
     <div className="hero-page">
       {loadError ? (
@@ -83,12 +78,18 @@ export const HeroPage = () => {
         <HeroLoadingCard displayName={displayName} />
       ) : (
         hero && (
-          <HeroCard
-            hero={hero}
-            displayName={displayName}
-            onAdventure={handleAdventure}
-            onRest={handleRest}
-          />
+          <>
+            <HeroCard
+              hero={hero}
+              displayName={displayName}
+              onRest={handleRest}
+            />
+            <BattlePanel
+              userId={userId}
+              disabled={hero.currentHealth === 0}
+              onBattleFinished={refreshHero}
+            />
+          </>
         )
       )}
       {pageMsg && <p className="message">{pageMsg}</p>}

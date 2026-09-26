@@ -75,6 +75,9 @@
 .page-content {
   max-width: 900px;
   margin: 0 auto;
+  /* La barra de navegacion es sticky: sin este margen, al saltar a una seccion
+     con scrollIntoView el encabezado queda escondido detras de ella. */
+  scroll-margin-top: 96px;
 }
 
 @media (max-width: 560px) {

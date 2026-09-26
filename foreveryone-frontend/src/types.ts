@@ -41,6 +41,40 @@ export interface HeroData {
     mana: number;
 }
 
+export interface EnemyOption {
+    key: string;
+    name: string;
+    health: number;
+    attack: number;
+    defense: number;
+    experienceReward: number;
+    goldReward: number;
+}
+
+export interface BattleRound {
+    round: number;
+    heroDamage: number;
+    enemyDamage: number;
+    enemyHealthRemaining: number;
+    heroHealthRemaining: number;
+    message: string;
+}
+
+export interface BattleResult {
+    victory: boolean;
+    enemyKey: string;
+    enemyName: string;
+    enemyHealth: number;
+    enemyAttack: number;
+    enemyDefense: number;
+    rounds: BattleRound[];
+    experienceGained: number;
+    goldGained: number;
+    levelBefore: number;
+    levelAfter: number;
+    message: string;
+}
+
 export interface KingdomData {
     kingdomId: string;
     castleLevel: number;

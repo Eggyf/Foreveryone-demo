@@ -1,0 +1,234 @@
+.battle-panel {
+  margin-top: 18px;
+  padding: 22px;
+  scroll-margin-top: 96px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 50%), var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.battle-header h3 {
+  margin: 0;
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.battle-header p {
+  margin: 6px 0 18px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.battle-enemies {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.battle-enemy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 18px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: all 0.2s var(--ease);
+}
+
+.battle-enemy:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  transform: translateY(-3px);
+}
+
+.battle-enemy:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.battle-enemy:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.battle-enemy-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.battle-enemy strong {
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.battle-enemy-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.battle-enemy-stats i {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-enemy-rewards {
+  color: var(--text-faint);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-hint,
+.battle-error {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.battle-hint {
+  background: rgba(74, 158, 222, 0.08);
+  color: #8cc4ea;
+}
+
+.battle-error {
+  background: rgba(224, 92, 75, 0.09);
+  color: var(--danger);
+}
+
+.battle-result {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+}
+
+.battle-result.is-victory {
+  border-color: rgba(92, 179, 119, 0.32);
+  background: rgba(92, 179, 119, 0.06);
+}
+
+.battle-result.is-defeat {
+  border-color: rgba(224, 92, 75, 0.32);
+  background: rgba(224, 92, 75, 0.06);
+}
+
+.battle-result-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.battle-result-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.battle-result-head strong {
+  color: var(--text-light);
+  font-family: "Cinzel", serif;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.battle-result-head p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.battle-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.battle-log li {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 11px;
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.battle-round-number {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.battle-round-text {
+  color: var(--text-light);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.battle-round-hp {
+  grid-column: 2;
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .battle-enemies {
+    grid-template-columns: 1fr;
+  }
+}
