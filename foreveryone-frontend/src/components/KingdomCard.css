@@ -164,10 +164,15 @@
   transition: all 0.2s var(--ease);
 }
 
-.army-actions button:hover {
+.army-actions button:hover:not(:disabled) {
   border-color: var(--border-strong);
   background: var(--gold-soft);
   color: var(--gold);
+}
+
+.army-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .kingdom-section {
@@ -242,10 +247,17 @@
   transition: all 0.2s var(--ease);
 }
 
-.build-menu button:hover {
+.build-menu button:hover:not(:disabled) {
   border-color: var(--border-strong);
   background: var(--gold-soft);
   color: var(--gold);
+}
+
+/* Un edificio ya construido queda visible pero inaccionable: el backend
+   respondería 400 si se intentara construir dos veces. */
+.build-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 @media (max-width: 640px) {

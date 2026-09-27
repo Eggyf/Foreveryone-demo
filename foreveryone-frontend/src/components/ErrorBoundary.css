@@ -1,0 +1,104 @@
+.boundary-screen {
+  width: 100%;
+  max-width: 520px;
+  margin: 48px auto;
+  padding: 30px 26px;
+  border: 1px solid rgba(224, 92, 75, 0.28);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.boundary-screen h2 {
+  margin: 0 0 12px;
+  color: var(--danger);
+  font-family: "Cinzel", serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.boundary-screen p {
+  margin: 0 0 18px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.boundary-detail {
+  max-height: 140px;
+  margin: 0 0 20px;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.boundary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.boundary-actions button {
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.2s var(--ease);
+}
+
+.boundary-retry {
+  border: none;
+  background: linear-gradient(135deg, var(--gold-bright), var(--dark-gold));
+  color: #14100a;
+}
+
+.boundary-retry:hover {
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.28);
+  transform: translateY(-2px);
+}
+
+.boundary-reload,
+.boundary-logout {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-light);
+}
+
+.boundary-reload:hover {
+  border-color: var(--border-strong);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.boundary-logout {
+  border-color: rgba(224, 92, 75, 0.35);
+  background: rgba(224, 92, 75, 0.1);
+  color: var(--danger);
+}
+
+.boundary-logout:hover {
+  border-color: rgba(224, 92, 75, 0.6);
+  background: rgba(224, 92, 75, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boundary-actions button {
+    transition: none;
+  }
+}

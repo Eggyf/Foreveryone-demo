@@ -1,26 +1,47 @@
 import type { KingdomData } from '../types';
 import { BuildingCard } from './BuildingCard';
+import { BARRACKS_TYPE, BUILDABLE_BUILDINGS, CASTLE_TYPE, getBuildingDetails } from './buildings';
 import './GameCard.css';
 import './KingdomCard.css';
 
-export const KingdomCard = ({ kingdom, onCreate, onBuild, onUpgrade, onTrain }: { 
-    kingdom: KingdomData | null, 
-    onCreate: () => void,
-    onBuild: (type: number) => void,
-    onUpgrade: (type: number) => void,
-    onTrain: (amount: number) => void
-}) => {
+const TRAIN_OPTIONS = [
+  { amount: 5, gold: 250, food: 125 },
+  { amount: 10, gold: 500, food: 250 },
+] as const;
+
+interface KingdomCardProps {
+  kingdom: KingdomData | null;
+  isBusy: boolean;
+  onCreate: () => void;
+  onBuild: (type: number) => void;
+  onUpgrade: (type: number) => void;
+  onTrain: (amount: number) => void;
+}
+
+export const KingdomCard = ({
+  kingdom,
+  isBusy,
+  onCreate,
+  onBuild,
+  onUpgrade,
+  onTrain,
+}: KingdomCardProps) => {
   if (!kingdom) {
     return (
       <div className="action-box">
         <p>Aún no tienes un reino.</p>
-        <button onClick={onCreate}>Crear Reino</button>
+        <button type="button" onClick={onCreate} disabled={isBusy}>
+          {isBusy ? 'Fundando tu reino…' : 'Crear Reino'}
+        </button>
       </div>
     );
   }
 
-  const constructedBuildings = kingdom.buildings.filter((building) => building.type !== 1);
-  const hasBarracks = constructedBuildings.some((building) => building.type === 6);
+  // El castillo ya existe desde la fundacion: la seccion de edificios muestra
+  // solo lo que el jugador ha construido despues.
+  const constructedBuildings = kingdom.buildings.filter((building) => building.type !== CASTLE_TYPE);
+  const hasBarracks = constructedBuildings.some((building) => building.type === BARRACKS_TYPE);
+  const builtTypes = new Set(constructedBuildings.map((building) => building.type));
 
   return (
     <div className="kingdom-view">
@@ -64,12 +85,16 @@ export const KingdomCard = ({ kingdom, onCreate, onBuild, onUpgrade, onTrain }: 
 
         {hasBarracks && (
           <div className="army-actions">
-            <button type="button" onClick={() => onTrain(5)}>
-              Entrenar 5 · 250🪙 125🍖
-            </button>
-            <button type="button" onClick={() => onTrain(10)}>
-              Entrenar 10 · 500🪙 250🍖
-            </button>
+            {TRAIN_OPTIONS.map(({ amount, gold, food }) => (
+              <button
+                type="button"
+                key={amount}
+                onClick={() => onTrain(amount)}
+                disabled={isBusy}
+              >
+                Entrenar {amount} · {gold}🪙 {food}🍖
+              </button>
+            ))}
           </div>
         )}
       </section>
@@ -89,9 +114,10 @@ export const KingdomCard = ({ kingdom, onCreate, onBuild, onUpgrade, onTrain }: 
           <div className="building-grid">
             {constructedBuildings.map((building) => (
               <BuildingCard
-                key={`${building.type}-${building.name}`}
+                key={building.type}
                 building={building}
                 onUpgrade={onUpgrade}
+                disabled={isBusy}
               />
             ))}
           </div>
@@ -111,10 +137,25 @@ export const KingdomCard = ({ kingdom, onCreate, onBuild, onUpgrade, onTrain }: 
           </div>
         </div>
         <div className="build-menu">
-          <button type="button" onClick={() => onBuild(2)}>🌾 Granja</button>
-          <button type="button" onClick={() => onBuild(3)}>🪚 Aserradero</button>
-          <button type="button" onClick={() => onBuild(6)}>🛡️ Cuartel</button>
+          {BUILDABLE_BUILDINGS.map((building) => (
+            <button
+              type="button"
+              key={building.type}
+              onClick={() => onBuild(building.type)}
+              // Un tipo solo se construye una vez: el backend responde 400 si se
+              // repite, asi que es mejor no ofrecerlo.
+              disabled={isBusy || builtTypes.has(building.type)}
+              title={building.description}
+            >
+              {building.icon} {building.label}
+            </button>
+          ))}
         </div>
+        {!hasBarracks && (
+          <p className="build-hint">
+            Construye un {getBuildingDetails(BARRACKS_TYPE)?.label.toLowerCase()} para poder entrenar tropas.
+          </p>
+        )}
       </section>
     </div>
   );

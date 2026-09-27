@@ -36,6 +36,7 @@ const RACE_DETAILS: Record<string, { label: string; icon: string }> = {
 interface HeroCardProps {
   hero: HeroData;
   displayName: string;
+  isResting?: boolean;
   onRest: () => void;
 }
 
@@ -51,6 +52,7 @@ const getRaceDetails = (race: string) => RACE_DETAILS[race.toLowerCase()] ?? nul
 export const HeroCard = ({
   hero,
   displayName,
+  isResting = false,
   onRest,
 }: HeroCardProps) => {
   const safeDisplayName = displayName || 'Aventurero';
@@ -136,9 +138,9 @@ export const HeroCard = ({
           type="button"
           className="rest-btn"
           onClick={onRest}
-          disabled={isFullyRested}
+          disabled={isFullyRested || isResting}
         >
-          🛏️ Descansar
+          {isResting ? '🛏️ Descansando…' : '🛏️ Descansar'}
         </button>
       </div>
 

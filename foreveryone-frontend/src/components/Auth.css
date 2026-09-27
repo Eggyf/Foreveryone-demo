@@ -98,6 +98,16 @@
   transform: translateY(0);
 }
 
+.auth-card form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.auth-card form button:disabled:hover {
+  box-shadow: none;
+  transform: none;
+}
+
 .auth-card .field-hint {
   margin: -4px 0 12px;
   color: var(--text-faint);

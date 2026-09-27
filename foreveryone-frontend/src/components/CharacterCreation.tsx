@@ -1,6 +1,6 @@
-import { isAxiosError } from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import { heroesApi } from '../api/api';
+import { getErrorMessage, isNotFound } from '../api/errors';
 import type {
   CharacterClassOption,
   CharacterOptions,
@@ -85,11 +85,6 @@ const resolveStats = (
 const formatModifier = (value: number): string =>
   value === 0 ? '—' : `${value > 0 ? '+' : ''}${value}%`;
 
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  isAxiosError<{ message?: string; detail?: string }>(error)
-    ? error.response?.data?.message || error.response?.data?.detail || fallback
-    : fallback;
-
 export const CharacterCreation = ({ user, onCreated, onSessionExpired }: CharacterCreationProps) => {
   const [options, setOptions] = useState<CharacterOptions | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -145,7 +140,7 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
     } catch (error: unknown) {
       // 404 = Heroes no encuentra la cuenta en Identity. El token es de una
       // cuenta borrada o caducada, así que la unica salida es cerrar sesión.
-      if (isAxiosError(error) && error.response?.status === 404) {
+      if (isNotFound(error)) {
         setAccountMissing(true);
         setIsSubmitting(false);
         return;

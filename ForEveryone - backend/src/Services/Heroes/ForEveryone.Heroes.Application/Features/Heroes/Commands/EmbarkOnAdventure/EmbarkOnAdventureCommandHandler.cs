@@ -33,7 +33,8 @@ public class EmbarkOnAdventureCommandHandler : IRequestHandler<EmbarkOnAdventure
         var enemy = Enemy.Goblin;
         var actions = PlanAttackOnlyTurns(hero, enemy);
 
-        var replay = BattleEngine.Replay(hero.Stats, hero.CurrentHealth, enemy, actions);
+        var replay = BattleEngine.Replay(
+            hero.Class, hero.Stats, hero.CurrentHealth, hero.Stats.Mana, enemy, actions);
 
         hero.SetHealthFromBattle(replay.HeroHealth);
 
@@ -64,13 +65,14 @@ public class EmbarkOnAdventureCommandHandler : IRequestHandler<EmbarkOnAdventure
     private static List<BattleAction> PlanAttackOnlyTurns(Hero hero, Enemy enemy)
     {
         var actions = new List<BattleAction>();
+        var basic = ClassAbilities.Find(hero.Class, BattleAction.Attack)!;
         var enemyHealth = enemy.Health;
         var heroHealth = hero.CurrentHealth;
 
         while (enemyHealth > 0 && heroHealth > 0)
         {
             actions.Add(BattleAction.Attack);
-            enemyHealth -= BattleEngine.DamageFor(BattleAction.Attack, hero.Stats, enemy);
+            enemyHealth -= BattleEngine.DamageFor(basic, hero.Stats, enemy);
 
             if (enemyHealth > 0)
                 heroHealth -= Math.Max(1, enemy.Attack - hero.Stats.Defense);

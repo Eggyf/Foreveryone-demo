@@ -1,29 +1,55 @@
-import { isAxiosError } from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { heroesApi } from '../api/api';
+import { getErrorMessage } from '../api/errors';
 import { BattlePanel } from '../components/BattlePanel';
 import { HeroCard, HeroLoadingCard } from '../components/HeroCard';
+import { Message, type MessageTone } from '../components/Message';
 import type { HeroData, UserSession } from '../types';
+import './HeroPage.css';
 
 interface HeroResultState {
   userId: string;
   hero: HeroData | null;
 }
 
-const getErrorMessage = (error: unknown, fallback: string): string => (
-  isAxiosError<{ message?: string }>(error)
-    ? error.response?.data?.message || fallback
-    : fallback
-);
+interface RestHeroResult {
+  currentHealth: number;
+  message: string;
+}
+
+interface Notice {
+  tone: MessageTone;
+  text: string;
+}
 
 export const HeroPage = () => {
   const { userId, displayName } = useOutletContext<UserSession>();
   const [heroResult, setHeroResult] = useState<HeroResultState | null>(null);
   const [loadError, setLoadError] = useState('');
-  const [pageMsg, setPageMsg] = useState('');
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [isResting, setIsResting] = useState(false);
   const hero = heroResult?.userId === userId ? heroResult.hero : null;
   const isLoading = Boolean(userId) && !loadError && !hero;
+
+  /**
+   * Tras una batalla el heroe puede haber cambiado de vida, nivel u oro, asi que
+   * hay que releerlo. Va memorizado porque `BattlePanel` lo envuelve en un
+   * `useCallback`: sin esto la funcion cambiaria en cada render.
+   */
+  const refreshHero = useCallback(async () => {
+    if (!userId) {
+      return;
+    }
+
+    try {
+      const { data } = await heroesApi.get<HeroData>(`/api/heroes/${userId}`);
+      setHeroResult({ userId, hero: data });
+      setLoadError('');
+    } catch (error: unknown) {
+      setLoadError(getErrorMessage(error, 'No se pudo actualizar la información del héroe.'));
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -34,9 +60,10 @@ export const HeroPage = () => {
 
     const fetchHero = async () => {
       try {
-        const response = await heroesApi.get(`/api/heroes/${userId}`);
+        const { data } = await heroesApi.get<HeroData>(`/api/heroes/${userId}`);
         if (isActive) {
-          setHeroResult({ userId, hero: response.data as HeroData });
+          setHeroResult({ userId, hero: data });
+          setLoadError('');
         }
       } catch (error: unknown) {
         if (isActive) {
@@ -53,27 +80,28 @@ export const HeroPage = () => {
   }, [userId]);
 
   const handleRest = async () => {
-    setPageMsg('');
-    try {
-      const { data: restData } = await heroesApi.post(`/api/heroes/${userId}/rest`);
-      setPageMsg(restData.message);
-      const { data } = await heroesApi.get(`/api/heroes/${userId}`);
-      setHeroResult({ userId, hero: data as HeroData });
-    } catch (error: unknown) {
-      setPageMsg(getErrorMessage(error, 'No se pudo descansar'));
-    }
-  };
+    setNotice(null);
+    setIsResting(true);
 
-  // Tras una batalla el heroe puede haber cambiado de vida, nivel u oro.
-  const refreshHero = async () => {
-    const { data } = await heroesApi.get(`/api/heroes/${userId}`);
-    setHeroResult({ userId, hero: data as HeroData });
+    try {
+      const { data } = await heroesApi.post<RestHeroResult>(`/api/heroes/${userId}/rest`);
+      const { data: heroData } = await heroesApi.get<HeroData>(`/api/heroes/${userId}`);
+      setHeroResult({ userId, hero: heroData });
+      setNotice({ tone: 'success', text: data.message });
+    } catch (error: unknown) {
+      setNotice({
+        tone: 'error',
+        text: getErrorMessage(error, 'No se pudo descansar.'),
+      });
+    } finally {
+      setIsResting(false);
+    }
   };
 
   return (
     <div className="hero-page">
       {loadError ? (
-        <p className="message">{loadError}</p>
+        <Message tone="error">{loadError}</Message>
       ) : isLoading ? (
         <HeroLoadingCard displayName={displayName} />
       ) : (
@@ -82,6 +110,7 @@ export const HeroPage = () => {
             <HeroCard
               hero={hero}
               displayName={displayName}
+              isResting={isResting}
               onRest={handleRest}
             />
             <BattlePanel
@@ -92,7 +121,7 @@ export const HeroPage = () => {
           </>
         )
       )}
-      {pageMsg && <p className="message">{pageMsg}</p>}
+      {notice && <Message tone={notice.tone}>{notice.text}</Message>}
     </div>
   );
 };

@@ -145,9 +145,10 @@ Foreveryone/
 │           └── Shop/
 ├── foreveryone-frontend/
 │   ├── src/
-│   │   ├── api/
-│   │   ├── components/
-│   │   ├── pages/
+│   │   ├── api/          # instancias de Axios y extracción de errores
+│   │   ├── auth/         # decodificación del JWT y acceso al token
+│   │   ├── components/   # componentes de UI, con su CSS contiguo
+│   │   ├── pages/        # rutas de la SPA
 │   │   ├── App.tsx
 │   │   └── types.ts
 │   ├── package.json
@@ -316,7 +317,7 @@ Abre:
 http://localhost:5173
 ```
 
-El frontend actual usa las URLs locales definidas en `foreveryone-frontend/src/api/api.ts`. Aunque existe un archivo `.env`, el código todavía no consume `import.meta.env`; por ello, sus variables no cambian las URLs en tiempo de ejecución.
+El frontend toma las URLs de los servicios de las variables `VITE_*` de `foreveryone-frontend/.env`, que se leen desde `import.meta.env` en `src/api/api.ts`. Si alguna no está definida se usa el puerto local por defecto (5045, 5281, 5256 y 5136), así que el `.env` es una comodidad y no un requisito.
 
 ## 🔌 Endpoints principales
 
@@ -431,20 +432,39 @@ red en cada batalla sin aportar nada. Si el sistema crece (habilidades, botín,
 mapa), el modelo está aislado en `BattleEngine` y `EnemyCatalog` para poder
 extraerlo después.
 
-**El jugador elige la acción en cada turno.** Hay dos:
+**El jugador elige la acción en cada turno.** No hay una lista global de
+habilidades: cada clase tiene **su propio kit de tres ranuras**, y el catálogo
+`ClassAbilities` del dominio es la única fuente de ese balance.
 
-| Acción | Daño | Coste |
-| --- | --- | --- |
-| `Attack` — Ataque normal | `ataque - defensa` | Gratis, siempre disponible |
-| `PowerStrike` — Golpe poderoso | `ataque × 2 - defensa` | 2 usos por combate |
+| Ranura | Guerrero | Cazador | Mago | Pícaro |
+| --- | --- | --- | --- | --- |
+| `Attack` — siempre gratis e ilimitada | Golpe de espada ×1 | Disparo ×1 | Dardo arcano ×0.9 | Tajo ×1 |
+| `PowerStrike` — característica de la clase | Estocada ×2 · 0 maná · 2 usos | Andanada ×1.8 · 25% maná · 2 usos | Bola de fuego ×2.4 · 40% maná · 2 usos | Ataque furtivo ×2.3 · 20% maná · 2 usos |
+| `Special` — exclusiva de la clase | Guardia: mitad del daño de ese turno · 0 maná · 2 usos | Disparo perforante ×2.2 **ignorando la defensa** · 50% maná · 1 uso | Escudo arcano: cura 30% de la vida antes del contraataque · 60% maná · 1 uso | Sangre fría: ×2.4 y devuelve el 50% del daño como vida · 35% maná · 2 usos |
 
-El daño nunca baja de 1 punto, para que un enemigo muy defensivo no eternice el
-combate, y no hay azar: el resultado depende solo de las estadísticas y de las
-acciones elegidas.
+El primer turno de cada clase es siempre gratuito, así que nunca hay bloqueo, y
+el multiplicador es un porcentaje del ataque: el daño final descuenta la defensa
+del enemigo salvo en la habilidad perforante. El daño nunca baja de 1 punto, para
+que un enemigo muy defensivo no eternice el combate, y no hay azar: el resultado
+depende solo de las estadísticas, la clase y las acciones elegidas.
 
-El límite de usos lo comprueba **el servidor**, no el cliente. Como la habilidad
-multiplica por dos el daño, gastarla pronto o reservarla para el final es una
-decisión real.
+El **maná** se recupera un 20% del máximo al empezar cada turno y antes de pagar
+el coste de la acción. Los costes van en porcentaje del maná máximo porque las
+reservas son muy distintas (Guerrero 10, Mago 50): un coste absoluto dejaría al
+Guerrero sin poder usar nunca su habilidad y al Mago usarla sin pensarlo. Como
+el ataque básico no cuesta maná, la reserva nunca se queda atascada a cero.
+
+Los límites de usos, el maná insuficiente y las habilidades que no son del kit
+los comprueba **el servidor**, no el cliente. `BattleEngine.Unavailability`
+devuelve el motivo en texto para que el panel muestre exactamente por qué un
+botón está deshabilitado, y usar la habilidad de otra clase se rechaza como
+petición inválida. El cliente no duplica ningún número: la respuesta incluye un
+array `actions` con el nombre, la descripción, el daño exacto contra ese enemigo,
+el coste en maná, los usos restantes y el motivo de bloqueo de cada habilidad.
+
+Las habilidades de soporte (Guardia, Escudo arcano) no golpean, así que no pueden
+rematar al enemigo: en esos turnos el enemigo no contraataca y el héroe recupera
+el control del combate.
 
 ```jsonc
 // POST /api/heroes/{userId}/battle                        -> inicia combate
@@ -459,7 +479,7 @@ decisión real.
 **El estado de la batalla se reconstruye, no se guarda turno a turno.** Como el
 combate es determinista, la secuencia de acciones jugadas *es* el estado: la
 tabla `Battles` solo guarda identificador, héroe, enemigo, esa secuencia en una
-columna CSV, la vida con la que empezó y el estado final. Así no existe forma de
+columna CSV, la vida y el maná con los que empezó, y el estado final. Así no existe forma de
 que la partida guardada se desincronice del héroe, y `BattleEngine.Replay` queda
 como una función pura, fácil de probar.
 
@@ -560,8 +580,8 @@ Usa el agente reviewer para revisar los cambios actuales sin modificar archivos.
 
 - **Autorización pendiente:** Identity emite JWT, pero Heroes, Kingdom y Shop no configuran actualmente `AddJwtBearer`, `UseAuthentication` ni `[Authorize]`. No confíes en el `userId` enviado por el cliente hasta resolverlo.
 - **Endpoint interno público:** `/internal/users/{id}/exists` no requiere autenticación entre servicios.
-- **Lint frontend pendiente:** `npm run lint` conserva errores existentes de tipos `any` y parámetros sin usar en `src/api/api.ts` y `src/pages/CastlePage.tsx`.
-- **Configuración frontend desacoplada:** las variables del archivo `.env` todavía no se utilizan y las URL de API están fijadas en `src/api/api.ts`.
+- **Lint frontend limpio:** `npm run lint` pasa sin errores y `npm run build` compila con `strict` activado en TypeScript.
+- **Formatos de error heterogéneos:** Identity devuelve `ProblemDetails` (`detail`/`title`), mientras que Heroes, Kingdom y Shop devuelven `{ "message": … }`. Los `NotFound()` sin cuerpo se reescriben a un `ProblemDetails` genérico sin `message` ni `detail`, así que el frontend decide por código de estado y no por cuerpo. `src/api/errors.ts` normaliza los cuatro casos; conviene unificar el contrato en el backend.
 - **Sin pruebas automatizadas:** no hay proyectos de tests .NET ni una suite de frontend.
 - **Sin CI/CD ni contenedores:** todavía no hay Dockerfiles, Docker Compose ni workflows de despliegue.
 - **Sin health checks ni observabilidad:** no hay endpoints de salud, métricas, trazas distribuidas ni correlación de requests.

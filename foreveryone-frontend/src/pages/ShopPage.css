@@ -22,6 +22,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+.shop-loading,
+.shop-empty {
+  margin: 18px 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
 .shop-item {
   display: flex;
   align-items: center;

@@ -1,7 +1,7 @@
-import { isAxiosError } from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { heroesApi } from '../api/api';
-import type { BattleActionId, BattleState, EnemyOption } from '../types';
+import { getErrorMessage } from '../api/errors';
+import type { BattleActionOption, BattleState, EnemyOption } from '../types';
 import './BattlePanel.css';
 
 // Iconos en el cliente: el dominio no depende de la presentacion.
@@ -12,11 +12,6 @@ const ENEMY_ICONS: Record<string, string> = {
 };
 
 const getEnemyIcon = (key: string) => ENEMY_ICONS[key.toLowerCase()] ?? '💀';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  isAxiosError<{ message?: string }>(error)
-    ? error.response?.data?.message || fallback
-    : fallback;
 
 const healthPercent = (current: number, max: number) =>
   max === 0 ? 0 : Math.max(0, Math.min(100, Math.round((current / max) * 100)));
@@ -61,10 +56,6 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
     return () => { isActive = false; };
   }, [userId]);
 
-  const refreshHero = useCallback(() => {
-    onBattleFinished();
-  }, [onBattleFinished]);
-
   const startBattle = async (enemyKey: string) => {
     setError('');
     setIsBusy(true);
@@ -78,7 +69,7 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
     }
   };
 
-  const playTurn = async (action: BattleActionId) => {
+  const playTurn = async (action: number) => {
     if (!battle) return;
     setError('');
     setIsBusy(true);
@@ -88,7 +79,11 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
         { action },
       );
       setBattle(data);
-      if (data.finished) refreshHero();
+      if (data.finished) {
+        // El combate ya no admite mas turnos; el heroe quedo actualizado en el
+        // servidor y hay que reflejarlo en la tarjeta de arriba.
+        onBattleFinished();
+      }
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'No se pudo jugar el turno.'));
     } finally {
@@ -105,7 +100,11 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
         <p>Elige a tu rival. En cada turno decides cómo atacar.</p>
       </header>
 
-      {!battle && (
+      {!battle && enemies.length === 0 && (
+        <p className="battle-hint">No hay rivales disponibles en este reino.</p>
+      )}
+
+      {!battle && enemies.length > 0 && (
         <>
           <div className="battle-enemies">
             {enemies.map((enemy) => (
@@ -168,28 +167,34 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
               </div>
               <small>{battle.heroHealth} / {battle.heroMaxHealth} · 💥 {battle.heroAttack} · 🛡️ {battle.heroDefense}</small>
             </span>
+            {battle.heroMaxMana > 0 && (
+              <span className="battle-fighter battle-mana">
+                <strong>🔮 Maná</strong>
+                <div
+                  className="battle-track is-mana"
+                  role="progressbar"
+                  aria-label="Maná de tu héroe"
+                  aria-valuemin={0}
+                  aria-valuemax={battle.heroMaxMana}
+                  aria-valuenow={battle.heroMana}
+                >
+                  <span style={{ width: `${healthPercent(battle.heroMana, battle.heroMaxMana)}%` }} />
+                </div>
+                <small>{battle.heroMana} / {battle.heroMaxMana}</small>
+              </span>
+            )}
             <span className="battle-turn-badge">Turno {battle.round + 1}</span>
           </div>
 
           {!battle.finished && (
             <div className="battle-choices">
               {battle.actions.map((option) => (
-                <button
-                  type="button"
+                <BattleChoice
                   key={option.action}
-                  className={`battle-choice${option.action === 2 ? ' is-skill' : ''}`}
-                  onClick={() => playTurn(option.action)}
-                  disabled={!option.available || isBusy}
-                >
-                  <strong>{option.name}</strong>
-                  <span className="battle-choice-damage">💥 {option.damage} de daño</span>
-                  <span className="battle-choice-desc">{option.description}</span>
-                  {option.action === 2 && (
-                    <span className="battle-choice-uses">
-                      Usos: {option.usesLeft}
-                    </span>
-                  )}
-                </button>
+                  option={option}
+                  isBusy={isBusy}
+                  onPlay={playTurn}
+                />
               ))}
             </div>
           )}
@@ -228,5 +233,45 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
         </div>
       )}
     </section>
+  );
+};
+
+/**
+ * Un boton de accion. Todo lo que se pinta viene del servidor (nombre, dano,
+ * coste de mana, limite de usos y el motivo por el que esta bloqueada), asi que
+ * anadir una habilidad nueva en el dominio no obliga a tocar el frontend.
+ */
+const BattleChoice = ({
+  option,
+  isBusy,
+  onPlay,
+}: {
+  option: BattleActionOption;
+  isBusy: boolean;
+  onPlay: (action: number) => void;
+}) => {
+  const isBlocked = !option.available;
+
+  return (
+    <button
+      type="button"
+      className={`battle-choice${option.action === 1 ? '' : ' is-skill'}`}
+      onClick={() => onPlay(option.action)}
+      disabled={isBlocked || isBusy}
+      title={option.unavailableReason || option.description}
+    >
+      <strong>{option.name}</strong>
+      <span className="battle-choice-damage">
+        {option.damage > 0 ? `💥 ${option.damage} de daño` : '🛡️ No hace daño'}
+      </span>
+      <span className="battle-choice-desc">{option.description}</span>
+      <span className="battle-choice-meta">
+        {option.manaCost > 0 ? <i>🔮 {option.manaCost} maná</i> : <i>Sin maná</i>}
+        {option.usesLimit > 0 && <i>Usos: {option.usesLeft}/{option.usesLimit}</i>}
+      </span>
+      {isBlocked && option.unavailableReason && (
+        <span className="battle-choice-blocked">{option.unavailableReason}</span>
+      )}
+    </button>
   );
 };

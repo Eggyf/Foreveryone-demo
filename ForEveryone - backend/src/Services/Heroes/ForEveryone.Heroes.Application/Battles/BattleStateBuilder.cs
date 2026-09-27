@@ -1,6 +1,6 @@
-using ForEveryone.Heroes.Domain;
-using ForEveryone.Heroes.Application.Features.Heroes.Commands.StartBattle;
 using ForEveryone.Heroes.Application.Exceptions;
+using ForEveryone.Heroes.Application.Features.Heroes.Commands.StartBattle;
+using ForEveryone.Heroes.Domain;
 
 namespace ForEveryone.Heroes.Application.Battles;
 
@@ -8,6 +8,10 @@ namespace ForEveryone.Heroes.Application.Battles;
 /// Construye el estado de combate que ve el cliente a partir del heroe y de la
 /// batalla. La forma de calcularlo (reproduccion determinista) la decide
 /// <see cref="BattleEngine"/>; aqui solo se proyecta al contrato de la API.
+///
+/// El maná que se manda es el de <i>después</i> del turno anterior, que es
+/// cuando le toca volver a elegir. El maná se regenera al empezar el turno, de
+/// forma que el siguiente salto se ve al confirmar la accion y no antes.
 /// </summary>
 public static class BattleStateBuilder
 {
@@ -18,7 +22,8 @@ public static class BattleStateBuilder
         bool applyRewards)
     {
         var actions = battle.Actions;
-        var replay = BattleEngine.Replay(hero.Stats, battle.HeroHealthAtStart, enemy, actions);
+        var replay = BattleEngine.Replay(
+            hero.Class, hero.Stats, battle.HeroHealthAtStart, battle.HeroManaAtStart, enemy, actions);
 
         var message = replay.Finished
             ? replay.Victory
@@ -37,46 +42,53 @@ public static class BattleStateBuilder
             enemy.Defense,
             replay.HeroHealth,
             hero.Stats.Health,
+            replay.HeroMana,
+            hero.Stats.Mana,
             hero.Stats.Attack,
             hero.Stats.Defense,
             replay.Finished,
             replay.Victory,
             // Las recompensas solo se muestran una vez aplicado el cierre, para
-            // que el cliente no las announces antes de tiempo.
+            // que el cliente no las anuncie antes de tiempo.
             applyRewards ? replay.ExperienceGained : 0,
             applyRewards ? replay.GoldGained : 0,
-            BuildActions(hero, enemy, actions, replay.Finished),
+            BuildActions(hero, enemy, actions, replay),
             replay.Rounds
                 .Select(r => new BattleRoundDto(
                     r.Round, r.Action, r.HeroDamage, r.EnemyDamage,
-                    r.EnemyHealthRemaining, r.HeroHealthRemaining, r.Message))
+                    r.EnemyHealthRemaining, r.HeroHealthRemaining, r.HeroManaRemaining, r.Message))
                 .ToList(),
             message);
     }
 
+    /// <summary>
+    /// Proyecta el kit entero de la clase, no un par de acciones fijas: asi el
+    /// jugador ve siempre sus tres opciones con el nombre y el coste reales, y
+    /// el cliente no tiene que decidir que boton es "la habilidad".
+    /// </summary>
     private static IReadOnlyList<BattleActionDto> BuildActions(
-        Hero hero, Enemy enemy, IReadOnlyList<BattleAction> actions, bool finished)
+        Hero hero, Enemy enemy, IReadOnlyList<BattleAction> actions, BattleReplay replay)
     {
-        if (finished) return [];
+        if (replay.Finished) return [];
 
-        var usesLeft = BattleEngine.SkillUsesLeft(actions);
+        return ClassAbilities.For(hero.Class)
+            .Select(ability =>
+            {
+                var usesLeft = BattleEngine.UsesLeft(ability, actions);
+                var reason = BattleEngine.Unavailability(
+                    ability.Action, hero.Class, hero.Stats, replay.HeroMana, actions);
 
-        return
-        [
-            new BattleActionDto(
-                BattleAction.Attack,
-                "Ataque normal",
-                $"Golpe basico de {hero.Stats.Attack} de ataque.",
-                BattleEngine.DamageFor(BattleAction.Attack, hero.Stats, enemy),
-                BattleEngine.IsAvailable(BattleAction.Attack, actions),
-                usesLeft),
-            new BattleActionDto(
-                BattleAction.PowerStrike,
-                "Golpe poderoso",
-                $"Golpe de {hero.Stats.Attack * 2} de ataque. Quedan {usesLeft} de {BattleEngine.SkillUsesPerBattle} usos.",
-                BattleEngine.DamageFor(BattleAction.PowerStrike, hero.Stats, enemy),
-                BattleEngine.IsAvailable(BattleAction.PowerStrike, actions),
-                usesLeft)
-        ];
+                return new BattleActionDto(
+                    ability.Action,
+                    ability.Name,
+                    ability.Description,
+                    BattleEngine.DamageFor(ability, hero.Stats, enemy),
+                    ClassAbilities.ManaCost(hero.Stats, ability),
+                    reason is null,
+                    ability.UseLimit <= 0 ? -1 : usesLeft,
+                    ability.UseLimit,
+                    reason ?? string.Empty);
+            })
+            .ToList();
     }
 }

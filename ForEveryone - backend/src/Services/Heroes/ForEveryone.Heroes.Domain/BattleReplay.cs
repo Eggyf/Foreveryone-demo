@@ -9,18 +9,7 @@ public sealed record BattleReplay(
     bool Finished,
     int EnemyHealth,
     int HeroHealth,
+    int HeroMana,
     IReadOnlyList<CombatRound> Rounds,
     int ExperienceGained,
     int GoldGained);
-
-/// <summary>
-/// Una accion disponible en el turno actual, con el dano exacto que haria.
-/// Mostrar el numero evita que el jugador elija a ciegas.
-/// </summary>
-public sealed record BattleActionOption(
-    BattleAction Action,
-    string Name,
-    string Description,
-    int Damage,
-    bool Available,
-    int UsesLeft);

@@ -33,9 +33,10 @@ export interface HeroData {
     race: string;
     class: string;
     level: number;
+    /** Vida maxima. La vida actual es `currentHealth`. */
     health: number;
     currentHealth: number;
-    gold: number; // NUEVO
+    gold: number;
     attack: number;
     defense: number;
     mana: number;
@@ -51,15 +52,27 @@ export interface EnemyOption {
     goldReward: number;
 }
 
-export type BattleActionId = 1 | 2;
+/**
+ * Ranura de accion del servidor. No es una habilidad concreta: cada clase
+ * rellena las tres ranuras con su propio kit, y el nombre, el coste y el efecto
+ * los decide la API en `actions`. Ver `BattleActionOption`.
+ */
+export type BattleActionId = 1 | 2 | 3;
 
 export interface BattleActionOption {
     action: BattleActionId;
     name: string;
     description: string;
+    /** Dano exacto contra este enemigo; 0 en habilidades que no golpean. */
     damage: number;
+    manaCost: number;
     available: boolean;
+    /** Usos restantes, o -1 si la accion no tiene limite. */
     usesLeft: number;
+    /** Usos por combate, o 0 si no tiene limite. */
+    usesLimit: number;
+    /** Por que no se puede jugar ahora, o cadena vacia si si se puede. */
+    unavailableReason: string;
 }
 
 export interface BattleRound {
@@ -69,6 +82,7 @@ export interface BattleRound {
     enemyDamage: number;
     enemyHealthRemaining: number;
     heroHealthRemaining: number;
+    heroManaRemaining: number;
     message: string;
 }
 
@@ -83,6 +97,8 @@ export interface BattleState {
     enemyDefense: number;
     heroHealth: number;
     heroMaxHealth: number;
+    heroMana: number;
+    heroMaxMana: number;
     heroAttack: number;
     heroDefense: number;
     finished: boolean;
@@ -102,12 +118,15 @@ export interface KingdomData {
     gold: number;
     food: number;
     buildings: BuildingData[];
-    armySize: number;      // NUEVO
-    militaryPower: number; // NUEVO
+    armySize: number;
+    militaryPower: number;
 }
 
 export interface BuildingData {
+    /** `BuildingType` del dominio de Kingdom: 1 castillo, 2 granja, 3 aserradero,
+        4 cantera, 5 mercado, 6 cuartel. */
     type: number;
+    /** Nombre del enum en ingles tal como lo devuelve el API. */
     name: string;
     level: number;
 }

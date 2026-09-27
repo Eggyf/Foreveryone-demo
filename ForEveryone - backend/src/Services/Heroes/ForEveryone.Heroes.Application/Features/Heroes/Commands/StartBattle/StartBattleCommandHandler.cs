@@ -38,7 +38,7 @@ public class StartBattleCommandHandler
         if (await _battleRepository.GetActiveByHeroIdAsync(request.UserId) is not null)
             throw BattleError.Conflict("Ya tienes un combate en curso.");
 
-        var battle = Battle.Start(request.UserId, enemy, hero.CurrentHealth);
+        var battle = Battle.Start(request.UserId, enemy, hero.CurrentHealth, hero.Stats.Mana);
         await _battleRepository.AddAsync(battle);
 
         return BattleStateBuilder.Build(hero, battle, enemy, applyRewards: false);

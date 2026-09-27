@@ -34,15 +34,25 @@ public class PlayBattleTurnCommandHandler
         if (battle.IsFinished)
             throw BattleError.Conflict("El combate ya ha terminado.");
 
-        // La habilidad tiene un limite de usos: lo comprueba el servidor y no el
-        // cliente, para que no se pueda saltar el limite desde el navegador.
-        if (!BattleEngine.IsAvailable(request.Action, battle.Actions))
-            throw BattleError.Conflict("No tienes usos disponibles de esa acción.");
+        var enemy = EnemyCatalog.FindByKey(battle.EnemyKey)!;
+
+        // Se reproduce el estado actual para validar contra el maná y los usos
+        // que quedan de verdad, no contra lo que el cliente dice que quedan.
+        var current = BattleEngine.Replay(
+            hero.Class, hero.Stats, battle.HeroHealthAtStart, battle.HeroManaAtStart, enemy, battle.Actions);
+
+        // Las habilidades tienen limite de usos, coste de maná y solo existen si
+        // son del kit de la clase. Todo se comprueba aqui, no en el cliente.
+        var blocked = BattleEngine.Unavailability(
+            request.Action, hero.Class, hero.Stats, current.HeroMana, battle.Actions);
+
+        if (blocked is not null)
+            throw BattleError.Conflict(blocked);
 
         battle.Play(request.Action);
 
-        var enemy = EnemyCatalog.FindByKey(battle.EnemyKey)!;
-        var replay = BattleEngine.Replay(hero.Stats, battle.HeroHealthAtStart, enemy, battle.Actions);
+        var replay = BattleEngine.Replay(
+            hero.Class, hero.Stats, battle.HeroHealthAtStart, battle.HeroManaAtStart, enemy, battle.Actions);
 
         // El dano se descuenta al heroe en cuanto ocurre el turno, no al cerrar
         // el combate. Asi, abandonar la pelea a medias tambien cuesta vida.

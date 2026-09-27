@@ -16,12 +16,13 @@ public sealed class Battle
     // Constructor privado sin parametros requerido por EF Core.
     private Battle() => _actionsCsv = string.Empty;
 
-    private Battle(Guid id, Guid heroId, Enemy enemy, int heroHealthAtStart)
+    private Battle(Guid id, Guid heroId, Enemy enemy, int heroHealthAtStart, int heroManaAtStart)
     {
         Id = id;
         HeroId = heroId;
         EnemyKey = enemy.Key;
         HeroHealthAtStart = heroHealthAtStart;
+        HeroManaAtStart = heroManaAtStart;
         Status = BattleStatus.InProgress;
     }
 
@@ -48,6 +49,14 @@ public sealed class Battle
 
     public int HeroHealthAtStart { get; private set; }
 
+    /// <summary>
+    /// Maná del heroe al empezar el combate. Se guarda por el mismo motivo que la
+    /// vida: el motor lo va descontando turno a turno al pagar cada habilidad, y
+    /// reproducir la pelea desde el principio necesita el valor de partida, no
+    /// el actual.
+    /// </summary>
+    public int HeroManaAtStart { get; private set; }
+
     public BattleStatus Status { get; private set; }
 
     public bool IsFinished => Status != BattleStatus.InProgress;
@@ -58,14 +67,24 @@ public sealed class Battle
         {
             if (string.IsNullOrWhiteSpace(_actionsCsv)) return [];
 
-            return _actionsCsv
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(value => Enum.Parse<BattleAction>(value))
-                .ToList();
+            var actions = new List<BattleAction>();
+
+            // Se ignoran las entradas que no se reconocen en vez de lanzar: una
+            // fila corrupta no debe impedir abrir el combate, y el motor ya
+            // cae al ataque basico si le llega una ranura ajena al kit.
+            foreach (var value in _actionsCsv.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (Enum.TryParse<BattleAction>(value, out var action))
+                {
+                    actions.Add(action);
+                }
+            }
+
+            return actions;
         }
     }
 
-    public static Battle Start(Guid heroId, Enemy enemy, int heroHealthAtStart)
+    public static Battle Start(Guid heroId, Enemy enemy, int heroHealthAtStart, int heroManaAtStart)
     {
         ArgumentNullException.ThrowIfNull(enemy);
 
@@ -73,7 +92,7 @@ public sealed class Battle
             throw new ArgumentOutOfRangeException(
                 nameof(heroHealthAtStart), "No se puede empezar un combate con el heroe derrotado.");
 
-        return new Battle(Guid.NewGuid(), heroId, enemy, heroHealthAtStart);
+        return new Battle(Guid.NewGuid(), heroId, enemy, heroHealthAtStart, heroManaAtStart);
     }
 
     /// <summary>

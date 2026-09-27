@@ -21,7 +21,10 @@ public class HeroesDbContext : DbContext
             builder.Property(b => b.Id).ValueGeneratedNever();
             builder.Property(b => b.EnemyKey).HasMaxLength(40).IsRequired();
             builder.Property(b => b.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
-            builder.Property(b => b.ActionsCsv).HasColumnName("Actions").HasMaxLength(64).IsRequired();
+            // 64 caracteres no daban de si: el nombre de la ranura de habilidad
+            // mas largo son 11 mas la coma, y un combate largo contra un enemigo
+            // blindado puede acumular decenas de turnos.
+            builder.Property(b => b.ActionsCsv).HasColumnName("Actions").HasMaxLength(512).IsRequired();
             builder.Ignore(b => b.Actions);
             builder.Ignore(b => b.IsFinished);
             builder.HasIndex(b => b.HeroId);

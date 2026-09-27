@@ -166,11 +166,21 @@
   background: linear-gradient(90deg, #2f7d4f, var(--success));
 }
 
+.battle-track.is-mana span {
+  background: linear-gradient(90deg, #2f6a9c, var(--mana));
+}
+
 .battle-hero-head {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 16px 0;
+}
+
+/* El maná se muestra en su propia columna para que el jugador vea de un vistazo
+   si le llega para la habilidad cara antes de elegirla. */
+.battle-mana {
+  max-width: 190px;
 }
 
 .battle-turn-badge {
@@ -186,9 +196,12 @@
   white-space: nowrap;
 }
 
+/* Tres acciones por clase. Con auto-fit caben las tres en una fila en pantallas
+   anchas y se apilan solas en movil, sin huecos como fijando un numero de
+   columnas. */
 .battle-choices {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 10px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
@@ -245,6 +258,29 @@
   color: var(--text-faint);
   font-size: 0.72rem;
   line-height: 1.45;
+}
+
+.battle-choice-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.battle-choice-meta i {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.battle-choice-blocked {
+  color: var(--danger);
+  font-size: 0.68rem;
+  line-height: 1.4;
 }
 
 .battle-outcome {
@@ -361,5 +397,18 @@
   .battle-enemies,
   .battle-choices {
     grid-template-columns: 1fr;
+  }
+
+  .battle-hero-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .battle-mana {
+    max-width: none;
+  }
+
+  .battle-turn-badge {
+    align-self: flex-start;
   }
 }

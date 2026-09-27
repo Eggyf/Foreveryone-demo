@@ -1,11 +1,11 @@
-import { isAxiosError } from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { heroesApi } from '../api/api';
+import { getErrorMessage, isNotFound } from '../api/errors';
 import type { UserSession } from '../types';
 import { CharacterCreation } from './CharacterCreation';
 import './GameGate.css';
 
-type GateState = 'checking' | 'ready' | 'needs-creation' | 'error';
+type GateState = 'checking' | 'ready' | 'needs-creation' | 'invalid-session' | 'error';
 
 interface GameGateProps {
   user: UserSession;
@@ -25,10 +25,11 @@ interface GameGateProps {
  */
 export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) => {
   const { userId } = user;
-  const [result, setResult] = useState<{ userId: string; state: GateState } | null>(null);
+  const [result, setResult] = useState<{ userId: string; state: GateState; detail: string } | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    // Sin `userId` no hay nada que consultar: el token no trajo un `sub` util.
     if (!userId) {
       return;
     }
@@ -39,7 +40,7 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
       .get(`/api/heroes/${userId}`)
       .then((response) => {
         if (isActive) {
-          setResult({ userId, state: response.data ? 'ready' : 'needs-creation' });
+          setResult({ userId, state: response.data ? 'ready' : 'needs-creation', detail: '' });
         }
       })
       .catch((error: unknown) => {
@@ -48,8 +49,11 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
         }
 
         // 404 = todavia no hay heroe. Cualquier otro fallo es un problema real.
-        const isMissing = isAxiosError(error) && error.response?.status === 404;
-        setResult({ userId, state: isMissing ? 'needs-creation' : 'error' });
+        setResult(
+          isNotFound(error)
+            ? { userId, state: 'needs-creation', detail: '' }
+            : { userId, state: 'error', detail: getErrorMessage(error, '') },
+        );
       });
 
     return () => {
@@ -59,7 +63,11 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
 
   const retry = useCallback(() => setAttempt((current) => current + 1), []);
 
-  const state: GateState = !userId ? 'error' : result?.userId === userId ? result.state : 'checking';
+  const state: GateState = !userId
+    ? 'invalid-session'
+    : result?.userId === userId
+      ? result.state
+      : 'checking';
 
   if (state === 'checking') {
     return (
@@ -69,12 +77,27 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
     );
   }
 
+  // El token existe pero no identifica a un usuario legible. Ningun servicio
+  // lo aceptara, asi que la unica salida util es volver al login.
+  if (state === 'invalid-session') {
+    return (
+      <div className="gate-screen">
+        <p className="gate-error">
+          Tu sesión no es válida o ha caducado. Inicia sesión de nuevo para continuar.
+        </p>
+        <button type="button" className="gate-retry" onClick={onSessionExpired}>
+          Volver al login
+        </button>
+      </div>
+    );
+  }
+
   if (state === 'error') {
     return (
       <div className="gate-screen">
         <p className="gate-error">
-          No se pudo comprobar si ya tienes personaje. Comprueba que los servicios
-          estén encendidos.
+          {result?.detail ||
+            'No se pudo comprobar si ya tienes personaje. Comprueba que los servicios estén encendidos.'}
         </p>
         <button type="button" className="gate-retry" onClick={retry}>
           Reintentar
