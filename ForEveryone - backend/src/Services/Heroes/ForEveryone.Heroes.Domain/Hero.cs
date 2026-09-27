@@ -72,6 +72,18 @@ public class Hero
         CurrentHealth = Stats.Health;
     }
 
+    /// <summary>
+    /// Fija la vida al resultado de un combate. Se acepta un valor absoluto y
+    /// no un delta porque el motor de batalla calcula el total de forma
+    /// determinista. Nunca puede dejar la vida por encima del maximo.
+    /// </summary>
+    public void SetHealthFromBattle(int health)
+    {
+        if (health < 0) throw new ArgumentOutOfRangeException(nameof(health));
+
+        CurrentHealth = Math.Min(health, Stats.Health);
+    }
+
     // --- NUEVAS MECÁNICAS DE TIENDA ---
     public void AddGold(int amount)
     {

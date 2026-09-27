@@ -1,7 +1,9 @@
-using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
+﻿using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;
-using ForEveryone.Heroes.Application.Features.Heroes.Commands.FightBattle;
+using ForEveryone.Heroes.Application.Features.Heroes.Commands.PlayBattleTurn;
+using ForEveryone.Heroes.Application.Features.Heroes.Commands.StartBattle;
 using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetCharacterOptions;
+using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetCurrentBattle;
 using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetHero;
 using Heroes.Application.Features.Heroes.Commands.EmbarkOnAdventure;
 using Heroes.Application.Features.Heroes.Commands.RestHero;
@@ -76,31 +78,83 @@ public class HeroesController : ControllerBase
     }
 
     /// <summary>
-    /// Pelatea por turnos contra el enemigo indicado en el cuerpo.
+    /// Inicia un combate por turnos contra el enemigo indicado en el cuerpo.
     /// </summary>
     [HttpPost("{userId:guid}/battle")]
-    public async Task<IActionResult> FightBattle(Guid userId, [FromBody] FightBattleCommand command)
+    public async Task<IActionResult> StartBattle(Guid userId, [FromBody] StartBattleCommand command)
     {
         try
         {
-            var result = await _mediator.Send(command with { UserId = userId });
-            return Ok(result);
+            return Ok(await _mediator.Send(command with { UserId = userId }));
         }
         catch (ValidationException ex)
         {
-            return BadRequest(new { message = ex.Message, errors = ex.Errors });
+                return ToValidationProblem(ex);
         }
-        catch (NotFoundException ex)
+        catch (BattleError ex)
         {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            // El heroe esta derrotado: no es un fallo del servidor sino un
-            // estado del juego, asi que responde 409 y no 500.
-            return Conflict(new { message = ex.Message });
+                return ToBattleProblem(ex);
         }
     }
+
+    /// <summary>
+    /// Juega un turno: el jugador elige accion y el servidor devuelve el nuevo
+    /// estado. El limite de usos de la habilidad se comprueba aqui, no en el
+    /// cliente.
+    /// </summary>
+    [HttpPost("{userId:guid}/battle/{battleId:guid}/turn")]
+    public async Task<IActionResult> PlayTurn(
+        Guid userId, Guid battleId, [FromBody] PlayBattleTurnCommand command)
+    {
+        try
+        {
+            return Ok(await _mediator.Send(
+                command with { UserId = userId, BattleId = battleId }));
+        }
+        catch (ValidationException ex)
+        {
+                return ToValidationProblem(ex);
+        }
+        catch (BattleError ex)
+        {
+                return ToBattleProblem(ex);
+        }
+    }
+
+    /// <summary>
+    /// Combate en curso, para que el cliente pueda retomarlo al recargar la pagina.
+    /// </summary>
+    [HttpGet("{userId:guid}/battle")]
+    public async Task<IActionResult> GetCurrentBattle(Guid userId)
+    {
+        try
+        {
+            return Ok(await _mediator.Send(new GetCurrentBattleQuery(userId)));
+        }
+        catch (ValidationException ex)
+        {
+                return ToValidationProblem(ex);
+        }
+        catch (BattleError ex)
+        {
+                return ToBattleProblem(ex);
+        }
+    }
+
+    private ObjectResult ToBattleProblem(BattleError ex) => ex.Kind switch
+    {
+        BattleErrorKind.NotFound => NotFound(new { message = ex.Message }),
+        BattleErrorKind.Conflict => Conflict(new { message = ex.Message }),
+        BattleErrorKind.Invalid => BadRequest(new { message = ex.Message, errors = ex.Errors }),
+        _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message })
+    };
+
+    /// <summary>
+    /// Traduce los fallos de FluentValidation, que el pipeline lanza antes de
+    /// que el handler llegue a ejecutarse.
+    /// </summary>
+    private ObjectResult ToValidationProblem(ValidationException ex) =>
+        BadRequest(new { message = ex.Message, errors = ex.Errors });
 
     [HttpGet("{userId:guid}")]
     public async Task<IActionResult> GetHero(Guid userId)

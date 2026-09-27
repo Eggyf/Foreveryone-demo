@@ -28,6 +28,7 @@ builder.Services.AddValidatorsFromAssembly(Assembly.Load("ForEveryone.Heroes.App
 
 // 4. Dependency Inversion (Infraestructura)
 builder.Services.AddScoped<IHeroRepository, HeroRepository>();
+builder.Services.AddScoped<IBattleRepository, BattleRepository>();
 builder.Services.AddHttpClient<IUserVerificationService, UserVerificationService>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["IdentityServiceUrl"]!);

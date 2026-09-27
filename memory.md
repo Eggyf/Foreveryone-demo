@@ -2,7 +2,7 @@
 
 Curated, durable context for future OpenCode sessions. This file is not an automatic transcript database: `AGENTS.md` instructs agents to read it at session startup and to keep it current when durable project context changes.
 
-Last verified: 2026-09-26
+Last verified: 2026-09-27
 
 ## User preferences
 
@@ -47,8 +47,8 @@ Last verified: 2026-09-26
 - A stale token is detected where it actually matters: `POST /api/heroes` returns `404` with "El usuario no existe en el sistema de Identity", and `CharacterCreation` shows a logout button instead of a generic error.
 - Heroes registers FluentValidation validators but had no `ValidationBehavior`, so they never ran and invalid input produced a `500` with a stack trace. A behavior was added on 2026-09-25; any new service needs the same pipeline registration.
 - Project-specific OpenCode subagents exist under `.opencode/agents/`: `code-explorer`, `reviewer`, `tester`, and `documentation-writer`.
-- Turn-based combat lives in Heroes, not in a separate microservice: it is pure domain logic over stats Heroes already owns. `BattleEngine.Run(Hero, Enemy)` resolves the fight and returns a `BattleOutcome` with the full per-turn `CombatRound` history. Enemies are static data in `EnemyCatalog` (Goblin, Wolf, Ogre), exposed via `GET /api/heroes/enemies` so the client never duplicates the balance.
-- Combat is deterministic: the hero attacks first, damage is floored at 1 so a high-defence enemy cannot stall the fight, and there is no randomness. A defeated hero gets `409` instead of starting a battle.
+- Turn-based combat lives in Heroes, not in a separate microservice: it is pure domain logic over stats Heroes already owns. The player picks an action each turn from `Attack` (free) or `PowerStrike` (double damage, 2 uses per battle, limit enforced server-side). Enemies are static data in `EnemyCatalog` (Goblin, Wolf, Ogre), exposed via `GET /api/heroes/enemies` so the client never duplicates the balance.
+- Battle state is never stored turn by turn. Because combat is deterministic, the action sequence IS the state: the `Battles` table holds only the id, hero, enemy, the action sequence as a CSV column (`Battle.ActionsCsv`, internal, mapped via `InternalsVisibleTo` from Heroes.Domain to Infrastructure), the starting hero health, and the final status. `BattleEngine.Replay(stats, heroHealthAtStart, enemy, actions)` is therefore a pure function. Hero damage is committed per turn, not at battle end, so abandoning a fight still costs health. One open battle per hero.
 - `start-all.ps1` builds the solution once, then launches each API with `dotnet <dll> --urls http://localhost:<port>` plus `ASPNETCORE_ENVIRONMENT=Development` (replicating the `http` launch profile), and the frontend with `npm run dev`. It waits for each port, and if a port is already occupied it reports the owning process with its PID and reuses it instead of waiting. Launching via `.dll` rather than `dotnet run` is deliberate: `dotnet run` executes the generated `.exe` and fails when another process locks it. The legacy `POST /api/heroes/{id}/adventure` route still exists and delegates to `BattleEngine` with the goblin.
 - On 2026-09-26 an unsigned, randomly named executable appeared in `%TEMP%` (`heyzhcpi.exe`, SHA256 `6F5AEB2A18F7A3B5956F8711BC388839044803DA50CC5D13EC38370A4BCF4AD2`) and held a lock on a freshly built API `.exe`. Defender reported no threats on it. It was never executed and not deleted; the user was told to check the hash on VirusTotal. Treat any reappearance as a security concern rather than a build problem.
 
@@ -90,6 +90,7 @@ Documented project risks that still require verification before production use:
 - 2026-09-25: renamed the user-facing game to `Foreveryone` and replaced "Eldoria" everywhere; rebuilt the visual system as design tokens in `App.css`.
 - 2026-09-25: verified the full flow in a real browser (register, login by username, race and class creation, hero page, shop). Fixed a 4-column grid in the creation wizard that left the last class card stranded on its own row.
 - 2026-09-26: added turn-based battles against three enemies (Goblin, Wolf, Ogre) with a `BattlePanel` on the hero page, and rewrote `start-all.ps1` to launch every service and the frontend with port waits.
+- 2026-09-27: turned the automatic battle into real turn-based play. The player now chooses an action every turn; the battle is persisted in a new `Battles` table and replayed deterministically from the action sequence. Added `Battle`, `BattleAction`, `BattleStatus`, `BattleError`, `BattleStateBuilder`, and the `StartBattle`, `PlayBattleTurn` and `GetCurrentBattle` endpoints, plus a rewritten interactive `BattlePanel`.
 - 2026-09-23: pushed commit `f1e06cd` (`refactor: split component styles into dedicated files`) to branch `Eggyfh-dev`.
 
 Git history is the source of truth for older changes; only add future entries here when they provide persistent context that is not already obvious from the repository.

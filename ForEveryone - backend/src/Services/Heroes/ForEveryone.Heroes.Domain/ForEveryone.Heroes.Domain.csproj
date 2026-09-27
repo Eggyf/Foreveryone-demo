@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Infrastructure necesita leer el detalle de mapeo interno (por ejemplo la
+         columna donde Battle guarda la secuencia de acciones) sin que eso pase
+         a formar parte del contrato publico del dominio. -->
+    <InternalsVisibleTo Include="ForEveryone.Heroes.Infrastructure" />
+  </ItemGroup>
+
 </Project>

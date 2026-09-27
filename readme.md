@@ -363,7 +363,9 @@ el nombre del jugador.
 | `POST` | `/api/heroes` | Crea un héroe con su raza y clase |
 | `GET` | `/api/heroes/options` | Catálogo de razas y clases con sus estadísticas |
 | `GET` | `/api/heroes/enemies` | Catálogo de enemigos con estadísticas y recompensas |
-| `POST` | `/api/heroes/{userId}/battle` | Pelatea por turnos contra el enemigo del cuerpo |
+| `POST` | `/api/heroes/{userId}/battle` | Inicia un combate por turnos contra el enemigo del cuerpo |
+| `POST` | `/api/heroes/{userId}/battle/{battleId}/turn` | Juega un turno eligiendo acción |
+| `GET` | `/api/heroes/{userId}/battle` | Combate en curso, para poder retomarlo |
 | `GET` | `/api/heroes/{userId}` | Obtiene el héroe de un usuario. Devuelve `404` si todavía no tiene |
 | `POST` | `/api/heroes/{userId}/adventure` | Ejecuta una aventura |
 | `POST` | `/api/heroes/{userId}/rest` | Recupera la vida del héroe |
@@ -429,18 +431,41 @@ red en cada batalla sin aportar nada. Si el sistema crece (habilidades, botín,
 mapa), el modelo está aislado en `BattleEngine` y `EnemyCatalog` para poder
 extraerlo después.
 
-El jugador elige enemigo y la pelea se resuelve turno a turno. El héroe ataca
-primero, el daño nunca baja de 1 punto (así un enemigo muy defensivo no
-eterniza el combate) y no hay azar: el resultado depende solo de las
-estadísticas, lo que lo hace predecible. La respuesta incluye el historial
-completo de turnos para que el cliente muestre la pelea sin simularla.
+**El jugador elige la acción en cada turno.** Hay dos:
+
+| Acción | Daño | Coste |
+| --- | --- | --- |
+| `Attack` — Ataque normal | `ataque - defensa` | Gratis, siempre disponible |
+| `PowerStrike` — Golpe poderoso | `ataque × 2 - defensa` | 2 usos por combate |
+
+El daño nunca baja de 1 punto, para que un enemigo muy defensivo no eternice el
+combate, y no hay azar: el resultado depende solo de las estadísticas y de las
+acciones elegidas.
+
+El límite de usos lo comprueba **el servidor**, no el cliente. Como la habilidad
+multiplica por dos el daño, gastarla pronto o reservarla para el final es una
+decisión real.
 
 ```jsonc
-// POST /api/heroes/{userId}/battle
+// POST /api/heroes/{userId}/battle                        -> inicia combate
 // { "enemyKey": "ogre" }
-// 200 -> { "victory": true, "enemyName": "Ogro", "rounds": [ ... ],
-//         "experienceGained": 150, "goldGained": 90, "message": "..." }
+
+// POST /api/heroes/{userId}/battle/{battleId}/turn         -> juega un turno
+// { "action": 2 }
+
+// GET /api/heroes/{userId}/battle                          -> combate en curso, o 404
 ```
+
+**El estado de la batalla se reconstruye, no se guarda turno a turno.** Como el
+combate es determinista, la secuencia de acciones jugadas *es* el estado: la
+tabla `Battles` solo guarda identificador, héroe, enemigo, esa secuencia en una
+columna CSV, la vida con la que empezó y el estado final. Así no existe forma de
+que la partida guardada se desincronice del héroe, y `BattleEngine.Replay` queda
+como una función pura, fácil de probar.
+
+El daño se descuenta del héroe en cuanto ocurre cada turno, no al cerrar el
+combate: abandonar la pelea a mitad también cuesta vida. Solo se admite un
+combate abierto por héroe.
 
 | Enemigo | Vida | Ataque | Defensa | Experiencia | Oro |
 | --- | --- | --- | --- | --- | --- |

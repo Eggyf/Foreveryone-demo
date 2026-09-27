@@ -9,8 +9,24 @@ public class HeroesDbContext : DbContext
 
     public DbSet<Hero> Heroes => Set<Hero>();
 
+    public DbSet<Battle> Battles => Set<Battle>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Aplica BattleConfiguration junto al resto de configuraciones.
+        modelBuilder.Entity<Battle>(builder =>
+        {
+            builder.ToTable("Battles");
+            builder.HasKey(b => b.Id);
+            builder.Property(b => b.Id).ValueGeneratedNever();
+            builder.Property(b => b.EnemyKey).HasMaxLength(40).IsRequired();
+            builder.Property(b => b.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
+            builder.Property(b => b.ActionsCsv).HasColumnName("Actions").HasMaxLength(64).IsRequired();
+            builder.Ignore(b => b.Actions);
+            builder.Ignore(b => b.IsFinished);
+            builder.HasIndex(b => b.HeroId);
+        });
+
         modelBuilder.Entity<Hero>(builder =>
         {
             builder.HasKey(h => h.Id);

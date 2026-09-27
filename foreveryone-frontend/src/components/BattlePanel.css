@@ -1,11 +1,11 @@
 .battle-panel {
   margin-top: 18px;
   padding: 22px;
-  scroll-margin-top: 96px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 50%), var(--bg-card);
   box-shadow: var(--shadow-sm);
+  scroll-margin-top: 96px;
   text-align: left;
 }
 
@@ -53,11 +53,6 @@
   transform: translateY(-3px);
 }
 
-.battle-enemy:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-}
-
 .battle-enemy:disabled {
   cursor: not-allowed;
   opacity: 0.45;
@@ -68,6 +63,7 @@
   place-items: center;
   width: 46px;
   height: 46px;
+  flex: 0 0 46px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
   font-size: 1.5rem;
@@ -105,6 +101,203 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* --- Arena: combate en curso --- */
+
+.battle-arena {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+}
+
+.battle-arena.is-victory {
+  border-color: rgba(92, 179, 119, 0.32);
+}
+
+.battle-arena.is-defeat {
+  border-color: rgba(224, 92, 75, 0.32);
+}
+
+.battle-enemy-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.battle-fighter {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.battle-fighter strong {
+  color: var(--text-light);
+  font-family: "Cinzel", serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.battle-fighter small {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-track {
+  overflow: hidden;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.battle-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8e2b24, var(--health));
+  transition: width 0.35s var(--ease);
+}
+
+.battle-track.is-hero span {
+  background: linear-gradient(90deg, #2f7d4f, var(--success));
+}
+
+.battle-hero-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.battle-turn-badge {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.battle-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.battle-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.2s var(--ease);
+}
+
+.battle-choice:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+}
+
+.battle-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.battle-choice.is-skill:not(:disabled) {
+  border-color: rgba(184, 134, 11, 0.4);
+  background: var(--gold-soft);
+}
+
+.battle-choice strong {
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.battle-choice-damage {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-choice-desc,
+.battle-choice-uses {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.battle-outcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.battle-outcome strong {
+  font-family: "Cinzel", serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.battle-outcome p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.battle-rewards {
+  color: var(--gold);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-again {
+  margin-top: 6px;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: "Cinzel", serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: all 0.2s var(--ease);
+}
+
+.battle-again:hover {
+  border-color: var(--border-strong);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
 .battle-hint,
 .battle-error {
   margin: 16px 0 0;
@@ -119,60 +312,17 @@
 }
 
 .battle-error {
+  margin-top: 14px;
   background: rgba(224, 92, 75, 0.09);
   color: var(--danger);
-}
-
-.battle-result {
-  margin-top: 20px;
-  padding: 18px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-deep);
-}
-
-.battle-result.is-victory {
-  border-color: rgba(92, 179, 119, 0.32);
-  background: rgba(92, 179, 119, 0.06);
-}
-
-.battle-result.is-defeat {
-  border-color: rgba(224, 92, 75, 0.32);
-  background: rgba(224, 92, 75, 0.06);
-}
-
-.battle-result-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.battle-result-icon {
-  font-size: 1.6rem;
-  line-height: 1;
-}
-
-.battle-result-head strong {
-  color: var(--text-light);
-  font-family: "Cinzel", serif;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.battle-result-head p {
-  margin: 4px 0 0;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  line-height: 1.5;
 }
 
 .battle-log {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 260px;
-  margin: 0;
+  max-height: 220px;
+  margin: 18px 0 0;
   padding: 0 4px 0 0;
   overflow-y: auto;
   list-style: none;
@@ -202,33 +352,14 @@
 }
 
 .battle-round-text {
-  color: var(--text-light);
-  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.79rem;
   line-height: 1.5;
 }
 
-.battle-round-hp {
-  grid-column: 2;
-  color: var(--text-faint);
-  font-size: 0.72rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.battle-rewards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  color: var(--gold);
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
 @media (max-width: 640px) {
-  .battle-enemies {
+  .battle-enemies,
+  .battle-choices {
     grid-template-columns: 1fr;
   }
 }

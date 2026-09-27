@@ -51,8 +51,20 @@ export interface EnemyOption {
     goldReward: number;
 }
 
+export type BattleActionId = 1 | 2;
+
+export interface BattleActionOption {
+    action: BattleActionId;
+    name: string;
+    description: string;
+    damage: number;
+    available: boolean;
+    usesLeft: number;
+}
+
 export interface BattleRound {
     round: number;
+    action: BattleActionId;
     heroDamage: number;
     enemyDamage: number;
     enemyHealthRemaining: number;
@@ -60,18 +72,25 @@ export interface BattleRound {
     message: string;
 }
 
-export interface BattleResult {
-    victory: boolean;
+export interface BattleState {
+    battleId: string;
     enemyKey: string;
     enemyName: string;
+    round: number;
     enemyHealth: number;
+    enemyMaxHealth: number;
     enemyAttack: number;
     enemyDefense: number;
-    rounds: BattleRound[];
+    heroHealth: number;
+    heroMaxHealth: number;
+    heroAttack: number;
+    heroDefense: number;
+    finished: boolean;
+    victory: boolean;
     experienceGained: number;
     goldGained: number;
-    levelBefore: number;
-    levelAfter: number;
+    actions: BattleActionOption[];
+    rounds: BattleRound[];
     message: string;
 }
 
