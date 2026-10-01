@@ -20,7 +20,7 @@ public class AddBuildingCommandHandler : IRequestHandler<AddBuildingCommand, Add
         // 1. Buscamos el reino del usuario
         var kingdom = await _kingdomRepository.GetByUserIdAsync(request.UserId);
         if (kingdom is null)
-            throw new NotFoundException("El usuario no tiene un reino.");
+            throw new NotFoundException("kingdom.error.notFound");
 
         // 2. El Aggregate Root valida si hay recursos y añade el edificio.
         // Si no hay recursos, el dominio lanzará una InvalidOperationException

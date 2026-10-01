@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <!-- `LocalizedText` permite que el texto de un error o de una accion lo
+         traduzca el cliente, en vez de mandar una frase en castellano. -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\ForEveryone.SharedKernel\ForEveryone.SharedKernel.csproj" />
     <ProjectReference Include="..\ForEveryone.Kingdom.Domain\ForEveryone.Kingdom.Domain.csproj" />
   </ItemGroup>
 

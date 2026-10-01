@@ -34,6 +34,10 @@ public sealed class AuthController : ControllerBase
             : ToProblemResult(result.Error);
     }
 
+    /// `detail` lleva la clave de traduccion y no el texto: el cliente la
+    /// resuelve en el idioma del jugador. Los errores de validacion llegan
+    /// indexados por campo en `errors`, tambien como claves.
+    /// </summary>
     private ObjectResult ToProblemResult(Error error)
     {
         var statusCode = error.Code switch
@@ -45,6 +49,29 @@ public sealed class AuthController : ControllerBase
             _ => StatusCodes.Status400BadRequest
         };
 
-        return Problem(detail: error.Description, statusCode: statusCode, title: error.Code);
+        var problem = new ProblemDetails
+        {
+            Detail = error.Description,
+            Status = statusCode,
+            Title = error.Code
+        };
+
+        if (error.Details is { Count: > 0 })
+        {
+            // Los errores de dominio envian la clave en `key`; los de validacion
+            // envian un diccionario campo -> clave. Se distinguen por la forma.
+            var isSingleKey = error.Details.Count == 1 && error.Details.ContainsKey("key");
+
+            if (isSingleKey)
+            {
+                problem.Extensions["message"] = error.Details["key"];
+            }
+            else
+            {
+                problem.Extensions["errors"] = error.Details;
+            }
+        }
+
+        return new ObjectResult(problem) { StatusCode = statusCode };
     }
 }

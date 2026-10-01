@@ -1,8 +1,10 @@
+using ForEveryone.Heroes.Domain;
 using Heroes.Application.Features.Heroes.Commands.BuyItem;
 using Heroes.Application.Features.Heroes.Queries.GetShopItems;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ForEveryone.Heroes.Application.Exceptions;
+using ForEveryone.SharedKernel;
 namespace Heroes.Api.Controllers;
 
 [ApiController]
@@ -33,15 +35,20 @@ public class ShopController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new LocalizedProblem(ex.Text));
         }
-        catch (InvalidOperationException ex)
+        catch (HeroRuleException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            // 400: el dominio rechaza la compra (oro insuficiente, objeto no
+            // aplicable). El motivo viaja como clave para que lo traduzca el cliente.
+            return BadRequest(new LocalizedProblem(ex.Text));
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new LocalizedProblem(
+                // El texto original se queda en el log; el cliente recibe la clave.
+                LocalizedText.Of("shop.error.invalidRequest"),
+                [LocalizedText.Of("shop.error.invalidRequest", ("detail", ex.Message))]));
         }
     }
 

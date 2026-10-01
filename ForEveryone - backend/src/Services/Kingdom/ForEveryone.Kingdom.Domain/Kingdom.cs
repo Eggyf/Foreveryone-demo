@@ -32,11 +32,11 @@ public class Kingdoms
     public void TrainSoldiers(int amount)
     {
         if (amount <= 0)
-            throw new ArgumentException("La cantidad a entrenar debe ser mayor a 0.");
+            throw new DomainRuleException("kingdom.error.armyAmountMustBePositive");
 
         var barracks = Buildings.FirstOrDefault(b => b.Type == BuildingType.Barracks);
         if (barracks is null)
-            throw new InvalidOperationException("Necesitas construir un Cuartel (Barracks) primero.");
+            throw new DomainRuleException("kingdom.error.needsBarracks");
 
         // Costo por soldado: 50 Oro, 25 Comida
         int goldCost = amount * 50;
@@ -44,7 +44,8 @@ public class Kingdoms
         var cost = new Resources(0, 0, goldCost, foodCost);
 
         if (!Resources.CanAfford(cost))
-            throw new InvalidOperationException("Oro o Comida insuficientes para entrenar tropas.");
+            throw new DomainRuleException(
+                "kingdom.error.notEnoughToTrain", ("amount", amount));
 
         Resources = Resources.Deduct(cost);
         ArmySize += amount;
@@ -94,11 +95,12 @@ public class Kingdoms
     {
         var building = Buildings.FirstOrDefault(b => b.Type == type);
         if (building is null)
-            throw new InvalidOperationException("No tienes ese edificio construido.");
+            throw new DomainRuleException("kingdom.error.buildingNotBuilt");
 
         var cost = GetUpgradeCost(building.Level);
         if (!Resources.CanAfford(cost))
-            throw new InvalidOperationException("Recursos insuficientes para mejorar el edificio.");
+            throw new DomainRuleException(
+                "kingdom.error.notEnoughToUpgrade", ("buildingKey", type.ToString()));
 
         Resources = Resources.Deduct(cost);
         building.Upgrade();
@@ -113,11 +115,11 @@ public class Kingdoms
     public void AddBuilding(BuildingType type)
     {
         if (Buildings.Any(b => b.Type == type))
-            throw new InvalidOperationException("Ya existe un edificio de este tipo en el reino.");
+            throw new DomainRuleException("kingdom.error.buildingAlreadyExists", ("buildingKey", type.ToString()));
 
         var cost = GetBuildingCost(type);
         if (!Resources.CanAfford(cost))
-            throw new InvalidOperationException("Recursos insuficientes para construir.");
+            throw new DomainRuleException("kingdom.error.notEnoughToBuild", ("buildingKey", type.ToString()));
 
         Resources = Resources.Deduct(cost);
         Buildings.Add(new Building(type, 1));

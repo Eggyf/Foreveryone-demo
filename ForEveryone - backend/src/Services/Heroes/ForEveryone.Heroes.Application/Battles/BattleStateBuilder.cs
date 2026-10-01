@@ -1,6 +1,7 @@
 using ForEveryone.Heroes.Application.Exceptions;
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.StartBattle;
 using ForEveryone.Heroes.Domain;
+using ForEveryone.SharedKernel;
 
 namespace ForEveryone.Heroes.Application.Battles;
 
@@ -27,14 +28,18 @@ public static class BattleStateBuilder
 
         var message = replay.Finished
             ? replay.Victory
-                ? $"¡Victoria contra {enemy.Name}! Ganaste {replay.ExperienceGained} de experiencia y {replay.GoldGained} de oro."
-                : $"Has sido derrotado por {enemy.Name}. Tu héroe necesita descansar."
-            : $"Turno {replay.Rounds.Count + 1}: elige cómo atacar.";
+                ? LocalizedText.Of(
+                    "battle.outcome.victory",
+                    ("enemyKey", enemy.Key),
+                    ("experienceGained", replay.ExperienceGained),
+                    ("goldGained", replay.GoldGained))
+                : LocalizedText.Of("battle.outcome.defeat", ("enemyKey", enemy.Key))
+            : LocalizedText.Of("battle.turn.prompt", ("round", replay.Rounds.Count + 1));
 
         return new BattleStateDto(
             battle.Id,
             enemy.Key,
-            enemy.Name,
+            enemy.NameKey,
             replay.Rounds.Count,
             replay.EnemyHealth,
             enemy.Health,
@@ -80,14 +85,14 @@ public static class BattleStateBuilder
 
                 return new BattleActionDto(
                     ability.Action,
-                    ability.Name,
-                    ability.Description,
+                    ability.NameKey,
+                    ability.DescriptionKey,
                     BattleEngine.DamageFor(ability, hero.Stats, enemy),
                     ClassAbilities.ManaCost(hero.Stats, ability),
                     reason is null,
                     ability.UseLimit <= 0 ? -1 : usesLeft,
                     ability.UseLimit,
-                    reason ?? string.Empty);
+                    reason);
             })
             .ToList();
     }

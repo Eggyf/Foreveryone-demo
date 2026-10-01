@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { heroesApi } from '../api/api';
 import { getErrorMessage } from '../api/errors';
+import { useTranslation } from '../i18n/useI18n';
 import type { BattleActionOption, BattleState, EnemyOption } from '../types';
 import './BattlePanel.css';
 
@@ -11,7 +12,7 @@ const ENEMY_ICONS: Record<string, string> = {
   ogre: '👹',
 };
 
-const getEnemyIcon = (key: string) => ENEMY_ICONS[key.toLowerCase()] ?? '💀';
+const FALLBACK_ENEMY_ICON = '💀';
 
 const healthPercent = (current: number, max: number) =>
   max === 0 ? 0 : Math.max(0, Math.min(100, Math.round((current / max) * 100)));
@@ -23,11 +24,14 @@ interface BattlePanelProps {
 }
 
 export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelProps) => {
+  const { t, tl } = useTranslation();
   const [enemies, setEnemies] = useState<EnemyOption[]>([]);
   const [loadError, setLoadError] = useState('');
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState('');
+
+  const getEnemyIcon = (key: string) => ENEMY_ICONS[key.toLowerCase()] ?? FALLBACK_ENEMY_ICON;
 
   // Al montar se recupera el combate en curso, para poder retomarlo si el
   // jugador recarga la pagina a mitad de pelea.
@@ -40,7 +44,7 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
         if (!isActive) return;
         setEnemies(data);
       } catch (err: unknown) {
-        if (isActive) setLoadError(getErrorMessage(err, 'No se pudieron cargar los enemigos.'));
+        if (isActive) setLoadError(getErrorMessage(err, t('battle.loadError')));
         return;
       }
 
@@ -54,16 +58,19 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
 
     load();
     return () => { isActive = false; };
-  }, [userId]);
+  }, [userId, t]);
 
   const startBattle = async (enemyKey: string) => {
     setError('');
     setIsBusy(true);
     try {
-      const { data } = await heroesApi.post<BattleState>(`/api/heroes/${userId}/battle`, { enemyKey });
+      const { data } = await heroesApi.post<BattleState>(`/api/heroes/${userId}/battle`, {
+        userId,
+        enemyKey,
+      });
       setBattle(data);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'No se pudo iniciar el combate.'));
+      setError(getErrorMessage(err, t('battle.startError')));
     } finally {
       setIsBusy(false);
     }
@@ -76,7 +83,7 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
     try {
       const { data } = await heroesApi.post<BattleState>(
         `/api/heroes/${userId}/battle/${battle.battleId}/turn`,
-        { action },
+        { userId, battleId: battle.battleId, action },
       );
       setBattle(data);
       if (data.finished) {
@@ -85,7 +92,7 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
         onBattleFinished();
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'No se pudo jugar el turno.'));
+      setError(getErrorMessage(err, t('battle.turnError')));
     } finally {
       setIsBusy(false);
     }
@@ -93,15 +100,17 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
 
   if (loadError) return <p className="battle-error">{loadError}</p>;
 
+  const enemyName = battle ? t(battle.enemyNameKey) : '';
+
   return (
-    <section className="battle-panel" aria-label="Batallas por turnos">
+    <section className="battle-panel" aria-label={t('battle.label')}>
       <header className="battle-header">
-        <h3>⚔️ Batallas</h3>
-        <p>Elige a tu rival. En cada turno decides cómo atacar.</p>
+        <h3>⚔️ {t('battle.title')}</h3>
+        <p>{t('battle.subtitle')}</p>
       </header>
 
       {!battle && enemies.length === 0 && (
-        <p className="battle-hint">No hay rivales disponibles en este reino.</p>
+        <p className="battle-hint">{t('battle.noEnemies')}</p>
       )}
 
       {!battle && enemies.length > 0 && (
@@ -115,65 +124,78 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
                 onClick={() => startBattle(enemy.key)}
                 disabled={disabled || isBusy}
               >
-                <span className="battle-enemy-icon" aria-hidden="true">{getEnemyIcon(enemy.key)}</span>
-                <strong>{enemy.name}</strong>
+                <span className="battle-enemy-icon" aria-hidden="true">
+                  {getEnemyIcon(enemy.key)}
+                </span>
+                <strong>{t(enemy.nameKey)}</strong>
                 <span className="battle-enemy-stats">
                   <i>❤️ {enemy.health}</i>
                   <i>💥 {enemy.attack}</i>
                   <i>🛡️ {enemy.defense}</i>
                 </span>
                 <span className="battle-enemy-rewards">
-                  ✨ {enemy.experienceReward} exp · 🪙 {enemy.goldReward} oro
+                  ✨ {t('battle.exp', { value: enemy.experienceReward })} · 🪙{' '}
+                  {t('battle.gold', { value: enemy.goldReward })}
                 </span>
               </button>
             ))}
           </div>
-          {disabled && <p className="battle-hint">Tu héroe está derrotado. Descansa para volver a luchar.</p>}
+          {disabled && <p className="battle-hint">{t('battle.heroDefeated')}</p>}
         </>
       )}
 
       {battle && (
-        <div className={`battle-arena${battle.finished ? (battle.victory ? ' is-victory' : ' is-defeat') : ''}`}>
+        <div
+          className={`battle-arena${battle.finished ? (battle.victory ? ' is-victory' : ' is-defeat') : ''}`}
+        >
           <header className="battle-enemy-head">
-            <span className="battle-enemy-icon" aria-hidden="true">{getEnemyIcon(battle.enemyKey)}</span>
+            <span className="battle-enemy-icon" aria-hidden="true">
+              {getEnemyIcon(battle.enemyKey)}
+            </span>
             <div className="battle-fighter">
-              <strong>{battle.enemyName}</strong>
+              <strong>{enemyName}</strong>
               <div
                 className="battle-track"
                 role="progressbar"
-                aria-label={`Vida de ${battle.enemyName}`}
+                aria-label={`${t('hero.healthLabel')}: ${enemyName}`}
                 aria-valuemin={0}
                 aria-valuemax={battle.enemyMaxHealth}
                 aria-valuenow={battle.enemyHealth}
               >
                 <span style={{ width: `${healthPercent(battle.enemyHealth, battle.enemyMaxHealth)}%` }} />
               </div>
-              <small>{battle.enemyHealth} / {battle.enemyMaxHealth} · 💥 {battle.enemyAttack} · 🛡️ {battle.enemyDefense}</small>
+              <small>
+                {battle.enemyHealth} / {battle.enemyMaxHealth} · 💥 {battle.enemyAttack} · 🛡️{' '}
+                {battle.enemyDefense}
+              </small>
             </div>
           </header>
 
           <div className="battle-hero-head">
             <span className="battle-fighter">
-              <strong>Tu héroe</strong>
+              <strong>{t('battle.yourHero')}</strong>
               <div
                 className="battle-track is-hero"
                 role="progressbar"
-                aria-label="Vida de tu héroe"
+                aria-label={t('battle.heroHealthLabel')}
                 aria-valuemin={0}
                 aria-valuemax={battle.heroMaxHealth}
                 aria-valuenow={battle.heroHealth}
               >
                 <span style={{ width: `${healthPercent(battle.heroHealth, battle.heroMaxHealth)}%` }} />
               </div>
-              <small>{battle.heroHealth} / {battle.heroMaxHealth} · 💥 {battle.heroAttack} · 🛡️ {battle.heroDefense}</small>
+              <small>
+                {battle.heroHealth} / {battle.heroMaxHealth} · 💥 {battle.heroAttack} · 🛡️{' '}
+                {battle.heroDefense}
+              </small>
             </span>
             {battle.heroMaxMana > 0 && (
               <span className="battle-fighter battle-mana">
-                <strong>🔮 Maná</strong>
+                <strong>🔮 {t('creation.mana')}</strong>
                 <div
                   className="battle-track is-mana"
                   role="progressbar"
-                  aria-label="Maná de tu héroe"
+                  aria-label={t('battle.heroManaLabel')}
                   aria-valuemin={0}
                   aria-valuemax={battle.heroMaxMana}
                   aria-valuenow={battle.heroMana}
@@ -183,7 +205,9 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
                 <small>{battle.heroMana} / {battle.heroMaxMana}</small>
               </span>
             )}
-            <span className="battle-turn-badge">Turno {battle.round + 1}</span>
+            <span className="battle-turn-badge">
+              {t('battle.turn', { round: battle.round + 1 })}
+            </span>
           </div>
 
           {!battle.finished && (
@@ -201,11 +225,12 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
 
           {battle.finished && (
             <div className="battle-outcome">
-              <strong>{battle.victory ? '🏆 ¡Victoria!' : '💀 Derrota'}</strong>
-              <p>{battle.message}</p>
+              <strong>{battle.victory ? `🏆 ${t('battle.victory')}` : `💀 ${t('battle.defeat')}`}</strong>
+              <p>{tl(battle.message)}</p>
               {battle.victory && (
                 <span className="battle-rewards">
-                  ✨ {battle.experienceGained} exp · 🪙 {battle.goldGained} oro
+                  ✨ {t('battle.exp', { value: battle.experienceGained })} · 🪙{' '}
+                  {t('battle.gold', { value: battle.goldGained })}
                 </span>
               )}
               <button
@@ -213,7 +238,7 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
                 className="battle-again"
                 onClick={() => { setBattle(null); setError(''); }}
               >
-                Volver a elegir rival
+                {t('battle.again')}
               </button>
             </div>
           )}
@@ -221,11 +246,11 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
           {error && <p className="battle-error">{error}</p>}
 
           {battle.rounds.length > 0 && (
-            <ol className="battle-log" aria-label="Turnos de la batalla">
+            <ol className="battle-log" aria-label={t('battle.logLabel')}>
               {battle.rounds.map((round) => (
                 <li key={round.round}>
                   <span className="battle-round-number">{round.round}</span>
-                  <span className="battle-round-text">{round.message}</span>
+                  <span className="battle-round-text">{tl(round.message)}</span>
                 </li>
               ))}
             </ol>
@@ -237,9 +262,10 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
 };
 
 /**
- * Un boton de accion. Todo lo que se pinta viene del servidor (nombre, dano,
- * coste de mana, limite de usos y el motivo por el que esta bloqueada), asi que
- * anadir una habilidad nueva en el dominio no obliga a tocar el frontend.
+ * Un boton de accion. Todo el balance viene del servidor (nombre, dano, coste de
+ * mana, limite de usos y el motivo por el que esta bloqueada), asi que anadir una
+ * habilidad nueva en el dominio no obliga a tocar el frontend. Solo el texto se
+ * compone en el cliente.
  */
 const BattleChoice = ({
   option,
@@ -250,7 +276,9 @@ const BattleChoice = ({
   isBusy: boolean;
   onPlay: (action: number) => void;
 }) => {
+  const { t, tl } = useTranslation();
   const isBlocked = !option.available;
+  const reason = tl(option.unavailableReason);
 
   return (
     <button
@@ -258,19 +286,27 @@ const BattleChoice = ({
       className={`battle-choice${option.action === 1 ? '' : ' is-skill'}`}
       onClick={() => onPlay(option.action)}
       disabled={isBlocked || isBusy}
-      title={option.unavailableReason || option.description}
+      title={reason || t(option.descriptionKey)}
     >
-      <strong>{option.name}</strong>
+      <strong>{t(option.nameKey)}</strong>
       <span className="battle-choice-damage">
-        {option.damage > 0 ? `💥 ${option.damage} de daño` : '🛡️ No hace daño'}
+        {option.damage > 0
+          ? `💥 ${t('battle.damageText', { damage: option.damage })}`
+          : `🛡️ ${t('battle.noDamage')}`}
       </span>
-      <span className="battle-choice-desc">{option.description}</span>
+      <span className="battle-choice-desc">{t(option.descriptionKey)}</span>
       <span className="battle-choice-meta">
-        {option.manaCost > 0 ? <i>🔮 {option.manaCost} maná</i> : <i>Sin maná</i>}
-        {option.usesLimit > 0 && <i>Usos: {option.usesLeft}/{option.usesLimit}</i>}
+        {option.manaCost > 0 ? (
+          <i>🔮 {t('battle.manaCost', { cost: option.manaCost })}</i>
+        ) : (
+          <i>{t('battle.noMana')}</i>
+        )}
+        {option.usesLimit > 0 && (
+          <i>{t('battle.uses', { left: option.usesLeft, limit: option.usesLimit })}</i>
+        )}
       </span>
-      {isBlocked && option.unavailableReason && (
-        <span className="battle-choice-blocked">{option.unavailableReason}</span>
+      {isBlocked && reason && (
+        <span className="battle-choice-blocked">{reason}</span>
       )}
     </button>
   );

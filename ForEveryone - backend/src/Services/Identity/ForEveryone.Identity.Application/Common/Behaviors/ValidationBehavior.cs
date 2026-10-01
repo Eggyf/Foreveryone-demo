@@ -1,5 +1,5 @@
-using FluentValidation;
 using ForEveryone.SharedKernel;
+using FluentValidation;
 using MediatR;
 
 namespace ForEveryone.Identity.Application.Common.Behaviors;
@@ -9,6 +9,11 @@ namespace ForEveryone.Identity.Application.Common.Behaviors;
 /// ANTES de que el Command/Query llegue a su Handler. Si falla, ni siquiera
 /// se toca el dominio: se devuelve un Result fallido con el error de validacion.
 /// Aplica el principio Single Responsibility: los handlers ya no validan nada.
+///
+/// Los validators escriben claves de traduccion en `WithMessage`, no frases: el
+/// <see cref="Error"/> que sale lleva la clave consolidada en
+/// <see cref="Error.Description"/> y la lista completa en `args`, para que el
+/// cliente la resuelva en el idioma del jugador.
 /// </summary>
 public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
@@ -35,9 +40,20 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         if (failures.Count == 0)
             return await next();
 
+        // Un mismo campo puede fallar en varias reglas ("contrasena" incumple a la
+        // vez la longitud y el requisito de mayuscula), asi que ToDictionary
+        // reventaria con clave duplicada. Se agrupa en una lista por campo.
+        var details = new Dictionary<string, string>();
+
+        foreach (var group in failures.GroupBy(failure => failure.PropertyName))
+        {
+            details[group.Key] = string.Join(" | ", group.Select(f => f.ErrorMessage));
+        }
+
         var error = new Error(
             "Validation.Failed",
-            string.Join(" | ", failures.Select(f => f.ErrorMessage)));
+            string.Join(" | ", failures.Select(f => f.ErrorMessage)),
+            details);
 
         return CreateFailureResult(error);
     }

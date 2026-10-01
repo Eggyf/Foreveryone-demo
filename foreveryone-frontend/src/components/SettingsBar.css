@@ -1,0 +1,60 @@
+/*
+  Selector de idioma y tema. Se apoya en tokens, asi que el tema claro lo recolorea
+  sin reglas propias: solo cambia el color de superficie y de borde.
+*/
+.settings-bar {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 2;
+}
+
+.settings-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.settings-select {
+  appearance: none;
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 5px 22px 5px 10px;
+  color: var(--text-light);
+  background-color: var(--bg-card);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 13px) center, calc(100% - 9px) center;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+
+.settings-select:hover {
+  border-color: var(--border-strong);
+}
+
+@media (max-width: 520px) {
+  .settings-bar {
+    position: static;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .settings-label {
+    display: none;
+  }
+}

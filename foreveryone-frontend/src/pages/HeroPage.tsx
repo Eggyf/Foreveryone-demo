@@ -5,17 +5,13 @@ import { getErrorMessage } from '../api/errors';
 import { BattlePanel } from '../components/BattlePanel';
 import { HeroCard, HeroLoadingCard } from '../components/HeroCard';
 import { Message, type MessageTone } from '../components/Message';
-import type { HeroData, UserSession } from '../types';
+import { useTranslation } from '../i18n/useI18n';
+import type { RestHeroResult, UserSession } from '../types';
 import './HeroPage.css';
 
 interface HeroResultState {
   userId: string;
-  hero: HeroData | null;
-}
-
-interface RestHeroResult {
-  currentHealth: number;
-  message: string;
+  hero: import('../types').HeroData | null;
 }
 
 interface Notice {
@@ -24,6 +20,7 @@ interface Notice {
 }
 
 export const HeroPage = () => {
+  const { t, tl } = useTranslation();
   const { userId, displayName } = useOutletContext<UserSession>();
   const [heroResult, setHeroResult] = useState<HeroResultState | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -43,13 +40,13 @@ export const HeroPage = () => {
     }
 
     try {
-      const { data } = await heroesApi.get<HeroData>(`/api/heroes/${userId}`);
+      const { data } = await heroesApi.get<import('../types').HeroData>(`/api/heroes/${userId}`);
       setHeroResult({ userId, hero: data });
       setLoadError('');
     } catch (error: unknown) {
-      setLoadError(getErrorMessage(error, 'No se pudo actualizar la información del héroe.'));
+      setLoadError(getErrorMessage(error, t('hero.refreshError')));
     }
-  }, [userId]);
+  }, [userId, t]);
 
   useEffect(() => {
     if (!userId) {
@@ -60,14 +57,14 @@ export const HeroPage = () => {
 
     const fetchHero = async () => {
       try {
-        const { data } = await heroesApi.get<HeroData>(`/api/heroes/${userId}`);
+        const { data } = await heroesApi.get<import('../types').HeroData>(`/api/heroes/${userId}`);
         if (isActive) {
           setHeroResult({ userId, hero: data });
           setLoadError('');
         }
       } catch (error: unknown) {
         if (isActive) {
-          setLoadError(getErrorMessage(error, 'No se pudo cargar tu héroe.'));
+          setLoadError(getErrorMessage(error, t('hero.loadError')));
         }
       }
     };
@@ -77,7 +74,7 @@ export const HeroPage = () => {
     return () => {
       isActive = false;
     };
-  }, [userId]);
+  }, [userId, t]);
 
   const handleRest = async () => {
     setNotice(null);
@@ -85,13 +82,16 @@ export const HeroPage = () => {
 
     try {
       const { data } = await heroesApi.post<RestHeroResult>(`/api/heroes/${userId}/rest`);
-      const { data: heroData } = await heroesApi.get<HeroData>(`/api/heroes/${userId}`);
+      const { data: heroData } = await heroesApi.get<import('../types').HeroData>(
+        `/api/heroes/${userId}`,
+      );
       setHeroResult({ userId, hero: heroData });
-      setNotice({ tone: 'success', text: data.message });
+      // El mensaje del servidor llega como clave con argumentos: se compone aqui.
+      setNotice({ tone: 'success', text: tl(data.message) });
     } catch (error: unknown) {
       setNotice({
         tone: 'error',
-        text: getErrorMessage(error, 'No se pudo descansar.'),
+        text: getErrorMessage(error, t('hero.restError')),
       });
     } finally {
       setIsResting(false);

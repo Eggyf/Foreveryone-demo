@@ -1,5 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <!-- `LocalizedText` vive en el SharedKernel: los textos que ve el jugador los
+         decide el cliente, y el dominio solo aporta la clave y los argumentos. -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\ForEveryone.SharedKernel\ForEveryone.SharedKernel.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

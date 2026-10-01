@@ -6,21 +6,24 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
 {
     public RegisterUserCommandValidator()
     {
+        // Las reglas de formato (longitudes minimas, patrones) viven en el
+        // dominio, en `Username` y `Password`. Aqui solo se confirma que el
+        // valor llego y se traduce el motivo, que el cliente compone en su idioma.
         RuleFor(x => x.Username)
-            .NotEmpty().WithMessage("El nombre de usuario es obligatorio.")
-            .MinimumLength(3).WithMessage("El nombre de usuario debe tener al menos 3 caracteres.")
-            .MaximumLength(24).WithMessage("El nombre de usuario no puede superar los 24 caracteres.")
+            .NotEmpty().WithMessage("auth.validation.usernameRequired")
+            .MinimumLength(3).WithMessage("auth.validation.usernameTooShort")
+            .MaximumLength(24).WithMessage("auth.validation.usernameTooLong")
             .Matches("^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$")
-            .WithMessage("El nombre de usuario solo admite letras, numeros, punto, guion y guion bajo, y debe empezar y terminar en letra o numero.");
+            .WithMessage("auth.validation.usernamePattern");
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("El email es obligatorio.")
-            .EmailAddress().WithMessage("El formato del email no es valido.");
+            .NotEmpty().WithMessage("auth.validation.emailRequired")
+            .EmailAddress().WithMessage("auth.validation.emailInvalid");
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("La contrasena es obligatoria.")
-            .MinimumLength(8).WithMessage("La contrasena debe tener al menos 8 caracteres.")
-            .Matches("[A-Z]").WithMessage("La contrasena debe tener al menos una mayuscula.")
-            .Matches("[0-9]").WithMessage("La contrasena debe tener al menos un numero.");
+            .NotEmpty().WithMessage("auth.validation.passwordRequired")
+            .MinimumLength(8).WithMessage("auth.validation.passwordTooShort")
+            .Matches("[A-Z]").WithMessage("auth.validation.passwordNeedsUppercase")
+            .Matches("[0-9]").WithMessage("auth.validation.passwordNeedsDigit");
     }
 }

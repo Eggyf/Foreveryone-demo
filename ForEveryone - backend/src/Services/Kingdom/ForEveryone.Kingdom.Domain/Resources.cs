@@ -10,8 +10,11 @@ public record Resources(int Wood, int Stone, int Gold, int Food)
 
     public Resources Deduct(Resources cost)
     {
+        // Red de seguridad: las reglas de negocio ya comprueban el affordability
+        // antes de deducir, asi que este fallo significa un forgot de esa
+        // comprobacion, no una situacion de juego. El mensaje va al log.
         if (!CanAfford(cost))
-            throw new InvalidOperationException("Recursos insuficientes.");
+            throw new DomainRuleException("kingdom.error.notEnoughResources");
 
         return new Resources(Wood - cost.Wood, Stone - cost.Stone, Gold - cost.Gold, Food - cost.Food);
     }

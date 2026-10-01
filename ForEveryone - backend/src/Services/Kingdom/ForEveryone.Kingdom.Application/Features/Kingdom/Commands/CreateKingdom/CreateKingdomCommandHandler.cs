@@ -20,10 +20,10 @@ public class CreateKingdomCommandHandler : IRequestHandler<CreateKingdomCommand,
     {
         var userExists = await _userVerificationService.VerifyUserExistsAsync(request.UserId);
         if (!userExists)
-            throw new NotFoundException("El usuario no existe en el sistema de Identity.");
+            throw new NotFoundException("kingdom.error.userMissingInIdentity");
 
         if (await _kingdomRepository.ExistsByUserIdAsync(request.UserId))
-            throw new ConflictException("El usuario ya posee un reino.");
+            throw new ConflictException("kingdom.error.alreadyHasKingdom");
 
         var kingdom = new Kingdoms(Guid.NewGuid(), request.UserId);
 

@@ -1,5 +1,7 @@
-﻿using ForEveryone.Heroes.Application.Exceptions; // NUEVO USING
+﻿using ForEveryone.Heroes.Application.Exceptions;
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.CreateHero;
+using ForEveryone.Heroes.Domain;
+using ForEveryone.SharedKernel;
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.PlayBattleTurn;
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.StartBattle;
 using ForEveryone.Heroes.Application.Features.Heroes.Queries.GetCharacterOptions;
@@ -33,15 +35,15 @@ public class HeroesController : ControllerBase
         }
         catch (ValidationException ex)
         {
-            return BadRequest(new { message = ex.Message, errors = ex.Errors }); // Devuelve 400
+            return BadRequest(new LocalizedProblem(ex.Errors.FirstOrDefault()!, ex.Errors));
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message }); // Devuelve 404
+            return NotFound(new LocalizedProblem(ex.Text));
         }
         catch (ConflictException ex)
         {
-            return Conflict(new { message = ex.Message }); // Devuelve 409
+            return Conflict(new LocalizedProblem(ex.Text));
         }
     }
 
@@ -65,7 +67,7 @@ public class HeroesController : ControllerBase
             .Select(enemy => new
             {
                 key = enemy.Key,
-                name = enemy.Name,
+                nameKey = enemy.NameKey,
                 health = enemy.Health,
                 attack = enemy.Attack,
                 defense = enemy.Defense,
@@ -141,12 +143,15 @@ public class HeroesController : ControllerBase
         }
     }
 
+    /// El texto sale como clave y argumentos, no redactado: el cliente lo
+    /// traduce. El codigo HTTP lo decide <see cref="BattleError.Kind"/>.
+    /// </summary>
     private ObjectResult ToBattleProblem(BattleError ex) => ex.Kind switch
     {
-        BattleErrorKind.NotFound => NotFound(new { message = ex.Message }),
-        BattleErrorKind.Conflict => Conflict(new { message = ex.Message }),
-        BattleErrorKind.Invalid => BadRequest(new { message = ex.Message, errors = ex.Errors }),
-        _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message })
+        BattleErrorKind.NotFound => NotFound(new LocalizedProblem(ex.Text)),
+        BattleErrorKind.Conflict => Conflict(new LocalizedProblem(ex.Text)),
+        BattleErrorKind.Invalid => BadRequest(new LocalizedProblem(ex.Text, ex.Errors)),
+        _ => StatusCode(StatusCodes.Status500InternalServerError, new LocalizedProblem(ex.Text))
     };
 
     /// <summary>
@@ -154,7 +159,7 @@ public class HeroesController : ControllerBase
     /// que el handler llegue a ejecutarse.
     /// </summary>
     private ObjectResult ToValidationProblem(ValidationException ex) =>
-        BadRequest(new { message = ex.Message, errors = ex.Errors });
+        BadRequest(new LocalizedProblem(ex.Errors.FirstOrDefault()!, ex.Errors));
 
     [HttpGet("{userId:guid}")]
     public async Task<IActionResult> GetHero(Guid userId)
@@ -174,11 +179,13 @@ public class HeroesController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new LocalizedProblem(ex.Text));
         }
-        catch (InvalidOperationException ex)
+        catch (HeroRuleException ex)
         {
-            return Conflict(new { message = ex.Message });
+            // El dominio lanza HeroRuleException cuando el heroe esta derrotado y
+            // no puede aventurarse. El texto lo compone el cliente.
+            return Conflict(new LocalizedProblem(ex.Text));
         }
     }
     [HttpPost("{userId:guid}/rest")]
@@ -191,7 +198,7 @@ public class HeroesController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new LocalizedProblem(ex.Text));
         }
     }
 }

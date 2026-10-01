@@ -6,6 +6,10 @@
  * `react-refresh` no admite que un archivo de componente exporte ademas
  * constantes sueltas.
  *
+ * Solo guarda las claves de traduccion y el icono. El texto lo compone el
+ * cliente, asi que el mismo edificio se llama "Granja" o "Farm" segun el idioma
+ * sin duplicar el catalogo.
+ *
  * Los numeros son los valores de `BuildingType` del dominio de Kingdom.
  */
 
@@ -16,10 +20,11 @@ export const BARRACKS_TYPE = 6;
 
 export interface BuildingDetails {
     type: number;
-    /** Nombre en castellano. El API devuelve el nombre del enum en ingles. */
-    label: string;
+    /** Clave del nombre, por ejemplo `building.farm.name`. */
+    nameKey: string;
     icon: string;
-    description: string;
+    /** Clave de la descripcion, por ejemplo `building.farm.desc`. */
+    descriptionKey: string;
 }
 
 /**
@@ -29,35 +34,42 @@ export interface BuildingDetails {
 export const BUILDABLE_BUILDINGS: readonly BuildingDetails[] = [
     {
         type: 2,
-        label: 'Granja',
+        nameKey: 'building.farm.name',
         icon: '🌾',
-        description: 'Genera comida de forma pasiva para alimentar al reino.',
+        descriptionKey: 'building.farm.desc',
     },
     {
         type: 3,
-        label: 'Aserradero',
+        nameKey: 'building.sawmill.name',
         icon: '🪚',
-        description: 'Genera madera de forma pasiva para construir y mejorar.',
+        descriptionKey: 'building.sawmill.desc',
     },
     {
         type: 4,
-        label: 'Cantera',
+        nameKey: 'building.quarry.name',
         icon: '⛏️',
-        description: 'Genera piedra de forma pasiva para construir y mejorar.',
+        descriptionKey: 'building.quarry.desc',
     },
     {
         type: 5,
-        label: 'Mercado',
+        nameKey: 'building.market.name',
         icon: '🏪',
-        description: 'Genera oro de forma pasiva para financiar el reino.',
+        descriptionKey: 'building.market.desc',
     },
     {
         type: BARRACKS_TYPE,
-        label: 'Cuartel',
+        nameKey: 'building.barracks.name',
         icon: '🛡️',
-        description: 'Permite entrenar soldados para defender el reino.',
+        descriptionKey: 'building.barracks.desc',
     },
 ];
+
+/**
+ * Descripcion de reserva para un edificio construido que no este en el
+ * catalogo. Se mantiene como clave porque sigue siendo texto del cliente.
+ */
+export const UNKNOWN_BUILDING_NAME_KEY = 'building.fallback';
+export const UNKNOWN_BUILDING_DESC_KEY = 'building.fallbackDesc';
 
 export const getBuildingDetails = (type: number): BuildingDetails | null =>
     BUILDABLE_BUILDINGS.find((building) => building.type === type) ?? null;

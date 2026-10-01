@@ -1,5 +1,6 @@
 using ForEveryone.Heroes.Application.Exceptions;
 using ForEveryone.Heroes.Domain;
+using ForEveryone.SharedKernel;
 using Heroes.Application.Interfaces;
 using MediatR;
 
@@ -23,7 +24,7 @@ public class EmbarkOnAdventureCommandHandler : IRequestHandler<EmbarkOnAdventure
     public async Task<AdventureResult> Handle(EmbarkOnAdventureCommand request, CancellationToken cancellationToken)
     {
         var hero = await _heroRepository.GetByUserIdAsync(request.UserId);
-        if (hero is null) throw new NotFoundException("El usuario no tiene un héroe.");
+        if (hero is null) throw new NotFoundException("hero.error.notFound");
 
         if (hero.IsDefeated)
             throw new InvalidOperationException("Tu héroe está derrotado. ¡Debe descansar antes de aventurarse!");
@@ -47,8 +48,12 @@ public class EmbarkOnAdventureCommandHandler : IRequestHandler<EmbarkOnAdventure
         await _heroRepository.UpdateAsync(hero);
 
         var message = replay.Victory
-            ? $"¡Victoria contra {enemy.Name}! Ganaste {replay.ExperienceGained} de experiencia y {replay.GoldGained} de oro."
-            : $"Has sido derrotado por {enemy.Name}. Tu héroe necesita descansar.";
+            ? LocalizedText.Of(
+                "battle.outcome.victory",
+                ("enemyKey", enemy.Key),
+                ("experienceGained", replay.ExperienceGained),
+                ("goldGained", replay.GoldGained))
+            : LocalizedText.Of("battle.outcome.defeat", ("enemyKey", enemy.Key));
 
         return new AdventureResult(
             replay.Victory,

@@ -17,7 +17,7 @@ public class UpgradeBuildingCommandHandler : IRequestHandler<UpgradeBuildingComm
     {
         var kingdom = await _kingdomRepository.GetByUserIdAsync(request.UserId);
         if (kingdom is null)
-            throw new NotFoundException("El usuario no tiene un reino.");
+            throw new NotFoundException("kingdom.error.notFound");
 
         // El dominio valida si hay recursos y sube el nivel
         kingdom.UpgradeBuilding(request.BuildingType);

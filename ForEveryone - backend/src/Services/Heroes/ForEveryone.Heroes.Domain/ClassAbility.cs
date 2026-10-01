@@ -1,3 +1,5 @@
+using ForEveryone.SharedKernel;
+
 namespace ForEveryone.Heroes.Domain;
 
 /// <summary>
@@ -26,13 +28,13 @@ public enum AbilityEffect
 /// <summary>
 /// Definicion de una accion de combate. Los identificadores son
 /// <see cref="BattleAction"/> (ranuras), no nombres propios de clase: el mismo
-/// identificador significa "la habilidad caracteristica de mi clase", y el
-/// nombre que ve el jugador lo decide el catalogo.
+/// identificador significa "la habilidad caracteristica de mi clase", y
+/// la clave de traduccion la decide el catalogo.
 /// </summary>
 /// <param name="Action">Ranura que ocupa esta habilidad.</param>
 /// <param name="Effect">Comportamiento adicional al dano.</param>
-/// <param name="Name">Nombre visible para el jugador.</param>
-/// <param name="Description">Explicacion de una linea para el boton.</param>
+/// <param name="NameKey">Clave del nombre visible, traducida por el cliente.</param>
+/// <param name="DescriptionKey">Clave de la explicacion de una linea para el boton.</param>
 /// <param name="DamagePercent">Dano como porcentaje del ataque: 100 es x1, 200 es x2.</param>
 /// <param name="ManaCostPercent">Coste como porcentaje del maná maximo.</param>
 /// <param name="UseLimit">Usos por combate; 0 significa sin limite.</param>
@@ -40,8 +42,8 @@ public enum AbilityEffect
 public sealed record ClassAbility(
     BattleAction Action,
     AbilityEffect Effect,
-    string Name,
-    string Description,
+    string NameKey,
+    string DescriptionKey,
     int DamagePercent,
     int ManaCostPercent,
     int UseLimit,
@@ -61,6 +63,10 @@ public sealed record ClassAbility(
 /// reservas muy distintas (Guerrero 10, Mago 50): un coste absoluto haria que
 /// el Guerrero no pudiera usar nunca su habilidad y el Mago la usara sin
 /// pensarlo.
+///
+/// El catalogo no redacta ningun texto: guarda claves de traduccion. La frase
+/// que ve el jugador la compone el cliente, para que el mismo kit se lea igual
+/// en los dos idiomas.
 /// </summary>
 public static class ClassAbilities
 {
@@ -90,11 +96,11 @@ public static class ClassAbilities
         HeroClass.Warrior =>
         [
             new(BattleAction.Attack, AbilityEffect.Damage,
-                "Golpe de espada", "Ataque cuerpo a cuerpo basico.", 100, 0, 0),
+                "ability.warrior.attack.name", "ability.warrior.attack.desc", 100, 0, 0),
             new(BattleAction.PowerStrike, AbilityEffect.Damage,
-                "Estocada", "Hundida certera que dobla el daño. Sin coste de maná.", 200, 0, 2),
+                "ability.warrior.powerStrike.name", "ability.warrior.powerStrike.desc", 200, 0, 2),
             new(BattleAction.Special, AbilityEffect.Guard,
-                "Guardia", "Deja al descubierto: reduce a la mitad el daño de este turno.", 0, 0, 2)
+                "ability.warrior.special.name", "ability.warrior.special.desc", 0, 0, 2)
         ],
 
         // El Cazador depende de la puntería, no de la magia: Andanada es barata
@@ -102,11 +108,11 @@ public static class ClassAbilities
         HeroClass.Hunter =>
         [
             new(BattleAction.Attack, AbilityEffect.Damage,
-                "Disparo", "Disparo basico a distancia.", 100, 0, 0),
+                "ability.hunter.attack.name", "ability.hunter.attack.desc", 100, 0, 0),
             new(BattleAction.PowerStrike, AbilityEffect.Damage,
-                "Andanada", "Dos flechas de una vez: daño por encima del doble.", 180, 25, 2),
+                "ability.hunter.powerStrike.name", "ability.hunter.powerStrike.desc", 180, 25, 2),
             new(BattleAction.Special, AbilityEffect.Pierce,
-                "Disparo perforante", "Ignora la defensa del enemigo y atraviesa su armadura.", 220, 50, 1)
+                "ability.hunter.special.name", "ability.hunter.special.desc", 220, 50, 1)
         ],
 
         // El Mago es cristal: poca vida y poca defensa, a cambio del mayor daño
@@ -114,11 +120,11 @@ public static class ClassAbilities
         HeroClass.Wizard =>
         [
             new(BattleAction.Attack, AbilityEffect.Damage,
-                "Dardo arcano", "Ataque magico modesto, siempre disponible.", 90, 0, 0),
+                "ability.wizard.attack.name", "ability.wizard.attack.desc", 90, 0, 0),
             new(BattleAction.PowerStrike, AbilityEffect.Damage,
-                "Bola de fuego", "Explosion devastadora. Consume bastante maná.", 240, 40, 2),
+                "ability.wizard.powerStrike.name", "ability.wizard.powerStrike.desc", 240, 40, 2),
             new(BattleAction.Special, AbilityEffect.Heal,
-                "Escudo arcano", "No ataca: recupera vida antes de que el enemigo contraataque.", 0, 60, 1, 30)
+                "ability.wizard.special.name", "ability.wizard.special.desc", 0, 60, 1, 30)
         ],
 
         // El Pícaro Sangre Fría le devuelve al atacante parte de lo que quita,
@@ -126,11 +132,11 @@ public static class ClassAbilities
         HeroClass.Rogue =>
         [
             new(BattleAction.Attack, AbilityEffect.Damage,
-                "Tajo", "Corte rapido basico.", 100, 0, 0),
+                "ability.rogue.attack.name", "ability.rogue.attack.desc", 100, 0, 0),
             new(BattleAction.PowerStrike, AbilityEffect.Damage,
-                "Ataque furtivo", "Sale de la sombra y golpea sin avisar.", 230, 20, 2),
+                "ability.rogue.powerStrike.name", "ability.rogue.powerStrike.desc", 230, 20, 2),
             new(BattleAction.Special, AbilityEffect.Drain,
-                "Sangre fría", "Roba vida al enemigo y se cura con una parte.", 240, 35, 2, 50)
+                "ability.rogue.special.name", "ability.rogue.special.desc", 240, 35, 2, 50)
         ],
         _ => throw new ArgumentOutOfRangeException(
             nameof(heroClass), heroClass, "Clase desconocida.")

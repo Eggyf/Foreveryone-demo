@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { heroesApi, shopApi } from '../api/api';
 import { getErrorMessage, isNotFound } from '../api/errors';
-import type { HeroData, ShopItemData, UserSession } from '../types';
+import { useTranslation } from '../i18n/useI18n';
+import type { BuyItemResult, HeroData, ShopItemData, UserSession } from '../types';
 import { Message, type MessageTone } from '../components/Message';
 import '../components/GameCard.css';
 import './ShopPage.css';
@@ -12,12 +13,8 @@ interface Notice {
   text: string;
 }
 
-interface BuyItemResult {
-  message: string;
-  currentGold: number;
-}
-
 export const ShopPage = () => {
+  const { t, tl } = useTranslation();
   const { userId } = useOutletContext<UserSession>();
   const [hero, setHero] = useState<HeroData | null>(null);
   const [items, setItems] = useState<ShopItemData[]>([]);
@@ -49,16 +46,16 @@ export const ShopPage = () => {
         if (heroResult.status === 'fulfilled') {
           setHero(heroResult.value.data);
         } else if (isNotFound(heroResult.reason)) {
-          setLoadError('Necesitas un héroe para entrar a la tienda.');
+          setLoadError(t('shop.needsHero'));
         } else {
-          setLoadError(getErrorMessage(heroResult.reason, 'No se pudo cargar tu héroe.'));
+          setLoadError(getErrorMessage(heroResult.reason, t('shop.loadHeroError')));
         }
 
         if (shopResult.status === 'fulfilled') {
           setItems(shopResult.value.data);
         } else {
           setLoadError(
-            getErrorMessage(shopResult.reason, 'No se pudo cargar el catálogo de la tienda.'),
+            getErrorMessage(shopResult.reason, t('shop.loadCatalogError')),
           );
         }
       } finally {
@@ -73,7 +70,7 @@ export const ShopPage = () => {
     return () => {
       isActive = false;
     };
-  }, [userId]);
+  }, [userId, t]);
 
   const handleBuyItem = async (item: ShopItemData) => {
     setNotice(null);
@@ -81,14 +78,17 @@ export const ShopPage = () => {
 
     try {
       // La compra la sirve Heroes, no Shop: es la que descuenta el oro al heroe.
-      const { data } = await heroesApi.post<BuyItemResult>(`/api/shop/${userId}/buy`, { itemId: item.id });
+      const { data } = await heroesApi.post<BuyItemResult>(`/api/shop/${userId}/buy`, {
+        itemId: item.id,
+      });
       const { data: heroData } = await heroesApi.get<HeroData>(`/api/heroes/${userId}`);
       setHero(heroData);
-      setNotice({ tone: 'success', text: data.message });
+      // El mensaje llega como clave con el nombre del articulo ya resuelto.
+      setNotice({ tone: 'success', text: tl(data.message) });
     } catch (error: unknown) {
       setNotice({
         tone: 'error',
-        text: getErrorMessage(error, 'No se pudo comprar el objeto.'),
+        text: getErrorMessage(error, t('shop.buyError')),
       });
     } finally {
       setPendingItemId(null);
@@ -96,7 +96,7 @@ export const ShopPage = () => {
   };
 
   if (isLoading) {
-    return <p className="shop-loading">Abriendo el puesto del mercader…</p>;
+    return <p className="shop-loading">{t('shop.loading')}</p>;
   }
 
   if (loadError) {
@@ -108,18 +108,18 @@ export const ShopPage = () => {
   }
 
   if (!hero) {
-    return <p className="shop-loading">Necesitas un héroe para entrar a la tienda.</p>;
+    return <p className="shop-loading">{t('shop.needsHero')}</p>;
   }
 
   return (
     <div className="stats-card">
       <div className="shop-header">
-        <h3>🏪 Tienda de Foreveryone</h3>
-        <span className="gold-display">🪙 Oro: {hero.gold}</span>
+        <h3>🏪 {t('shop.title')}</h3>
+        <span className="gold-display">🪙 {t('shop.gold', { value: hero.gold })}</span>
       </div>
 
       {items.length === 0 ? (
-        <p className="shop-empty">El mercader no tiene nada preparado por ahora.</p>
+        <p className="shop-empty">{t('shop.empty')}</p>
       ) : (
         <div className="shop-items">
           {items.map((item) => {
@@ -129,8 +129,8 @@ export const ShopPage = () => {
             return (
               <div key={item.id} className="shop-item">
                 <div className="item-info">
-                  <h4>{item.name}</h4>
-                  <p>{item.description}</p>
+                  <h4>{t(item.nameKey)}</h4>
+                  <p>{t(item.descriptionKey)}</p>
                 </div>
                 <div className="item-action">
                   <span className="item-cost">🪙 {item.cost}</span>
@@ -141,7 +141,7 @@ export const ShopPage = () => {
                     // rapidas descutaban el objeto dos veces.
                     disabled={!canAfford || pendingItemId !== null}
                   >
-                    {isPending ? 'Comprando…' : 'Comprar'}
+                    {isPending ? t('shop.buying') : t('shop.buy')}
                   </button>
                 </div>
               </div>

@@ -3,12 +3,15 @@ namespace ForEveryone.Heroes.Domain;
 /// <summary>
 /// Enemigo contra el que puede luchar el heroe. Es un Value Object: dos
 /// enemigos con los mismos valores son el mismo enemigo.
-/// La clave <see cref="Key"/> es el identificador estable que usa el cliente,
-/// mientras que <see cref="Name"/> es solo para mostrar.
+/// <para>
+/// <see cref="Key"/> es el identificador estable que usa el cliente, mientras
+/// que <see cref="NameKey"/> es solo la clave del nombre visible: el texto lo
+/// traduce el cliente, porque el dominio no sabe en que idioma se juega.
+/// </para>
 /// </summary>
 public sealed record Enemy(
     string Key,
-    string Name,
+    string NameKey,
     int Health,
     int Attack,
     int Defense,
@@ -16,13 +19,13 @@ public sealed record Enemy(
     int GoldReward)
 {
     public static readonly Enemy Goblin =
-        new("goblin", "Goblin", 50, 12, 5, 40, 20);
+        new("goblin", "enemy.goblin", 50, 12, 5, 40, 20);
 
     public static readonly Enemy Wolf =
-        new("wolf", "Lobo", 90, 20, 8, 80, 45);
+        new("wolf", "enemy.wolf", 90, 20, 8, 80, 45);
 
     public static readonly Enemy Ogre =
-        new("ogre", "Ogro", 150, 30, 14, 150, 90);
+        new("ogre", "enemy.ogre", 150, 30, 14, 150, 90);
 }
 
 /// <summary>

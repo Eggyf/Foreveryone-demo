@@ -6,10 +6,12 @@ import { Auth } from './components/Auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GameGate } from './components/GameGate';
 import { GameLayout } from './components/GameLayout';
+import { SettingsBar } from './components/SettingsBar';
 import { HeroPage } from './pages/HeroPage';
 import { CastlePage } from './pages/CastlePage';
 import { ShopPage } from './pages/ShopPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { useTranslation } from './i18n/useI18n';
 import './App.css';
 
 /** Un token caducado se descarta al arrancar en vez de dejar el juego a medias. */
@@ -21,6 +23,7 @@ const initialToken = (): string | null => {
 function App() {
   const [token, setToken] = useState<string | null>(initialToken);
   const [user, setUser] = useState(() => decodeUserSession(initialToken()));
+  const { t } = useTranslation();
 
   const handleAuthSuccess = (newToken: string) => {
     writeToken(newToken);
@@ -37,8 +40,9 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-container">
+        <SettingsBar />
         <h1>Foreveryone</h1>
-        {!token && <p>Bienvenido a Foreveryone</p>}
+        {!token && <p>{t('app.welcome')}</p>}
 
         <ErrorBoundary onSessionExpired={handleLogout}>
           {!token ? (

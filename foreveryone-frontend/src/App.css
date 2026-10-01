@@ -3,8 +3,15 @@
 /*
   Tokens globales. App.css queda limitado a variables de tema, reset del body
   y layout raiz; el resto de estilos vive junto a cada componente.
-  La paleta mantiene el ADN medieval (oro sobre piedra oscura) pero con
-  contrastes mas limpios, superficies translucidas y sombras suaves.
+
+  El tema oscuro es el tema de partida y define los tokens en `:root`. El claro
+  solo redefine esos mismos tokens en `[data-theme="light"]`: ningun componente
+  necesita saber que tema hay activo, y anadir un tercero no obliga a tocar CSS.
+
+  El claro mantiene el ADN medieval (oro, superficies translucidas, sombras
+  suaves) con los valores recalculados para que el contraste siga siendo legible:
+  el oro se oscurece porque el dorado claro no se lee sobre piedra clara, y las
+  sombras bajan de opacidad porque negro al 50 % sobre blanco ensucia.
 */
 :root {
   /* Acentos */
@@ -42,6 +49,65 @@
   --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
 
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Fondo del body. Son colores literales, no tokens, asi que se redefinen aqui
+     para que el tema claro no herede el degradado oscuro. */
+  --body-bg: linear-gradient(180deg, #0e1013 0%, #0a0b0d 100%);
+  --body-aura: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    rgba(212, 175, 55, 0.09),
+    transparent 70%
+  );
+
+  /* Aura dorada del titulo: sobre fondo claro el dorado claro desaparece. */
+  --title-gradient: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--dark-gold) 100%);
+  --title-shadow: 0 2px 18px rgba(212, 175, 55, 0.18);
+}
+
+[data-theme="light"] {
+  /* Acentos oscurecidos: sobre piedra clara el dorado puro no llega a 4.5:1. */
+  --gold: #8a6d1f;
+  --gold-bright: #6d5518;
+  --dark-gold: #5a4512;
+  --gold-soft: rgba(138, 109, 31, 0.1);
+
+  /* Superficies: pergamino antes que blanco puro, para no castigar la vista. */
+  --bg-dark: #f2ede1;
+  --bg-deep: #e8e1d1;
+  --bg-card: #fbf8f1;
+  --surface: rgba(43, 32, 12, 0.03);
+  --surface-hover: rgba(43, 32, 12, 0.06);
+
+  /* Texto oscuro sobre fondo claro, con los tres niveles recalculados. */
+  --text-light: #241d10;
+  --text-muted: #57503f;
+  --text-faint: #7b7261;
+
+  /* Semantica: los mismos tonos, oscurecidos para mantener el contraste. */
+  --health: #a82f2f;
+  --mana: #1f5f96;
+  --danger: #a83b28;
+  --success: #2f7346;
+
+  /* Los bordes suben de opacidad porque sobre fondo claro el dorado al 16 %
+     desaparece por completo. */
+  --border: rgba(138, 109, 31, 0.3);
+  --border-strong: rgba(138, 109, 31, 0.6);
+
+  /* Sombras suaves: negro al 50 % sobre pergamino se ve como mancha, no como
+     profundidad. */
+  --shadow-sm: 0 2px 8px rgba(60, 48, 24, 0.1);
+  --shadow-md: 0 8px 24px rgba(60, 48, 24, 0.13);
+  --shadow-lg: 0 20px 50px rgba(60, 48, 24, 0.16);
+
+  --body-bg: linear-gradient(180deg, #f4efe4 0%, #e6dfcd 100%);
+  --body-aura: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    rgba(138, 109, 31, 0.1),
+    transparent 70%
+  );
+
+  --title-shadow: 0 2px 14px rgba(138, 109, 31, 0.14);
 }
 
 * {
@@ -53,11 +119,12 @@ body {
   min-height: 100vh;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   background-color: var(--bg-dark);
-  /* Aura dorada muy suave, sin el tramado de puntos del estilo anterior. */
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 175, 55, 0.09), transparent 70%),
-    linear-gradient(180deg, #0e1013 0%, #0a0b0d 100%);
+  /* Aura dorada muy suave, sin el tramado de puntos del estilo anterior. Los dos
+     degradados vienen de token para que el tema claro no herede los colores
+     oscuros del tema base. */
+  background-image: var(--body-aura), var(--body-bg);
   background-attachment: fixed;
+  transition: background-color 0.25s var(--ease);
   color: var(--text-light);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -76,11 +143,11 @@ body {
   font-size: clamp(2.2rem, 6vw, 3.4rem);
   font-weight: 700;
   letter-spacing: 0.06em;
-  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--dark-gold) 100%);
+  background: var(--title-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: 0 2px 18px rgba(212, 175, 55, 0.18);
+  text-shadow: var(--title-shadow);
 }
 
 .app-container > p {

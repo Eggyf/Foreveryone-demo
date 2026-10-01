@@ -102,7 +102,7 @@ public sealed class Battle
     public void Play(BattleAction action)
     {
         if (IsFinished)
-            throw new InvalidOperationException("El combate ya ha terminado.");
+            throw new HeroRuleException("battle.error.alreadyFinished");
 
         var actions = Actions.ToList();
         actions.Add(action);

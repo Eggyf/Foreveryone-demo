@@ -2,6 +2,7 @@
 using ForEveryone.Heroes.Application.Exceptions;
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.StartBattle;
 using ForEveryone.Heroes.Domain;
+using ForEveryone.SharedKernel;
 using Heroes.Application.Interfaces;
 using MediatR;
 
@@ -25,14 +26,14 @@ public class PlayBattleTurnCommandHandler
     {
         var hero = await _heroRepository.GetByUserIdAsync(request.UserId);
         if (hero is null)
-            throw BattleError.NotFound("El usuario no tiene un héroe.");
+            throw BattleError.NotFound(LocalizedText.Of("hero.error.notFound"));
 
         var battle = await _battleRepository.GetByIdAsync(request.BattleId);
         if (battle is null || battle.HeroId != request.UserId)
-            throw BattleError.NotFound("El combate no existe.");
+            throw BattleError.NotFound(LocalizedText.Of("battle.error.notFound"));
 
         if (battle.IsFinished)
-            throw BattleError.Conflict("El combate ya ha terminado.");
+            throw BattleError.Conflict(LocalizedText.Of("battle.error.alreadyFinished"));
 
         var enemy = EnemyCatalog.FindByKey(battle.EnemyKey)!;
 
@@ -47,7 +48,7 @@ public class PlayBattleTurnCommandHandler
             request.Action, hero.Class, hero.Stats, current.HeroMana, battle.Actions);
 
         if (blocked is not null)
-            throw BattleError.Conflict(blocked);
+            throw BattleError.Conflict(blocked, $"Acción {request.Action} no disponible: {blocked.Key}");
 
         battle.Play(request.Action);
 

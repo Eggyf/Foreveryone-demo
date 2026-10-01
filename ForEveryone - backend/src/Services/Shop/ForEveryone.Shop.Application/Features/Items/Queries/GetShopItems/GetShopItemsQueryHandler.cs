@@ -15,6 +15,8 @@ public class GetShopItemsQueryHandler : IRequestHandler<GetShopItemsQuery, List<
     public async Task<List<ShopItemDto>> Handle(GetShopItemsQuery request, CancellationToken cancellationToken)
     {
         var items = await _shopRepository.GetAllAsync();
-        return items.Select(i => new ShopItemDto(i.Id, i.Name, i.Description, i.Cost)).ToList();
+        return items
+            .Select(i => new ShopItemDto(i.Id, i.Key, $"shopItem.{i.Key}.name", $"shopItem.{i.Key}.desc", i.Cost))
+            .ToList();
     }
 }

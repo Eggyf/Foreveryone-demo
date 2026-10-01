@@ -1,3 +1,4 @@
+using ForEveryone.SharedKernel;
 using FluentValidation;
 using MediatR;
 
@@ -33,8 +34,12 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         if (failures.Count == 0)
             return await next();
 
+        // Los validators escriben claves de traduccion, no frases. El nombre de
+        // la propiedad viaja como argumento para que el mensaje pueda mencionarlo
+        // sin que el validator tenga que repetirlo en cada idioma.
         // Fully qualified: FluentValidation tambien define ValidationException.
         throw new Exceptions.ValidationException(
-            failures.Select(failure => failure.ErrorMessage));
+            failures.Select(failure =>
+                LocalizedText.Of(failure.ErrorMessage, ("property", failure.PropertyName))));
     }
 }

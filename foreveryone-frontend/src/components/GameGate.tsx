@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { heroesApi } from '../api/api';
 import { getErrorMessage, isNotFound } from '../api/errors';
+import { useTranslation } from '../i18n/useI18n';
 import type { UserSession } from '../types';
 import { CharacterCreation } from './CharacterCreation';
 import './GameGate.css';
@@ -24,6 +25,7 @@ interface GameGateProps {
  * y CharacterCreation lo muestra con la opcion de cerrar sesion.
  */
 export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) => {
+  const { t } = useTranslation();
   const { userId } = user;
   const [result, setResult] = useState<{ userId: string; state: GateState; detail: string } | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -52,14 +54,14 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
         setResult(
           isNotFound(error)
             ? { userId, state: 'needs-creation', detail: '' }
-            : { userId, state: 'error', detail: getErrorMessage(error, '') },
+            : { userId, state: 'error', detail: getErrorMessage(error, t('gate.checkFailed')) },
         );
       });
 
     return () => {
       isActive = false;
     };
-  }, [userId, attempt]);
+  }, [userId, attempt, t]);
 
   const retry = useCallback(() => setAttempt((current) => current + 1), []);
 
@@ -72,7 +74,7 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
   if (state === 'checking') {
     return (
       <div className="gate-screen">
-        <p className="gate-loading">Buscando tu destino en Foreveryone…</p>
+        <p className="gate-loading">{t('gate.searching')}</p>
       </div>
     );
   }
@@ -82,11 +84,9 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
   if (state === 'invalid-session') {
     return (
       <div className="gate-screen">
-        <p className="gate-error">
-          Tu sesión no es válida o ha caducado. Inicia sesión de nuevo para continuar.
-        </p>
+        <p className="gate-error">{t('gate.invalidSession')}</p>
         <button type="button" className="gate-retry" onClick={onSessionExpired}>
-          Volver al login
+          {t('gate.backToLogin')}
         </button>
       </div>
     );
@@ -95,12 +95,9 @@ export const GameGate = ({ user, onSessionExpired, children }: GameGateProps) =>
   if (state === 'error') {
     return (
       <div className="gate-screen">
-        <p className="gate-error">
-          {result?.detail ||
-            'No se pudo comprobar si ya tienes personaje. Comprueba que los servicios estén encendidos.'}
-        </p>
+        <p className="gate-error">{result?.detail || t('gate.checkFailed')}</p>
         <button type="button" className="gate-retry" onClick={retry}>
-          Reintentar
+          {t('gate.retry')}
         </button>
       </div>
     );

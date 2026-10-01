@@ -2,6 +2,7 @@ using ForEveryone.Heroes.Application.Battles;
 using ForEveryone.Heroes.Application.Exceptions;
 using ForEveryone.Heroes.Application.Features.Heroes.Commands.StartBattle;
 using ForEveryone.Heroes.Domain;
+using ForEveryone.SharedKernel;
 using Heroes.Application.Interfaces;
 using MediatR;
 
@@ -26,11 +27,11 @@ public class GetCurrentBattleQueryHandler : IRequestHandler<GetCurrentBattleQuer
     {
         var battle = await _battleRepository.GetActiveByHeroIdAsync(request.UserId);
         if (battle is null)
-            throw BattleError.NotFound("No tienes ningún combate en curso.");
+            throw BattleError.NotFound(LocalizedText.Of("battle.error.noneInProgress"));
 
         var hero = await _heroRepository.GetByUserIdAsync(request.UserId);
         if (hero is null)
-            throw BattleError.NotFound("El usuario no tiene un héroe.");
+            throw BattleError.NotFound(LocalizedText.Of("hero.error.notFound"));
 
         var enemy = EnemyCatalog.FindByKey(battle.EnemyKey)!;
         return BattleStateBuilder.Build(hero, battle, enemy, applyRewards: false);

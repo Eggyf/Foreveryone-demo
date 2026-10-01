@@ -1,6 +1,7 @@
 ﻿using ForEveryone.Heroes.Application.Battles;
 using ForEveryone.Heroes.Application.Exceptions;
 using ForEveryone.Heroes.Domain;
+using ForEveryone.SharedKernel;
 using Heroes.Application.Interfaces;
 using MediatR;
 
@@ -24,19 +25,19 @@ public class StartBattleCommandHandler
     {
         var enemy = EnemyCatalog.FindByKey(request.EnemyKey);
         if (enemy is null)
-            throw BattleError.NotFound("Ese enemigo no existe en este reino.");
+            throw BattleError.NotFound(LocalizedText.Of("battle.error.enemyNotFound"));
 
         var hero = await _heroRepository.GetByUserIdAsync(request.UserId);
         if (hero is null)
-            throw BattleError.NotFound("El usuario no tiene un héroe.");
+            throw BattleError.NotFound(LocalizedText.Of("hero.error.notFound"));
 
         if (hero.IsDefeated)
-            throw BattleError.Conflict("Tu héroe está derrotado. ¡Debe descansar antes de luchar!");
+            throw BattleError.Conflict(LocalizedText.Of("battle.error.heroDefeated"));
 
         // Solo se permite un combate abierto por heroe, para que el jugador no
         // pueda abrir varios y Saltarse el dano de alguno.
         if (await _battleRepository.GetActiveByHeroIdAsync(request.UserId) is not null)
-            throw BattleError.Conflict("Ya tienes un combate en curso.");
+            throw BattleError.Conflict(LocalizedText.Of("battle.error.alreadyInProgress"));
 
         var battle = Battle.Start(request.UserId, enemy, hero.CurrentHealth, hero.Stats.Mana);
         await _battleRepository.AddAsync(battle);

@@ -18,7 +18,8 @@ public class GetShopItemByIdQueryHandler : IRequestHandler<GetShopItemByIdQuery,
         if (item is null) return null;
 
         return new ShopItemDetailsDto(
-            item.Id, item.Name, item.Description, item.Cost,
+            item.Id, item.Key,
+            $"shopItem.{item.Key}.name", $"shopItem.{item.Key}.desc", item.Cost,
             item.AttackBoost, item.DefenseBoost, item.HealToFull
         );
     }

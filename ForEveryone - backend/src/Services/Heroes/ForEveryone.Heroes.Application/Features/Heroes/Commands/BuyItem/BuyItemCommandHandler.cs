@@ -1,4 +1,5 @@
 using ForEveryone.Heroes.Application.Exceptions;
+using ForEveryone.SharedKernel;
 using Heroes.Application.Interfaces;
 using MediatR;
 
@@ -19,17 +20,19 @@ public class BuyItemCommandHandler : IRequestHandler<BuyItemCommand, BuyItemResu
     {
         var hero = await _heroRepository.GetByUserIdAsync(request.UserId);
         if (hero is null)
-            throw new NotFoundException("Héroe no encontrado.");
+            throw new NotFoundException("hero.error.notFound");
 
         // Heroes consulta a Shop para validar el objeto y aplicar sus efectos.
         var item = await _shopCatalogService.GetItemByIdAsync(request.ItemId);
         if (item is null)
-            throw new NotFoundException("El item no existe en la tienda de Shop.");
+            throw new NotFoundException("shop.error.itemNotFound");
 
         // El dominio valida si hay oro suficiente y aplica el boost
         hero.PurchaseItem(item.Cost, item.AttackBoost, item.DefenseBoost, item.HealToFull);
         await _heroRepository.UpdateAsync(hero);
 
-        return new BuyItemResult("¡Compra exitosa!", hero.Gold);
+        return new BuyItemResult(
+            LocalizedText.Of("shop.message.purchaseSuccess", ("itemKey", item.Key)),
+            hero.Gold);
     }
 }

@@ -31,11 +31,11 @@ public class KingdomsController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new { detail = ex.Text });
         }
         catch (ConflictException ex)
         {
-            return Conflict(new { message = ex.Message });
+            return Conflict(new { detail = ex.Text });
         }
     }
 
@@ -58,12 +58,12 @@ public class KingdomsController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new { detail = ex.Text });
         }
-        catch (InvalidOperationException ex)
+        catch (DomainRuleException ex)
         {
-            // 400 Bad Request: Lanzado por el dominio si no hay recursos o el edificio ya existe
-            return BadRequest(new { message = ex.Message });
+            // 400: el dominio rechaza la operacion con la regla incumplida.
+            return BadRequest(new { detail = ex.Text });
         }
     }
 
@@ -78,11 +78,11 @@ public class KingdomsController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new { detail = ex.Text });
         }
-        catch (InvalidOperationException ex)
+        catch (DomainRuleException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new { detail = ex.Text });
         }
     }
 
@@ -97,11 +97,11 @@ public class KingdomsController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new { detail = ex.Text });
         }
-        catch (InvalidOperationException ex)
+        catch (DomainRuleException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new { detail = ex.Text });
         }
     }
 

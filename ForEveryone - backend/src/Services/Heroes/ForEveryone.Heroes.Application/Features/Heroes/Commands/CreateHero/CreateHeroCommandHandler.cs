@@ -22,11 +22,11 @@ public class CreateHeroCommandHandler : IRequestHandler<CreateHeroCommand, Creat
         // 1. Comunicación entre microservicios
         var userExists = await _userVerificationService.VerifyUserExistsAsync(request.UserId);
         if (!userExists)
-            throw new NotFoundException("El usuario no existe en el sistema de Identity.");
+            throw new NotFoundException("hero.error.userMissingInIdentity");
 
         // 2. Regla de Dominio: 1 héroe por usuario
         if (await _heroRepository.ExistsByUserIdAsync(request.UserId))
-            throw new ConflictException("El usuario ya posee un héroe.");
+            throw new ConflictException("hero.error.alreadyHasHero");
 
         // 3. Estadísticas base de la clase. El bonus de la raza lo aplica
         //    el propio Hero en su constructor.

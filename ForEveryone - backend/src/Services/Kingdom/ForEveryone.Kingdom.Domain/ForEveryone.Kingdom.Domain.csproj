@@ -1,5 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <!-- `LocalizedText` permite que el texto de una regla incumplida lo traduzca
+         el cliente en vez de mandar una frase en castellano. -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\ForEveryone.SharedKernel\ForEveryone.SharedKernel.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

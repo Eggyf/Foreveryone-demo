@@ -1,3 +1,5 @@
+using ForEveryone.SharedKernel;
+
 namespace ForEveryone.Heroes.Domain;
 
 /// <summary>
@@ -53,8 +55,12 @@ public static class BattleEngine
     /// Por que una accion no se puede jugar ahora mismo, o <c>null</c> si si se
     /// puede. Se devuelve el motivo en vez de un booleano porque el cliente lo
     /// muestra tal cual y evita tener que adivinarlo en el frontend.
+    ///
+    /// El motivo es un <see cref="LocalizedText"/>, no una frase: el nombre de la
+    /// habilidad viaja como <c>abilityNameKey</c> para que el cliente lo traduzca
+    /// antes de insertarlo en el mensaje.
     /// </summary>
-    public static string? Unavailability(
+    public static LocalizedText? Unavailability(
         BattleAction action,
         HeroClass heroClass,
         HeroStats stats,
@@ -66,15 +72,19 @@ public static class BattleEngine
         // Una ranura que no es del kit de la clase no es un conflicto de estado
         // sino una peticion invalida: el jugador intenta usar magia sin ser mago.
         if (ability is null)
-            return "Tu clase no tiene esa habilidad.";
+            return LocalizedText.Of("battle.blocked.notInKit");
 
         if (ability.UseLimit > 0 && UsesLeft(ability, played) <= 0)
-            return $"No te quedan usos de {ability.Name}.";
+            return LocalizedText.Of("battle.blocked.noUsesLeft", ("abilityNameKey", ability.NameKey));
 
         var cost = ClassAbilities.ManaCost(stats, ability);
 
         if (cost > heroMana)
-            return $"Necesitas {cost} de maná para {ability.Name} y solo tienes {heroMana}.";
+            return LocalizedText.Of(
+                "battle.blocked.manaTooLow",
+                ("cost", cost),
+                ("abilityNameKey", ability.NameKey),
+                ("have", heroMana));
 
         return null;
     }
@@ -150,7 +160,12 @@ public static class BattleEngine
             {
                 rounds.Add(new CombatRound(
                     round, slot, heroDamage, 0, enemyHealth, heroHealth, heroMana,
-                    $"Turno {round}: {ability.Name} hace {heroDamage} de daño. ¡{enemy.Name} ha caído!"));
+                    LocalizedText.Of(
+                        "battle.round.enemyDefeated",
+                        ("round", round),
+                        ("heroDamage", heroDamage),
+                        ("abilityNameKey", ability.NameKey),
+                        ("enemyKey", enemy.Key))));
 
                 break;
             }
@@ -185,7 +200,7 @@ public static class BattleEngine
             GoldGained: victory ? enemy.GoldReward : 0);
     }
 
-    private static string BuildRoundMessage(
+    private static LocalizedText BuildRoundMessage(
         int round,
         ClassAbility ability,
         int heroDamage,
@@ -193,18 +208,44 @@ public static class BattleEngine
         Enemy enemy,
         int heroHealth) => ability.Effect switch
         {
+            // Un turno reune siempre los mismos datos y solo cambia la frase, asi
+            // que se mandan los cinco y el cliente elige el texto segun el efecto.
             AbilityEffect.Guard =>
-                $"Turno {round}: {ability.Name} y el golpe de {enemy.Name} rebota: {enemyDamage} de daño. Tu vida: {heroHealth}.",
+                LocalizedText.Of(
+                    "battle.round.guarded",
+                    ("round", round),
+                    ("enemyDamage", enemyDamage),
+                    ("abilityNameKey", ability.NameKey),
+                    ("enemyKey", enemy.Key),
+                    ("heroHealth", heroHealth)),
 
             AbilityEffect.Heal =>
-                $"Turno {round}: {ability.Name} recupera vida antes del contraataque. {enemy.Name} responde con {enemyDamage}. Tu vida: {heroHealth}.",
+                LocalizedText.Of(
+                    "battle.round.healed",
+                    ("round", round),
+                    ("abilityNameKey", ability.NameKey),
+                    ("enemyDamage", enemyDamage),
+                    ("enemyKey", enemy.Key),
+                    ("heroHealth", heroHealth)),
 
             AbilityEffect.Drain =>
-                $"Turno {round}: {ability.Name} hace {heroDamage} de daño y le roba vida. " +
-                $"{enemy.Name} responde con {enemyDamage}. Tu vida: {heroHealth}.",
+                LocalizedText.Of(
+                    "battle.round.drained",
+                    ("round", round),
+                    ("heroDamage", heroDamage),
+                    ("abilityNameKey", ability.NameKey),
+                    ("enemyDamage", enemyDamage),
+                    ("enemyKey", enemy.Key),
+                    ("heroHealth", heroHealth)),
 
             _ =>
-                $"Turno {round}: {ability.Name} hace {heroDamage} de daño. " +
-                $"{enemy.Name} responde con {enemyDamage}. Tu vida: {heroHealth}."
+                LocalizedText.Of(
+                    "battle.round.struck",
+                    ("round", round),
+                    ("heroDamage", heroDamage),
+                    ("abilityNameKey", ability.NameKey),
+                    ("enemyDamage", enemyDamage),
+                    ("enemyKey", enemy.Key),
+                    ("heroHealth", heroHealth))
         };
 }

@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from '../i18n/useI18n';
 import type { UserSession } from '../types';
 import './GameLayout.css';
 
@@ -8,6 +9,7 @@ interface GameLayoutProps {
 }
 
 export const GameLayout = ({ user, onLogout }: GameLayoutProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -17,11 +19,13 @@ export const GameLayout = ({ user, onLogout }: GameLayoutProps) => {
 
   return (
     <div className="game-layout">
-      <nav className="navbar" aria-label="Navegación principal">
-        <NavLink to="/hero" className="nav-link">⚔️ Héroe</NavLink>
-        <NavLink to="/castle" className="nav-link">🏰 Castillo</NavLink>
-        <NavLink to="/shop" className="nav-link">🏪 Tienda</NavLink>
-        <button type="button" className="logout-btn-nav" onClick={handleLogout}>Salir</button>
+      <nav className="navbar" aria-label={t('nav.label')}>
+        <NavLink to="/hero" className="nav-link">⚔️ {t('nav.hero')}</NavLink>
+        <NavLink to="/castle" className="nav-link">🏰 {t('nav.castle')}</NavLink>
+        <NavLink to="/shop" className="nav-link">🏪 {t('nav.shop')}</NavLink>
+        <button type="button" className="logout-btn-nav" onClick={handleLogout}>
+          {t('nav.logout')}
+        </button>
       </nav>
 
       <main className="page-content">

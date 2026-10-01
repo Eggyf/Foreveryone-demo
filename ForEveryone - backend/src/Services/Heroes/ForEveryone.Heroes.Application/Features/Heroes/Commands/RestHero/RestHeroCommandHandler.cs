@@ -1,4 +1,5 @@
 using ForEveryone.Heroes.Application.Exceptions;
+using ForEveryone.SharedKernel;
 using Heroes.Application.Interfaces;
 using MediatR;
 
@@ -16,11 +17,11 @@ public class RestHeroCommandHandler : IRequestHandler<RestHeroCommand, RestHeroR
     public async Task<RestHeroResult> Handle(RestHeroCommand request, CancellationToken cancellationToken)
     {
         var hero = await _heroRepository.GetByUserIdAsync(request.UserId);
-        if (hero is null) throw new NotFoundException("Héroe no encontrado.");
+        if (hero is null) throw new NotFoundException("hero.error.notFound");
 
         hero.Rest();
         await _heroRepository.UpdateAsync(hero);
 
-        return new RestHeroResult(hero.CurrentHealth, "Tu héroe ha descansado y recuperado su vida.");
+        return new RestHeroResult(hero.CurrentHealth, LocalizedText.Of("hero.message.rested"));
     }
 }

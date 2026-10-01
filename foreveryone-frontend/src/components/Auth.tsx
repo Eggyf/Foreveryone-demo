@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { identityApi } from '../api/api';
 import { getErrorMessage } from '../api/errors';
+import { useTranslation } from '../i18n/useI18n';
 import { Message, type MessageTone } from './Message';
 import './Auth.css';
 
@@ -12,6 +13,7 @@ interface AuthNotice {
 }
 
 export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<AuthMode>('login');
   const [identifier, setIdentifier] = useState('');
   const [username, setUsername] = useState('');
@@ -42,7 +44,10 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
       if (isLogin) {
         onSuccess(response.data.token);
       } else {
-        setNotice({ tone: 'success', text: `¡Registro exitoso! Ya puedes entrar como "${username}".` });
+        setNotice({
+          tone: 'success',
+          text: t('auth.registerSuccess', { username }),
+        });
         setUsername('');
         setEmail('');
         setPassword('');
@@ -51,7 +56,7 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
     } catch (error: unknown) {
       setNotice({
         tone: 'error',
-        text: getErrorMessage(error, 'No se pudo completar la operación.'),
+        text: getErrorMessage(error, t('auth.genericError')),
       });
     } finally {
       setIsSubmitting(false);
@@ -60,7 +65,7 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
 
   return (
     <div className="auth-card">
-      <div className="tabs" role="tablist" aria-label="Acceso a Foreveryone">
+      <div className="tabs" role="tablist" aria-label="Foreveryone">
         <button
           type="button"
           role="tab"
@@ -70,7 +75,7 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
           className={isLogin ? 'active' : ''}
           onClick={() => switchMode('login')}
         >
-          Login
+          {t('auth.login')}
         </button>
         <button
           type="button"
@@ -81,7 +86,7 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
           className={!isLogin ? 'active' : ''}
           onClick={() => switchMode('register')}
         >
-          Registro
+          {t('auth.register')}
         </button>
       </div>
 
@@ -94,8 +99,8 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
         {isLogin ? (
           <input
             type="text"
-            placeholder="Email o usuario"
-            aria-label="Email o usuario"
+            placeholder={t('auth.identifierPlaceholder')}
+            aria-label={t('auth.identifierPlaceholder')}
             autoComplete="username"
             autoFocus
             value={identifier}
@@ -106,8 +111,8 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
           <>
             <input
               type="text"
-              placeholder="Nombre de usuario"
-              aria-label="Nombre de usuario"
+              placeholder={t('auth.usernamePlaceholder')}
+              aria-label={t('auth.usernamePlaceholder')}
               autoComplete="username"
               autoFocus
               value={username}
@@ -115,14 +120,14 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
               minLength={3}
               maxLength={24}
               pattern="[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?"
-              title="De 3 a 24 caracteres, empezando y terminando en letra o número. Solo letras, números, punto, guion y guion bajo."
+              title={t('auth.usernamePatternTitle')}
               required
             />
-            <p className="field-hint">De 3 a 24 caracteres. Letras, números, punto, guion y guion bajo.</p>
+            <p className="field-hint">{t('auth.usernameHint')}</p>
             <input
               type="email"
-              placeholder="Email"
-              aria-label="Email"
+              placeholder={t('auth.emailPlaceholder')}
+              aria-label={t('auth.emailPlaceholder')}
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -132,15 +137,19 @@ export const Auth = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
         )}
         <input
           type="password"
-          placeholder="Contraseña"
-          aria-label="Contraseña"
+          placeholder={t('auth.passwordPlaceholder')}
+          aria-label={t('auth.passwordPlaceholder')}
           autoComplete={isLogin ? 'current-password' : 'new-password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Un momento…' : isLogin ? 'Entrar' : 'Registrarse'}
+          {isSubmitting
+            ? t('auth.waiting')
+            : isLogin
+              ? t('auth.enter')
+              : t('auth.registerAction')}
         </button>
       </form>
 

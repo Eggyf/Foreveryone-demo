@@ -1,18 +1,17 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../i18n/useI18n';
 import './NotFoundPage.css';
 
-export const NotFoundPage = () => (
-  <section className="notfound-screen">
-    <span className="notfound-eyebrow">Error 404</span>
-    <h2>Esta página no existe</h2>
-    <p>El enlace que has seguido no lleva a ninguna parte del reino.</p>
-    <div className="notfound-actions">
-      <Link className="notfound-link" to="/hero">
-        Volver a mi héroe
+export const NotFoundPage = () => {
+  const { t } = useTranslation();
+
+  return (
+    <section className="not-found">
+      <span aria-hidden="true">🧭</span>
+      <h2>{t('notFound.title')}</h2>
+      <Link to="/hero" className="not-found-link">
+        {t('notFound.back')}
       </Link>
-      <Link className="notfound-link is-quiet" to="/castle">
-        Ir al castillo
-      </Link>
-    </div>
-  </section>
-);
+    </section>
+  );
+};

@@ -1,41 +1,37 @@
+import { useTranslation } from '../i18n/useI18n';
 import type { BuildingData } from '../types';
-import { getBuildingDetails } from './buildings';
-import './BuildingCard.css';
+import {
+  UNKNOWN_BUILDING_DESC_KEY,
+  UNKNOWN_BUILDING_NAME_KEY,
+  getBuildingDetails,
+} from './buildings';
 
 interface BuildingCardProps {
-    building: BuildingData;
-    onUpgrade: (type: number) => void;
-    disabled?: boolean;
+  building: BuildingData;
 }
 
-export const BuildingCard = ({ building, onUpgrade, disabled = false }: BuildingCardProps) => {
-    const details = getBuildingDetails(building.type);
-    // El API devuelve el nombre del enum en ingles; el castellano sale del
-    // catalogo. Para un tipo desconocido se conserva el nombre recibido.
-    const icon = details?.icon ?? '🏛️';
-    const name = details?.label ?? building.name;
-    const description =
-        details?.description ?? 'Edificio construido para el funcionamiento del reino.';
+/**
+ * Tarjeta de un edificio ya construido.
+ *
+ * El nombre legible sale del catalogo (`buildings.ts`) por tipo, no del `name` que
+ * devuelve el API: aquel es el nombre del enum en ingles y aqui solo haria falta
+ * para cuando el servidor crecen con un tipo que el catalogo todavia no conoce.
+ */
+export const BuildingCard = ({ building }: BuildingCardProps) => {
+  const { t } = useTranslation();
+  const details = getBuildingDetails(building.type);
 
-    return (
-        <article className="building-card">
-            <div className="building-icon" aria-hidden="true">
-                {icon}
-            </div>
-            <h4>{name}</h4>
-            <p>{description}</p>
-            <div className="building-card-footer">
-                <span className="building-level">Nivel {building.level}</span>
-                <button
-                    type="button"
-                    className="upgrade-btn"
-                    onClick={() => onUpgrade(building.type)}
-                    disabled={disabled}
-                    aria-label={`Mejorar ${name} al nivel ${building.level + 1}`}
-                >
-                    ⬆️ Mejorar
-                </button>
-            </div>
-        </article>
-    );
+  const nameKey = details?.nameKey ?? UNKNOWN_BUILDING_NAME_KEY;
+  const descriptionKey = details?.descriptionKey ?? UNKNOWN_BUILDING_DESC_KEY;
+  const icon = details?.icon ?? '🏛️';
+
+  return (
+    <article className="building-card" title={t(descriptionKey)}>
+      <span className="building-icon" aria-hidden="true">{icon}</span>
+      <div className="building-copy">
+        <strong>{t(nameKey)}</strong>
+        <small>Nv. {building.level}</small>
+      </div>
+    </article>
+  );
 };

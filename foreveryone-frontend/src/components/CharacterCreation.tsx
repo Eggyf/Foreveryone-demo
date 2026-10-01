@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { heroesApi } from '../api/api';
 import { getErrorMessage, isNotFound } from '../api/errors';
+import { useTranslation } from '../i18n/useI18n';
 import type {
   CharacterClassOption,
   CharacterOptions,
@@ -11,43 +12,28 @@ import './CharacterCreation.css';
 
 type Step = 'race' | 'class';
 
-const RACE_DETAILS: Record<string, { icon: string; description: string }> = {
-  humano: {
-    icon: '🧑',
-    description: 'Versátil y sin debilidades marcados. Se adapta a cualquier clase.',
-  },
-  elfo: {
-    icon: '🧝',
-    description: 'Descendiente de los bosques: certero y mágico, pero frágil cuerpo a cuerpo.',
-  },
-  enano: {
-    icon: '🧔',
-    description: 'Forjado en las profundidades: mucha vida y defensa, a costa de su ataque.',
-  },
-  orco: {
-    icon: '👹',
-    description: 'Fuerza desbordada y gran vitalidad, con menos defensa y menos maná.',
-  },
+/**
+ * Iconos y claves de descripcion de las razas y las clases.
+ *
+ * El servidor devuelve el nombre del enum (`Humano`, `Warrior`), asi que se busca
+ * por esa clave en minusculas. Solo se guardan icono y clave de texto: las
+ * estadisticas siguen viniendo del API y no se duplican aqui.
+ */
+const RACE_META: Record<string, { icon: string; descriptionKey: string }> = {
+  humano: { icon: '🧑', descriptionKey: 'hero.raceDescription.humano' },
+  elfo: { icon: '🧝', descriptionKey: 'hero.raceDescription.elfo' },
+  enano: { icon: '🧔', descriptionKey: 'hero.raceDescription.enano' },
+  orco: { icon: '👹', descriptionKey: 'hero.raceDescription.orco' },
 };
 
-const CLASS_DETAILS: Record<string, { icon: string; description: string }> = {
-  warrior: {
-    icon: '⚔️',
-    description: 'Especialista en combate cuerpo a cuerpo. Aguanta el frente.',
-  },
-  hunter: {
-    icon: '🏹',
-    description: 'Experto en ataques a distancia. Precisión y velocidad.',
-  },
-  wizard: {
-    icon: '🔮',
-    description: 'Maestro de la magia. Gran daño arcano a cambio de fragilidad.',
-  },
-  rogue: {
-    icon: '🗡️',
-    description: 'Sombra letal. equilibra daño y supervivencia con muy poco maná.',
-  },
+const CLASS_META: Record<string, { icon: string; descriptionKey: string }> = {
+  warrior: { icon: '⚔️', descriptionKey: 'hero.classDescription.warrior' },
+  hunter: { icon: '🏹', descriptionKey: 'hero.classDescription.hunter' },
+  wizard: { icon: '🔮', descriptionKey: 'hero.classDescription.wizard' },
+  rogue: { icon: '🗡️', descriptionKey: 'hero.classDescription.rogue' },
 };
+
+const FALLBACK_ICON = '❔';
 
 interface CharacterCreationProps {
   user: UserSession;
@@ -85,7 +71,22 @@ const resolveStats = (
 const formatModifier = (value: number): string =>
   value === 0 ? '—' : `${value > 0 ? '+' : ''}${value}%`;
 
+/** Nombre localizado de una raza o clase a partir del enum del servidor. */
+const localizedOptionName = (
+  t: (key: string) => string,
+  kind: 'race' | 'class',
+  serverName: string,
+): string => {
+  const key = serverName.toLowerCase();
+  const known = (kind === 'race' ? RACE_META[key] : CLASS_META[key]) !== undefined;
+
+  // Si el dominio anade una raza o clase nueva, se muestra el nombre del enum tal
+  // cual en vez de dejar la tarjeta a medias con la clave de traduccion a la vista.
+  return known ? t(`hero.${kind}.${key}`) : serverName;
+};
+
 export const CharacterCreation = ({ user, onCreated, onSessionExpired }: CharacterCreationProps) => {
+  const { t } = useTranslation();
   const [options, setOptions] = useState<CharacterOptions | null>(null);
   const [loadError, setLoadError] = useState('');
   const [step, setStep] = useState<Step>('race');
@@ -107,14 +108,14 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
       })
       .catch((error: unknown) => {
         if (isActive) {
-          setLoadError(getErrorMessage(error, 'No se pudieron cargar las razas y clases.'));
+          setLoadError(getErrorMessage(error, t('creation.loadError')));
         }
       });
 
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [t]);
 
   const preview = useMemo(
     () =>
@@ -146,7 +147,7 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
         return;
       }
 
-      setFormError(getErrorMessage(error, 'No se pudo crear tu personaje.'));
+      setFormError(getErrorMessage(error, t('creation.createError')));
       setIsSubmitting(false);
     }
   };
@@ -154,12 +155,9 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
   if (accountMissing) {
     return (
       <div className="creation-shell">
-        <p className="creation-error">
-          Tu cuenta ya no existe en el servidor. Vuelve a iniciar sesión o registra
-          una cuenta nueva para continuar.
-        </p>
+        <p className="creation-error">{t('creation.accountGone')}</p>
         <button type="button" className="creation-next" onClick={onSessionExpired}>
-          Ir al login
+          {t('creation.closeSession')}
         </button>
       </div>
     );
@@ -176,7 +174,7 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
   if (!options) {
     return (
       <div className="creation-shell">
-        <p className="creation-loading">Invocando el destino…</p>
+        <p className="creation-loading">{t('creation.summoning')}</p>
       </div>
     );
   }
@@ -187,24 +185,26 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
   return (
     <div className="creation-shell">
       <header className="creation-header">
-        <span className="creation-eyebrow">Bienvenido, {user.displayName || 'Aventurero'}</span>
-        <h1>Crea tu personaje</h1>
-        <p>Foreveryone necesita un héroe. Elige primero tu raza y después tu clase.</p>
+        <span className="creation-eyebrow">
+          {t('creation.welcome', { name: user.displayName || t('hero.adventurer') })}
+        </span>
+        <h1>{t('creation.title')}</h1>
+        <p>{t('creation.subtitle')}</p>
       </header>
 
-      <ol className="creation-steps" aria-label="Progreso de creación">
+      <ol className="creation-steps" aria-label={t('creation.stepsLabel')}>
         <li className={isRaceStep ? 'is-active' : 'is-done'}>
-          <span>1</span> Raza
+          <span>1</span> {t('creation.stepRace')}
         </li>
         <li className={!isRaceStep ? 'is-active' : ''}>
-          <span>2</span> Clase
+          <span>2</span> {t('creation.stepClass')}
         </li>
       </ol>
 
       {isRaceStep ? (
-        <section className="creation-grid" aria-label="Elige tu raza">
+        <section className="creation-grid" aria-label={t('creation.stepRace')}>
           {options.races.map((race) => {
-            const details = RACE_DETAILS[race.name.toLowerCase()];
+            const details = RACE_META[race.name.toLowerCase()];
             const isSelected = selectedRace?.id === race.id;
 
             return (
@@ -216,24 +216,28 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
                 aria-pressed={isSelected}
               >
                 <span className="creation-card-icon" aria-hidden="true">
-                  {details?.icon ?? '❔'}
+                  {details?.icon ?? FALLBACK_ICON}
                 </span>
-                <strong className="creation-card-title">{race.name}</strong>
-                <span className="creation-card-text">{details?.description}</span>
+                <strong className="creation-card-title">
+                  {localizedOptionName(t, 'race', race.name)}
+                </strong>
+                <span className="creation-card-text">
+                  {details ? t(details.descriptionKey) : null}
+                </span>
                 <span className="creation-card-mods">
-                  <i>Vida {formatModifier(race.healthPercent)}</i>
-                  <i>Atq {formatModifier(race.attackPercent)}</i>
-                  <i>Def {formatModifier(race.defensePercent)}</i>
-                  <i>Maná {formatModifier(race.manaPercent)}</i>
+                  <i>{t('creation.health')} {formatModifier(race.healthPercent)}</i>
+                  <i>{t('creation.attackShort')} {formatModifier(race.attackPercent)}</i>
+                  <i>{t('creation.defenseShort')} {formatModifier(race.defensePercent)}</i>
+                  <i>{t('creation.mana')} {formatModifier(race.manaPercent)}</i>
                 </span>
               </button>
             );
           })}
         </section>
       ) : (
-        <section className="creation-grid" aria-label="Elige tu clase">
+        <section className="creation-grid" aria-label={t('creation.stepClass')}>
           {options.classes.map((heroClass) => {
-            const details = CLASS_DETAILS[heroClass.name.toLowerCase()];
+            const details = CLASS_META[heroClass.name.toLowerCase()];
             const stats = selectedRace ? resolveStats(heroClass, selectedRace) : null;
             const isSelected = selectedClass?.id === heroClass.id;
 
@@ -246,10 +250,14 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
                 aria-pressed={isSelected}
               >
                 <span className="creation-card-icon" aria-hidden="true">
-                  {details?.icon ?? '❔'}
+                  {details?.icon ?? FALLBACK_ICON}
                 </span>
-                <strong className="creation-card-title">{heroClass.name}</strong>
-                <span className="creation-card-text">{details?.description}</span>
+                <strong className="creation-card-title">
+                  {localizedOptionName(t, 'class', heroClass.name)}
+                </strong>
+                <span className="creation-card-text">
+                  {details ? t(details.descriptionKey) : null}
+                </span>
                 {stats && (
                   <span className="creation-card-stats">
                     <i>❤️ {stats.health}</i>
@@ -266,8 +274,14 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
 
       {preview && (
         <div className="creation-preview" aria-live="polite">
-          <strong>{selectedRace?.name} {selectedClass?.name}</strong>
-          <span>Vida {preview.health} · Ataque {preview.attack} · Defensa {preview.defense} · Maná {preview.mana}</span>
+          <strong>
+            {selectedRace ? localizedOptionName(t, 'race', selectedRace.name) : ''}{' '}
+            {selectedClass ? localizedOptionName(t, 'class', selectedClass.name) : ''}
+          </strong>
+          <span>
+            {t('creation.health')} {preview.health} · {t('creation.attack')} {preview.attack} ·{' '}
+            {t('creation.defense')} {preview.defense} · {t('creation.mana')} {preview.mana}
+          </span>
         </div>
       )}
 
@@ -276,7 +290,7 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
       <footer className="creation-actions">
         {!isRaceStep ? (
           <button type="button" className="creation-back" onClick={() => setStep('race')}>
-            ← Cambiar raza
+            ← {t('creation.changeRace')}
           </button>
         ) : (
           <span />
@@ -289,7 +303,7 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
             onClick={() => setStep('class')}
             disabled={!selectedRace}
           >
-            Continuar con la clase →
+            {t('creation.continueToClass')} →
           </button>
         ) : (
           <button
@@ -298,7 +312,9 @@ export const CharacterCreation = ({ user, onCreated, onSessionExpired }: Charact
             onClick={handleCreate}
             disabled={!canConfirm}
           >
-            {isSubmitting ? 'Creando personaje…' : '⚔️ Entrar en Foreveryone'}
+            {isSubmitting
+              ? t('creation.creatingCharacter')
+              : `⚔️ ${t('creation.enterGame')}`}
           </button>
         )}
       </footer>

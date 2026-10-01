@@ -103,7 +103,7 @@ public class Hero
     public void PurchaseItem(int cost, int attackBoost, int defenseBoost, bool healToFull)
     {
         if (Gold < cost)
-            throw new InvalidOperationException("Oro insuficiente para comprar este objeto.");
+            throw new HeroRuleException("shop.error.notEnoughGold", ("cost", cost), ("have", Gold));
 
         Gold -= cost;
 

@@ -1,26 +1,36 @@
 import { isAxiosError } from 'axios';
+import { t, translateText } from '../i18n/static';
 
 /**
  * Los cuatro servicios no comparten un unico formato de error, asi que este
  * modulo centraliza como se extrae un mensaje legible de cualquier respuesta:
  *
- * - Identity devuelve `ProblemDetails` con `detail` (texto) y `title` (codigo).
- * - Heroes, Kingdom y Shop devuelven `{ "message": "..." }` a proposito.
- * - Los `NotFound()` sin cuerpo se reescriben a un `ProblemDetails` generico
- *   que solo trae `title: "Not Found"`, sin `message` ni `detail`.
- * - Las validaciones anaden `errors`, ya sea como lista plana o indexada por
- *   campo (los `ValidationProblemDetails` automaticos de `[ApiController]`).
+ * - Identity devuelve `ProblemDetails` con `detail` (codigo) y `title` (codigo de
+ *   dominio). Sus claves viajan en `message`, o en `errors` cuando son varias.
+ * - Heroes, Kingdom y Shop devuelven `LocalizedProblem`:
+ *   `{ "detail": { "key": "...", "args": { ... } } }`.
+ * - Los `NotFound()` sin cuerpo se reescriben a un `ProblemDetails` generico que
+ *   solo trae `title: "Not Found"`, sin mensaje alguno.
  * - Una excepcion sin manejar llega como 500 `text/plain` con la traza de la
  *   pila, que nunca debe mostrarse al jugador.
+ *
+ * Aqui se traduce con `t()` del modulo estatico en vez del hook porque el error
+ * se normaliza fuera del arbol de React (interceptor de Axios, manejadores). Ese
+ * modulo lee el idioma que el provider ya aplico, de modo que el resultado es el
+ * mismo. Es tambien el unico sitio donde se lee el cuerpo del error: anadir un
+ * `error.response.data.message` en un componente volveria a mezclar los formatos.
  */
-
-type ValidationErrors = Record<string, unknown> | string[] | undefined;
 
 interface ErrorBody {
   message?: unknown;
   detail?: unknown;
   title?: unknown;
-  errors?: ValidationErrors;
+  errors?: unknown;
+}
+
+interface LocalizedTextBody {
+  key?: unknown;
+  args?: unknown;
 }
 
 const firstString = (value: unknown): string | undefined => {
@@ -32,9 +42,46 @@ const firstString = (value: unknown): string | undefined => {
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
-const collectValidationErrors = (errors: ValidationErrors): string[] => {
+/**
+ * Normaliza el cuerpo de un `LocalizedText`. Devuelve `null` si no trae clave,
+ * que es la señal de que el cuerpo no venia en ese formato y hay que buscar otra
+ * cosa (por ejemplo, un `ProblemDetails` de Identity).
+ */
+const toLocalizedText = (value: unknown): { key: string; args: Record<string, string> } | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const body = value as LocalizedTextBody;
+  const key = firstString(body.key);
+
+  if (!key) {
+    return null;
+  }
+
+  const args: Record<string, string> = {};
+
+  if (body.args && typeof body.args === 'object' && !Array.isArray(body.args)) {
+    for (const [name, arg] of Object.entries(body.args as Record<string, unknown>)) {
+      const text = firstString(arg);
+      if (text) args[name] = text;
+    }
+  }
+
+  return { key, args };
+};
+
+/**
+ * Los errores de validacion llegan como diccionario campo -> clave, o como lista
+ * plana. Se aplanan a claves para resolverlas con el mismo `t()` del resto.
+ */
+const collectValidationKeys = (errors: unknown): string[] => {
   if (Array.isArray(errors)) {
     return errors.flatMap((entry) => firstString(entry) ?? []);
+  }
+
+  if (errors && typeof errors !== 'object') {
+    return [];
   }
 
   if (errors && typeof errors === 'object') {
@@ -72,8 +119,9 @@ export const getStatusCode = (error: unknown): number | undefined => {
 };
 
 /**
- * Devuelve el primer mensaje utilizable del cuerpo de la respuesta y, si no
- * hay ninguno, `fallback`. Nunca filtra trazas de pila ni codigos HTTP crudos.
+ * Devuelve el primer mensaje utilizable del cuerpo de la respuesta, ya traducido,
+ * y si no hay ninguno, `fallback` (que llega traducido desde el componente).
+ * Nunca filtra trazas de pila ni codigos HTTP crudos.
  */
 export const getErrorMessage = (error: unknown, fallback: string): string => {
   if (!isAxiosError(error)) {
@@ -81,7 +129,7 @@ export const getErrorMessage = (error: unknown, fallback: string): string => {
   }
 
   if (!error.response) {
-    return 'No hay conexión con el servidor. Comprueba que los servicios estén encendidos.';
+    return t('network.down');
   }
 
   const data: unknown = error.response.data;
@@ -96,14 +144,35 @@ export const getErrorMessage = (error: unknown, fallback: string): string => {
   }
 
   const body = data as ErrorBody;
-  const title = firstString(body.title);
-  const validationErrors = collectValidationErrors(body.errors);
 
-  return (
-    firstString(body.message) ??
-    firstString(body.detail) ??
-    (validationErrors.length > 0 ? validationErrors.join(' · ') : undefined) ??
-    (title && isErrorCode(title) ? title : undefined) ??
-    fallback
-  );
+  // Formato de Heroes, Kingdom y Shop: el texto llega como clave y argumentos.
+  const localizedDetail = toLocalizedText(body.detail);
+
+  if (localizedDetail) {
+    return translateText(localizedDetail);
+  }
+
+  // Identity manda la clave de traduccion en `message` cuando es un error de
+  // dominio, y en `errors` cuando son varias reglas incumplidas.
+  const messageKey = firstString(body.message);
+
+  if (messageKey && !looksLikeStackTrace(messageKey)) {
+    return t(messageKey);
+  }
+
+  const validationKeys = collectValidationKeys(body.errors);
+
+  if (validationKeys.length > 0) {
+    // Un campo puede incumplir varias reglas, y Identity las une en una sola
+    // cadena separada por `|`. Se parten para traducir cada clave por separado.
+    return validationKeys
+      .flatMap((entry) => entry.split('|').map((key) => key.trim()))
+      .filter(Boolean)
+      .map((key) => t(key))
+      .join(' · ');
+  }
+
+  const title = firstString(body.title);
+
+  return (title && isErrorCode(title) ? title : undefined) ?? fallback;
 };

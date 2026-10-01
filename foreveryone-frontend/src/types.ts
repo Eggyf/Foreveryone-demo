@@ -1,3 +1,5 @@
+import type { LocalizedText } from './i18n/I18nProvider';
+
 export interface UserSession {
     userId: string;
     username: string;
@@ -42,9 +44,13 @@ export interface HeroData {
     mana: number;
 }
 
+/**
+ * Enemigo disponible. `nameKey` es la clave de traduccion del nombre: el servidor
+ * no sabe en que idioma juega la persona, asi que no manda el texto.
+ */
 export interface EnemyOption {
     key: string;
-    name: string;
+    nameKey: string;
     health: number;
     attack: number;
     defense: number;
@@ -61,8 +67,10 @@ export type BattleActionId = 1 | 2 | 3;
 
 export interface BattleActionOption {
     action: BattleActionId;
-    name: string;
-    description: string;
+    /** Clave de traduccion del nombre de la habilidad. */
+    nameKey: string;
+    /** Clave de traduccion de la explicacion de una linea. */
+    descriptionKey: string;
     /** Dano exacto contra este enemigo; 0 en habilidades que no golpean. */
     damage: number;
     manaCost: number;
@@ -71,8 +79,11 @@ export interface BattleActionOption {
     usesLeft: number;
     /** Usos por combate, o 0 si no tiene limite. */
     usesLimit: number;
-    /** Por que no se puede jugar ahora, o cadena vacia si si se puede. */
-    unavailableReason: string;
+    /**
+     * Por que no se puede jugar ahora, o `null` si si se puede. Llega con la
+     * clave y sus argumentos: el cliente lo compone en su idioma.
+     */
+    unavailableReason: LocalizedText | null;
 }
 
 export interface BattleRound {
@@ -83,13 +94,15 @@ export interface BattleRound {
     enemyHealthRemaining: number;
     heroHealthRemaining: number;
     heroManaRemaining: number;
-    message: string;
+    /** Clave y argumentos del texto del turno; lo compone el cliente. */
+    message: LocalizedText;
 }
 
 export interface BattleState {
     battleId: string;
     enemyKey: string;
-    enemyName: string;
+    /** Clave de traduccion del nombre del enemigo. */
+    enemyNameKey: string;
     round: number;
     enemyHealth: number;
     enemyMaxHealth: number;
@@ -107,7 +120,8 @@ export interface BattleState {
     goldGained: number;
     actions: BattleActionOption[];
     rounds: BattleRound[];
-    message: string;
+    /** Clave y argumentos del mensaje de estado; lo compone el cliente. */
+    message: LocalizedText;
 }
 
 export interface KingdomData {
@@ -131,9 +145,39 @@ export interface BuildingData {
     level: number;
 }
 
+export interface UpgradeBuildingResult {
+    buildingName: string;
+    newLevel: number;
+}
+
+export interface TrainArmyResult {
+    armySize: number;
+    militaryPower: number;
+    /** Clave y argumentos del mensaje; lo compone el cliente. */
+    message: LocalizedText;
+}
+
+export interface RestHeroResult {
+    currentHealth: number;
+    /** Clave y argumentos del mensaje; lo compone el cliente. */
+    message: LocalizedText;
+}
+
+export interface BuyItemResult {
+    /** Clave y argumentos del mensaje; lo compone el cliente. */
+    message: LocalizedText;
+    currentGold: number;
+}
+
+/**
+ * Articulo del catalogo. El nombre y la descripcion llegan como claves: el texto
+ * lo decide el cliente, porque el servidor no sabe el idioma del jugador.
+ */
 export interface ShopItemData {
     id: number;
-    name: string;
-    description: string;
+    /** Clave estable del articulo, por ejemplo `sword`. */
+    key: string;
+    nameKey: string;
+    descriptionKey: string;
     cost: number;
 }

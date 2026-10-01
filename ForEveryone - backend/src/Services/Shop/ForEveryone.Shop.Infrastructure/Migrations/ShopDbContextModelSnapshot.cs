@@ -45,6 +45,11 @@ namespace ForEveryone.Shop.Infrastructure.Migrations
                     b.Property<bool>("HealToFull")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -63,6 +68,7 @@ namespace ForEveryone.Shop.Infrastructure.Migrations
                             DefenseBoost = 0,
                             Description = "Aumenta el Ataque +10 permanentemente.",
                             HealToFull = false,
+                            Key = "sword",
                             Name = "🗡️ Espada de Hierro"
                         },
                         new
@@ -73,6 +79,7 @@ namespace ForEveryone.Shop.Infrastructure.Migrations
                             DefenseBoost = 10,
                             Description = "Aumenta la Defensa +10 permanentemente.",
                             HealToFull = false,
+                            Key = "armor",
                             Name = "🛡️ Armadura de Cuero"
                         },
                         new
@@ -83,6 +90,7 @@ namespace ForEveryone.Shop.Infrastructure.Migrations
                             DefenseBoost = 0,
                             Description = "Restaura toda tu vida al instante.",
                             HealToFull = true,
+                            Key = "potion",
                             Name = "🧪 Poción de Vida"
                         });
                 });
