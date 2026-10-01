@@ -1,0 +1,17 @@
+# El contexto de compilación es la raíz de "ForEveryone - backend". Todo lo
+# que genera dotnet o el IDE se excluye: son binarios del host y no aportan
+# nada a la imagen, pero sí engordan la copia y pueden colarse en el
+# contenedor hasta hacer que la app sirva código que no es el que se compiló.
+
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.userosscache
+**/*.suo
+**/*.cache
+**/*.log
+**/.git/
+**/.gitignore

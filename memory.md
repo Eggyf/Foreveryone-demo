@@ -2,7 +2,7 @@
 
 Curated, durable context for future OpenCode sessions. This file is not an automatic transcript database: `AGENTS.md` instructs agents to read it at session startup and to keep it current when durable project context changes.
 
-Last verified: 2026-09-27
+Last verified: 2026-10-01
 
 ## User preferences
 
@@ -19,11 +19,21 @@ Last verified: 2026-09-27
 - The backend is a .NET 10 solution in `ForEveryone - backend/ForEveryone.slnx`.
 - Backend services are Identity (port 5045), Heroes (5281), Kingdom (5256), and Shop (5136).
 - Each service has its own PostgreSQL database and normally follows `Api`, `Application`, `Domain`, and `Infrastructure` layers.
+- Local PostgreSQL was replaced by Docker on 2026-10-01: `docker-compose.yml` at the repo root runs the four databases and the four APIs. The frontend stays local on Vite.
 - The frontend calls the service APIs directly; there is currently no API gateway.
 - The authoritative setup and architecture document is `readme.md`.
 
 ## Established decisions
 
+- **Docker owns PostgreSQL and the backend APIs; the frontend stays local.** `docker-compose.yml` runs four `postgres:17-alpine` containers, one per service (`identity-db` 5432, `heroes-db` 5433, `kingdom-db` 5434, `shop-db` 5435), each with its own named volume, so the per-service data isolation is preserved. Four API containers publish the original ports, so `foreveryone-frontend/.env` needs no change.
+- All four APIs share one parameterized `ForEveryone - backend/docker/Dockerfile`, selecting the project via the `PROJECT` build arg and the entry assembly via `APP_DLL` from compose. One Dockerfile instead of four that drift apart.
+- Credentials live in a root `.env`, ignored by an anchored `/.env` rule. Anchoring matters: a bare `.env` pattern would also match the tracked `foreveryone-frontend/.env`. Compose uses `:?` guards on every secret so it refuses to start rather than creating databases with a shared default password.
+- `ASPNETCORE_ENVIRONMENT=Development` is set on all four API containers, and is not optional: the services only run `Database.Migrate()` in Development, so without it they start against an empty schema.
+- **MediatR is pinned to 14.2.0 in all four services and in `SharedKernel`.** It was inconsistent (12.4.1 in `Identity.Application` and `SharedKernel`, 14.2.0 elsewhere) and that broke Identity only when compiled in Release: a clean restore resolves the highest version in the graph and overwrites the 12.4.1 that Identity compiled against, so it died with `TypeLoadException` on `ServiceCollectionExtensions`, a type MediatR 14 moved. It went unnoticed because Debug builds had a pinned local resolution. Symptom to recognize: Identity restarting with exit 139 while the other three start fine.
+- **Shop listens on 4136, not 5136.** Windows reserves `5071-5170` on this machine (`netsh interface ipv4 show excludedportrange protocol=tcp`), and neither Docker nor ASP.NET can use an excluded port. `foreveryone-frontend/.env` points at `http://localhost:4136` to match. To go back to 5136, free that range and change both files.
+- Every API waits on `service_healthy` before starting, using `pg_isready`, because migration at startup otherwise races PostgreSQL initialization.
+- Compose injects `IdentityServiceUrl`/`ShopServiceUrl` as service names (`http://identity-api:5045/`). Inside a container `localhost` would be the API itself. These are not optional: the code reads them with `!`, which only silences the compiler, so a missing value throws `ArgumentNullException` from `new Uri(null)` at startup.
+- `start-all.ps1` no longer builds or launches the APIs; it validates Docker and the `.env`, runs `docker compose up -d` (with `-Rebuild` to force a rebuild), waits for the API ports, and opens only the frontend. It kept the port-owner diagnostics.
 - Component and page styles are co-located with their React files.
 - The visual system lives as design tokens in `App.css`: gold accents on near-black stone, translucent surfaces, soft shadows, and a `Cinzel` display face for headings with `Inter` for body text. Keep the medieval tone through the gold palette and serif headings, not through heavy borders and inset shadows.
 - `foreveryone-frontend/src/App.css` holds the design tokens, the body reset, and the application root layout.
@@ -91,7 +101,7 @@ Documented project risks that still require verification before production use:
 - Identity issues JWTs, but downstream APIs do not yet consistently validate JWTs or enforce authorization.
 - The internal Identity existence endpoint is not protected between services.
 - Do not trust a `userId` supplied by the browser; eventually derive it from validated claims.
-- No CI/CD, containers, health checks, distributed tracing, or comprehensive automated test suite exists yet.
+- No CI/CD, distributed tracing, or comprehensive automated test suite exists yet. Containers landed on 2026-10-01 (PostgreSQL plus the four APIs), but the API containers still have no healthcheck endpoint, only the databases have `pg_isready` checks.
 - Concurrency protection and global domain-error handling are incomplete.
 
 ## Recent durable work
@@ -107,6 +117,8 @@ Documented project risks that still require verification before production use:
 - 2026-09-27: turned the automatic battle into real turn-based play. The player now chooses an action every turn; the battle is persisted in a new `Battles` table and replayed deterministically from the action sequence. Added `Battle`, `BattleAction`, `BattleStatus`, `BattleError`, `BattleStateBuilder`, and the `StartBattle`, `PlayBattleTurn` and `GetCurrentBattle` endpoints, plus a rewritten interactive `BattlePanel`.
 - 2026-09-27: full frontend review and improvement pass. Enabled TypeScript `strict` (zero new errors), wired the API URLs to `VITE_*` env variables, extracted `src/api/errors.ts` to normalize the four different error body shapes, added `ErrorBoundary` and a 404 route, added a toned `Message` component, gave Castle and Shop real loading/error/404 states plus submit guards, unified the building catalog so Cantera and Mercado are buildable, switched the login/register toggle to real tab semantics, added a global focus ring, fixed the green-styled error messages, and replaced the Vite template README.
 - 2026-09-27: class combat kits and mana. Replaced the two fixed actions with a three-slot kit per class in `ClassAbilities` (basic, signature, exclusive), added `AbilityEffect` (Pierce/Guard/Heal/Drain), mana as a per-turn regenerating resource with percentage costs, `Special` as the third slot, migration `AddManaToBattles`, and a `BattlePanel` that renders the mana bar, the real per-slot name/description/damage/cost and the server's blocked reason.
+- 2026-10-01: unified MediatR to 14.2.0 across all services and `SharedKernel`, fixing a `TypeLoadException` in Identity that only appeared on a clean Release restore, and moved Shop to port 4136 because Windows reserves 5071-5170.
+- 2026-10-01: replaced the local PostgreSQL setup with Docker. Added `docker-compose.yml` (four databases + four APIs), the shared `docker/Dockerfile`, `.dockerignore`, `.env.example`, an anchored `/.env` ignore, a Docker-based `start-all.ps1`, and rewrote the `readme.md` setup and troubleshooting sections. The previous User Secrets instructions now apply only to running the APIs outside Docker.
 - 2026-09-23: pushed commit `f1e06cd` (`refactor: split component styles into dedicated files`) to branch `Eggyfh-dev`.
 
 Git history is the source of truth for older changes; only add future entries here when they provide persistent context that is not already obvious from the repository.

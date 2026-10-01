@@ -129,10 +129,15 @@ ForEveryone.[Service].Infrastructure
 
 ```text
 Foreveryone/
+├── .agents/
+│   └── skills/                        # Skills de agentes
 ├── .opencode/
 │   └── agents/                       # Agentes de OpenCode
 ├── ForEveryone - backend/
+│   ├── .dockerignore
 │   ├── ForEveryone.slnx
+│   ├── docker/
+│   │   └── Dockerfile                 # imagen común a las cuatro APIs
 │   ├── setup-shop.ps1
 │   ├── start-all.ps1
 │   └── src/
@@ -143,6 +148,8 @@ Foreveryone/
 │           ├── Heroes/
 │           ├── Kingdom/
 │           └── Shop/
+├── .env.example                       # plantilla de credenciales (versionada)
+├── docker-compose.yml                 # las 4 BBDD + las 4 APIs
 ├── foreveryone-frontend/
 │   ├── src/
 │   │   ├── api/          # instancias de Axios y extracción de errores
@@ -156,150 +163,126 @@ Foreveryone/
 └── readme.md
 ```
 
+> El `.env` de la raíz no aparece porque **no se versiona**: contiene las
+> passwords de las bases de datos y el secreto de firma de los JWT. Se genera
+> a partir de `.env.example`.
+
 ## ✅ Requisitos previos
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- Node.js `^20.19.0` o `>=22.12.0`
-- npm
-- PostgreSQL local o en Docker, con una versión compatible con Npgsql
-- PowerShell si se desea ejecutar `start-all.ps1`
+- [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) con Docker Compose v2 o superior. Aporta PostgreSQL y las cuatro APIs, así que **no hace falta instalar PostgreSQL ni el .NET SDK** para levantar el entorno.
+- [Node.js](https://nodejs.org/) `^20.19.0` o `>=22.12.0` y npm, solo para el frontend, que sigue ejecutándose en local.
+- PowerShell si se desea ejecutar `start-all.ps1`.
 
 Comprueba las versiones instaladas:
 
 ```powershell
-dotnet --version
+docker --version
+docker compose version
 node --version
 npm --version
-psql --version
 ```
+
+El [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) ya no es necesario para levantar el entorno, porque las cuatro APIs se compilan dentro de Docker. Sigue siendo útil para iterar sobre el backend sin Docker o para abrir la solución en un IDE.
 
 ## ⚙️ Configuración local
 
-### 1. Crear las bases de datos
+### 1. Crear el `.env` de credenciales
 
-El proyecto utiliza un contexto y una base de datos por servicio. Crea cuatro bases vacías:
+Las cuatro bases de datos y las cuatro APIs arrancan en Docker. El `docker-compose.yml` de la raíz lee de un `.env` las passwords y el secreto de firma de los JWT, que **no se versionan**.
 
-```sql
-CREATE DATABASE foreveryone_identity;
-CREATE DATABASE foreveryone_heroes;
-CREATE DATABASE foreveryone_kingdom;
-CREATE DATABASE foreveryone_shop;
-```
-
-En desarrollo, cada API aplica sus migraciones automáticamente al arrancar. Fuera de `Development`, las migraciones deben ejecutarse como parte de un proceso explícito de despliegue.
-
-### 2. Configurar las APIs
-
-No guardes contraseñas ni secretos JWT en Git. Para desarrollo local se recomienda usar **.NET User Secrets**.
-
-#### Identity
-
-Desde `ForEveryone - backend`:
+Cópialo de la plantilla una sola vez:
 
 ```powershell
-Push-Location src/Services/Identity/ForEveryone.Identity.Api
-
-dotnet user-secrets set "ConnectionStrings:IdentityDb" "Host=localhost;Port=5432;Database=foreveryone_identity;Username=postgres;Password=TU_PASSWORD"
-dotnet user-secrets set "Jwt:Secret" "CAMBIAR_POR_UN_SECRETO_LARGO_Y_ALEATORIO"
-dotnet user-secrets set "Jwt:Issuer" "ForEveryone.Identity"
-dotnet user-secrets set "Jwt:Audience" "ForEveryone.Clients"
-dotnet user-secrets set "Jwt:ExpirationMinutes" "60"
-
-Pop-Location
+copy .env.example .env
 ```
 
-#### Heroes
+Y sustituye cada valor por uno propio. Docker Compose se niega a arrancar si falta cualquiera de ellos, en vez de crear bases con una password por defecto compartida.
+
+> Cambiar la password de una base que **ya tiene datos** no hace nada: el volumen
+> sigue guardando la password con la que se inicializó. O dejas la variable como
+> estaba cuando se creó el volumen, o ejecutas `docker compose down -v` para
+> empezar de cero.
+
+### 2. Levantar las bases de datos y las APIs
+
+El proyecto usa un contexto y una base de datos por servicio. Las cuatro se crean solas al arrancar: `docker-compose.yml` declara un contenedor PostgreSQL por servicio y un volumen para cada uno.
 
 ```powershell
-Push-Location src/Services/Heroes/ForEveryone.Heroes.Api
-
-dotnet user-secrets set "ConnectionStrings:HeroesDb" "Host=localhost;Port=5432;Database=foreveryone_heroes;Username=postgres;Password=TU_PASSWORD"
-dotnet user-secrets set "IdentityServiceUrl" "http://localhost:5045/"
-dotnet user-secrets set "ShopServiceUrl" "http://localhost:5136/"
-
-Pop-Location
+docker compose up -d
 ```
 
-#### Kingdom
+La primera vez compila las cuatro imágenes de las APIs, y puede tardar varios minutos. Las siguientes reutilizan la imagen ya construida.
+
+| Contenedor | Base de datos | Puerto en el host |
+|---|---|---|
+| `identity-db` | `foreveryone_identity` | `5432` |
+| `heroes-db` | `foreveryone_heroes` | `5433` |
+| `kingdom-db` | `foreveryone_kingdom` | `5434` |
+| `shop-db` | `foreveryone_shop` | `5435` |
+| `identity-api` | — | `5045` |
+| `heroes-api` | — | `5281` |
+| `kingdom-api` | — | `5256` |
+| `shop-api` | — | `4136` |
+
+Los puertos de las APIs no han cambiado, salvo Shop. El `5136` cae dentro del rango `5071-5170` que Windows reserva (visible en `netsh interface ipv4 show excludedportrange protocol=tcp`), y en un puerto excluido ni Docker puede publicar ni ASP.NET puede escuchar. Shop se mueve por eso al `4136`, tanto dentro del contenedor como en el host, y `foreveryone-frontend/.env` apunta allí. Para volver al `5136`, libera ese rango reservado y ajusta a la vez `docker-compose.yml` y el `.env` del frontend.
+
+Cada API aplica sus migraciones pendientes al arrancar, y solo lo hace porque el compose fija `ASPNETCORE_ENVIRONMENT=Development` en las cuatro. Cada API espera a que su base de datos esté `healthy` (comprobado con `pg_isready`) antes de arrancar, para que la migración no compita con el arranque de PostgreSQL. Fuera de `Development`, las migraciones deben ejecutarse como parte de un proceso explícito de despliegue.
+
+Comandos habituales:
 
 ```powershell
-Push-Location src/Services/Kingdom/ForEveryone.Kingdom.Api
-
-dotnet user-secrets set "ConnectionStrings:KingdomDb" "Host=localhost;Port=5432;Database=foreveryone_kingdom;Username=postgres;Password=TU_PASSWORD"
-dotnet user-secrets set "IdentityServiceUrl" "http://localhost:5045/"
-
-Pop-Location
+docker compose ps                 # estado y salud de cada contenedor
+docker compose logs -f heroes-api # seguir el log de un servicio
+docker compose restart heroes-api # reiniciar solo una API
+docker compose up -d --build      # recompilar las imágenes y recrear
+docker compose down               # parar, conservando los datos
+docker compose down -v            # parar y borrar también las bases de datos
 ```
 
-#### Shop
+> `down -v` destruye los volúmenes, y con ellos las cuentas, héroes, reinos y partidas. Es la forma de empezar de cero cuando una migración deja el esquema inconsistente.
 
-```powershell
-Push-Location src/Services/Shop/ForEveryone.Shop.Api
+#### Sobre las URLs entre servicios
 
-dotnet user-secrets set "ConnectionStrings:ShopDb" "Host=localhost;Port=5432;Database=foreveryone_shop;Username=postgres;Password=TU_PASSWORD"
+Heroes llama a Identity y a Shop, y Kingdom llama a Identity. Dentro de un contenedor, `localhost` sería la propia API, así que el compose les da la URL del otro servicio por su nombre en la red:
 
-Pop-Location
+```yaml
+IdentityServiceUrl: "http://identity-api:5045/"
 ```
 
-### 3. Ejecutar el backend
-
-Abre una terminal diferente para cada API o ejecuta el script de arranque.
-
-Desde `ForEveryone - backend`:
-
-```powershell
-dotnet restore ForEveryone.slnx
-dotnet build ForEveryone.slnx --no-restore
-```
-
-Identity:
-
-```powershell
-dotnet run --project src/Services/Identity/ForEveryone.Identity.Api --launch-profile http
-```
-
-Heroes:
-
-```powershell
-dotnet run --project src/Services/Heroes/ForEveryone.Heroes.Api --launch-profile http
-```
-
-Kingdom:
-
-```powershell
-dotnet run --project src/Services/Kingdom/ForEveryone.Kingdom.Api --launch-profile http
-```
-
-Shop:
-
-```powershell
-dotnet run --project src/Services/Shop/ForEveryone.Shop.Api --launch-profile http
-```
+Esas variables **no son opcionales**: el código las lee con `!` (`null-forgiving`), que solo silencia al aviso del compilador. Si faltan, `new Uri(null)` hace fallar el arranque del contenedor.
 
 #### Script de arranque
 
-También existe `start-all.ps1`, que abre las cuatro APIs y el frontend:
+También existe `start-all.ps1`, que levanta Docker Compose y abre solo el frontend:
 
 ```powershell
 cd "ForEveryone - backend"
 .\start-all.ps1
+.\start-all.ps1 -Rebuild    # además recompila las imágenes de las APIs
 ```
 
-> El script abre cada proceso en su propia ventana de PowerShell y **espera a que
-> cada API responda** antes de lanzar la siguiente, porque Identity debe existir
-> antes que Heroes: al crear un héroe, Heroes llama a Identity para comprobar
-> que la cuenta existe. Resuelve las rutas del repositorio de forma relativa, así
-> que funciona en cualquier equipo sin editar nada. Si una API no responde en 60
-> segundos, avisa y continúa. Si un puerto ya está ocupado, indica qué proceso lo
-> tiene con su PID y lo reutiliza en vez de esperar.
+> El script comprueba que Docker responde y que el `.env` existe antes de tocar nada, levanta Compose, espera a que cada API responda en su puerto y luego abre Vite en el puerto 5173. Si un puerto ya está ocupado, indica qué proceso lo tiene con su PID y lo reutiliza en vez de esperar.
 
-> Los servicios se lanzan con `dotnet <dll>` y no con `dotnet run`. `dotnet run`
-> intenta ejecutar el `.exe` generado, y si ese archivo queda bloqueado por otro
-> proceso el arranque falla con *"The process cannot access the file because it
-> is being used by another process"*. Ejecutando el `.dll` se evita ese bloqueo.
-> El script replica el perfil `http` de cada `launchSettings.json`, incluido
-> `ASPNETCORE_ENVIRONMENT=Development`, que es lo que hace que las APIs apliquen
-> las migraciones pendientes al arrancar.
+#### Trabajar sobre el backend sin Docker
+
+Las APIs se pueden seguir levantando en local con el SDK de .NET, contra las bases de datos que publican los contenedores. Al estar en Docker, los puertos son los de la tabla anterior:
+
+```powershell
+dotnet restore ForEveryone.slnx
+dotnet build ForEveryone.slnx --no-restore
+dotnet run --project src/Services/Identity/ForEveryone.Identity.Api --launch-profile http
+```
+
+En este caso las APIs necesitan su configuración en **.NET User Secrets**, que Compose no inyecta:
+
+```powershell
+Push-Location src/Services/Identity/ForEveryone.Identity.Api
+dotnet user-secrets set "ConnectionStrings:IdentityDb" "Host=localhost;Port=5432;Database=foreveryone_identity;Username=postgres;Password=TU_PASSWORD"
+dotnet user-secrets set "Jwt:Secret" "CAMBIAR_POR_UN_SECRETO_LARGO_Y_ALEATORIO"
+Pop-Location
+```
+
+Lo mismo para `HeroesDb` en Heroes, `KingdomDb` en Kingdom y `ShopDb` en Shop, más `IdentityServiceUrl` y `ShopServiceUrl` en Heroes y `IdentityServiceUrl` en Kingdom, esta vez apuntando a `http://localhost:<puerto>/` porque ya no hay red de Docker de por medio.
 
 ### 4. Ejecutar el frontend
 
@@ -612,13 +595,24 @@ ShopServiceUrl=http://localhost:5136/
 
 ### Error de conexión con PostgreSQL
 
-Comprueba que:
+Lo primero es mirar el estado real de los contenedores:
 
-1. PostgreSQL esté ejecutándose.
-2. Las cuatro bases existan.
-3. El usuario y la contraseña sean correctos.
-4. El firewall permita conexiones locales al puerto `5432`.
+```powershell
+docker compose ps
+docker compose logs heroes-api
+```
+
+Si un contenedor de base de datos aparece como `unhealthy` o `restarting`, el log suele decir que la password no coincide. Suele significar que el `.env` se editó **después** de que el volumen se creara: PostgreSQL solo aplica `POSTGRES_PASSWORD` la primera vez que inicializa el volumen, y a partir de ahí la contraseña guardada es la original. La solución es devolver la variable a su valor anterior, o `docker compose down -v` para empezar de cero.
+
+Comprueba además que:
+
+1. Docker Desktop esté arrancado.
+2. El `.env` exista en la raíz del repositorio y tenga los cinco valores.
+3. La API esté usando el nombre del servicio como host (`Host=heroes-db`), no `localhost`.
+4. El firewall permita conexiones locales a los puertos publicados de las bases de datos (`5432` a `5435`).
 5. La API esté ejecutándose con `ASPNETCORE_ENVIRONMENT=Development` si esperas que aplique migraciones.
+
+> Si cambiaste el `.env` y el comportamiento no cambia, no basta con volver a aplicarlo: los contenedores conservan las variables del momento en que arrancaron. Usa `docker compose up -d --force-recreate`.
 
 ### CORS desde el frontend
 

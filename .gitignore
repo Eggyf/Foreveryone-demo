@@ -13,3 +13,10 @@ obj/
 [Oo]bj/
 appsettings.Development.json
 *.userosscache
+
+## --- Credenciales del entorno Docker ---
+# Anclado a la raiz a proposito. Un patron ".env" sin "/" tambien entraria en
+# foreveryone-frontend/.env, que si se versiona y solo contiene las URLs
+# publicas de las APIs. El .env de la raiz guarda passwords y el secreto de
+# firma de los JWT, y nunca debe subirse.
+/.env

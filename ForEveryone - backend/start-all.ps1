@@ -1,35 +1,40 @@
-# Arranca los cuatro servicios backend y el frontend del juego Foreveryone.
+# Arranca el entorno completo de desarrollo de Foreveryone.
 #
 # Uso (desde la carpeta "ForEveryone - backend"):
 #   .\start-all.ps1
+#   .\start-all.ps1 -Rebuild     fuerza a recompilar las imagenes de las APIs
 #
-# Cada proceso se abre en su propia ventana para poder ver su log.
-# El script espera a que cada API responda antes de lanzar la siguiente, porque
-# Identity debe existir antes que Heroes: al crear un heroe, Heroes llama a
-# Identity para comprobar que la cuenta existe.
+# Las cuatro APIs y sus cuatro bases de datos PostgreSQL arrancan en Docker,
+# orchestrated por el docker-compose.yml de la raiz del repositorio. El
+# frontend sigue en local con Vite: su recarga en caliente es la parte del
+# trabajo que mas se itera, y meterlo en un contenedor la estorba.
 #
-# Los servicios se lanzan con "dotnet <dll>" en lugar de "dotnet run".
-# Motivo: "dotnet run" intenta ejecutar el .exe generado, y si ese fichero
-# queda bloqueado por otro proceso el arranque falla con
-# "The process cannot access the file because it is being used by another
-# process". Ejecutando el .dll se evita por completo ese bloqueo.
+# Cada API se queda en su puerto de siempre (5045, 5281, 5256, 5136), asi que
+# foreveryone-frontend/.env no necesita ningun cambio.
+#
+# La primera vez hay que crear el .env de credenciales, que esta en .gitignore:
+#   copy ..\.env.example ..\.env
+#
+# Requisitos: Docker arrancado. Para parar todo:
+#   docker compose down              (conserva los datos)
+#   docker compose down -v           (borra tambien las bases de datos)
+
+[CmdletBinding()]
+param(
+    # Recompila las imagenes aunque ya existan. Sin este parametro, compose
+    # reutiliza la imagen previa y el arranque es casi instantaneo.
+    [switch]$Rebuild
+)
 
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
-# Raiz del repositorio, dos niveles por encima de "ForEveryone - backend".
+# Raiz del repositorio, un nivel por encima de "ForEveryone - backend".
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $frontendPath = Join-Path $repoRoot 'foreveryone-frontend'
 
-# Nombre legible -> ruta del proyecto .Api dentro de la solucion.
-$services = [ordered]@{
-    'Identity API' = 'src\Services\Identity\ForEveryone.Identity.Api'
-    'Heroes API'   = 'src\Services\Heroes\ForEveryone.Heroes.Api'
-    'Kingdom API'  = 'src\Services\Kingdom\ForEveryone.Kingdom.Api'
-    'Shop API'     = 'src\Services\Shop\ForEveryone.Shop.Api'
-}
-
-# Puertos tomados de cada Properties\launchSettings.json (perfil "http").
+# Puertos publicados por cada API. Deben coincidir con los de
+# docker-compose.yml y con las variables VITE_* de foreveryone-frontend/.env.
 $servicePorts = [ordered]@{
     'Identity API' = 5045
     'Heroes API'   = 5281
@@ -37,7 +42,7 @@ $servicePorts = [ordered]@{
     'Shop API'     = 5136
 }
 
-$total = $services.Count + 1
+$total = $servicePorts.Count + 1
 $step = 0
 
 function Test-PortOpen([int]$Port) {
@@ -65,19 +70,19 @@ function Get-PortOwner([int]$Port) {
     return "PID $($conn.OwningProcess)"
 }
 
-# Si el puerto ya esta ocupado, el servicio normalmente sigue vivo de una
-# ejecucion anterior. No tiene sentido relanzarlo ni esperar: se avisa y se
-# sigue, en lugar de esperar 60 s para luego decir que no respondio.
+# Si el puerto ya esta ocupado, normalmente es un contenedor de una ejecucion
+# anterior que sigue en pie. No tiene sentido relanzarlo ni esperar: se avisa y
+# se sigue, en lugar de esperar 60 s para luego decir que no respondio.
 function Test-PortBusy([string]$Name, [int]$Port) {
     if (-not (Test-PortOpen $Port)) { return $false }
 
     $owner = Get-PortOwner $Port
-    Write-Host "    $Name ya esta corriendo en el puerto $Port ($owner). Se reutiliza." -ForegroundColor Yellow
-    Write-Host "    Para reiniciarlo, cierra esa ventana y vuelve a ejecutar este script." -ForegroundColor DarkGray
+    Write-Host "    $Name ya responde en el puerto $Port ($owner)." -ForegroundColor Yellow
+    Write-Host "    Para reiniciarla, ejecuta 'docker compose restart' o '.\start-all.ps1 -Rebuild'." -ForegroundColor DarkGray
     return $true
 }
 
-function Wait-ForPort([string]$Name, [int]$Port, [int]$TimeoutSeconds = 60) {
+function Wait-ForPort([string]$Name, [int]$Port, [int]$TimeoutSeconds = 90) {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
         if (Test-PortOpen $Port) {
@@ -87,65 +92,76 @@ function Wait-ForPort([string]$Name, [int]$Port, [int]$TimeoutSeconds = 60) {
         Start-Sleep -Milliseconds 500
     }
 
-    Write-Host "    $Name no respondio en $TimeoutSeconds s. Revisa su ventana." -ForegroundColor Yellow
+    Write-Host "    $Name no respondio en $TimeoutSeconds s. Revisa 'docker compose logs $Name'." -ForegroundColor Yellow
     return $false
 }
 
 Write-Host ''
 Write-Host '  Foreveryone - iniciando el entorno completo' -ForegroundColor Cyan
-Write-Host "  $($services.Count) APIs + 1 frontend" -ForegroundColor DarkGray
+Write-Host "  $($servicePorts.Count) APIs + $($servicePorts.Count) bases de datos en Docker" -ForegroundColor DarkGray
+Write-Host "  1 frontend en local" -ForegroundColor DarkGray
 Write-Host ''
 
-# Se compila una sola vez para que todos los servicios sirvan el mismo codigo
-# y no un binario antiguo.
-Write-Host '  Compilando la solucion...' -ForegroundColor Cyan
-& dotnet build ForEveryone.slnx -c Debug --nologo -v quiet
-if ($LASTEXITCODE -ne 0) {
-    Write-Host '  La compilacion fallo. Revisa los errores anteriores.' -ForegroundColor Red
+# --- Docker ------------------------------------------------------------
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    Write-Host '  Docker no esta instalado o no esta en el PATH.' -ForegroundColor Red
+    Write-Host '  Instalalo y abre esta terminal de nuevo.' -ForegroundColor Red
     exit 1
 }
-Write-Host '  Compilacion correcta.' -ForegroundColor DarkGray
+
+# docker info no falla con codigo 0 cuando el demonio esta parado, asi que se
+# comprueba la salida y no solo el ultimo codigo de error.
+$dockerInfo = docker info 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host '  El demonio de Docker no responde. Abre Docker Desktop y espera a que arranque.' -ForegroundColor Red
+    Write-Host '  Detalle: ' + ($dockerInfo | Select-Object -First 1) -ForegroundColor DarkGray
+    exit 1
+}
+
+$envFile = Join-Path $repoRoot '.env'
+if (-not (Test-Path $envFile)) {
+    Write-Host '  Falta el .env de credenciales en la raiz del repositorio.' -ForegroundColor Red
+    Write-Host '  Crealo una vez con:' -ForegroundColor Yellow
+    Write-Host '      copy ..\.env.example ..\.env' -ForegroundColor Yellow
+    Write-Host '  Docker Compose lo necesita para crear las cuatro bases de datos.' -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host '  Levantando Docker Compose...'
+Push-Location $repoRoot
+try {
+    if ($Rebuild) {
+        docker compose up -d --build
+    } else {
+        # Sin --build: compose reutiliza las imagenes existentes y solo compila
+        # si falta alguna, que es el caso de la primera ejecucion.
+        docker compose up -d
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host '  "docker compose up" fallo. Revisa los errores anteriores.' -ForegroundColor Red
+        exit 1
+    }
+} finally {
+    Pop-Location
+}
 Write-Host ''
 
-foreach ($entry in $services.GetEnumerator()) {
+foreach ($entry in $servicePorts.GetEnumerator()) {
     $step++
     $name = $entry.Key
-    $projectPath = $entry.Value
-    $port = $servicePorts[$name]
+    $port = $entry.Value
 
-    if (-not (Test-Path $projectPath)) {
-        Write-Host "[$step/$total] $name no encontrado en $projectPath" -ForegroundColor Red
-        continue
-    }
-
-    Write-Host "[$step/$total] Levantando $name..." -ForegroundColor Green
+    Write-Host "[$step/$total] $name..." -ForegroundColor Green
 
     if (Test-PortBusy $name $port) { continue }
-
-    # Nombre del ensamblado, por ejemplo ForEveryone.Identity.Api.dll
-    $assembly = Split-Path -Leaf $projectPath
-    $dll = Join-Path $projectPath "bin\Debug\net10.0\$assembly.dll"
-
-    if (-not (Test-Path $dll)) {
-        Write-Host "    No se encontro $dll. Revisa la compilacion." -ForegroundColor Red
-        continue
-    }
-
-    # Se replica el perfil "http" de launchSettings.json: mismo puerto y
-    # ASPNETCORE_ENVIRONMENT=Development, que es lo que hace que las APIs
-    # apliquen las migraciones pendientes al arrancar.
-    Start-Process powershell -ArgumentList @(
-        '-NoExit', '-Command',
-        "`$env:ASPNETCORE_ENVIRONMENT='Development'; " +
-        "Set-Location '$PSScriptRoot'; " +
-        "dotnet '$dll' --urls 'http://localhost:$port'"
-    )
 
     Wait-ForPort $name $port | Out-Null
 }
 
+# --- Frontend ----------------------------------------------------------
 $step++
-Write-Host "[$step/$total] Levantando Frontend..." -ForegroundColor Green
+Write-Host "[$step/$total] Frontend..." -ForegroundColor Green
 
 if (-not (Test-Path $frontendPath)) {
     Write-Host "    Frontend no encontrado en $frontendPath" -ForegroundColor Red
@@ -164,6 +180,7 @@ if (-not (Test-Path $frontendPath)) {
 
 Write-Host ''
 Write-Host '  Entorno listo. Abre http://localhost:5173' -ForegroundColor Green
-Write-Host '  Para detenerlo, cierra las ventanas abiertas o ejecuta:' -ForegroundColor DarkGray
-Write-Host '    Get-Process dotnet,node -ErrorAction SilentlyContinue | Stop-Process -Force' -ForegroundColor DarkGray
+Write-Host '  Para detenerlo:' -ForegroundColor DarkGray
+Write-Host '    docker compose down' -ForegroundColor DarkGray
+Write-Host '    cierra ademas la ventana del frontend' -ForegroundColor DarkGray
 Write-Host ''

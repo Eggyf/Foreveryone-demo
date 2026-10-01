@@ -1,0 +1,169 @@
+# Entorno de desarrollo de Foreveryone.
+#
+# Aquí viven las cuatro bases de datos PostgreSQL y las cuatro APIs del
+# backend. El frontend sigue en local con "npm run dev", así que cada API
+# publica su puerto en el host y foreveryone-frontend/.env no necesita cambios.
+#
+#   docker compose up -d --build        levanta todo
+#   docker compose logs -f heroes-api    sigue el log de un servicio
+#   docker compose ps                    estado y salud de cada contenedor
+#   docker compose down                  para, conservando los datos
+#   docker compose down -v               para y borra también las bases de datos
+#
+# Las credenciales viven en el .env de la raíz, que está en .gitignore.
+# Si no existe, copia .env.example a .env y ajusta los valores.
+
+name: foreveryone
+
+# Base común de las cuatro bases de datos. Una instancia por servicio, con su
+# propio volumen, para conservar el aislamiento de datos que ya tenía el
+# proyecto: cada servicio sigue hablando únicamente con su base.
+x-database: &database
+  image: postgres:17-alpine
+  restart: unless-stopped
+  healthcheck:
+    # pg_isready confirma que Postgres acepta conexiones, que no es lo mismo
+    # que estar arrancado. Las APIs ejecutan "Database.Migrate()" en el
+    # arranque, así que esperar solo a "container started" produce una
+    # carrera y la migración falla con un error poco descriptivo.
+    test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+    interval: 5s
+    timeout: 5s
+    retries: 12
+    start_period: 15s
+
+# Base común de las cuatro APIs: mismo Dockerfile, parametrizado por servicio.
+x-api: &api
+  build:
+    context: ./ForEveryone - backend
+    dockerfile: docker/Dockerfile
+  restart: unless-stopped
+
+services:
+  # --- Bases de datos ---------------------------------------------------
+  identity-db:
+    <<: *database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: foreveryone_identity
+      POSTGRES_PASSWORD: ${IDENTITY_DB_PASSWORD:?falta IDENTITY_DB_PASSWORD en el .env de la raíz}
+    ports:
+      # 5432 conserva el puerto que usaba el PostgreSQL local, para poder
+      # seguir entrando con un cliente gráfico sin cambiar su configuración.
+      - "5432:5432"
+    volumes:
+      - identity-data:/var/lib/postgresql/data
+
+  heroes-db:
+    <<: *database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: foreveryone_heroes
+      POSTGRES_PASSWORD: ${HEROES_DB_PASSWORD:?falta HEROES_DB_PASSWORD en el .env de la raíz}
+    ports:
+      - "5433:5432"
+    volumes:
+      - heroes-data:/var/lib/postgresql/data
+
+  kingdom-db:
+    <<: *database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: foreveryone_kingdom
+      POSTGRES_PASSWORD: ${KINGDOM_DB_PASSWORD:?falta KINGDOM_DB_PASSWORD en el .env de la raíz}
+    ports:
+      - "5434:5432"
+    volumes:
+      - kingdom-data:/var/lib/postgresql/data
+
+  shop-db:
+    <<: *database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: foreveryone_shop
+      POSTGRES_PASSWORD: ${SHOP_DB_PASSWORD:?falta SHOP_DB_PASSWORD en el .env de la raíz}
+    ports:
+      - "5435:5432"
+    volumes:
+      - shop-data:/var/lib/postgresql/data
+
+  # --- APIs -------------------------------------------------------------
+  identity-api:
+    <<: *api
+    environment:
+      # Imprescindible: las APIs solo ejecutan las migraciones pendientes
+      # cuando el entorno es Development. Sin esta línea arrancan contra una
+      # base vacía y el esquema no se crea nunca.
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5045
+      APP_DLL: ForEveryone.Identity.Api.dll
+      # El host es el nombre del servicio en la red de Compose, no localhost:
+      # dentro del contenedor, localhost sería la propia API.
+      ConnectionStrings__IdentityDb: "Host=identity-db;Port=5432;Database=foreveryone_identity;Username=postgres;Password=${IDENTITY_DB_PASSWORD:?falta IDENTITY_DB_PASSWORD}"
+      Jwt__Secret: ${JWT_SECRET:?falta JWT_SECRET en el .env de la raíz}
+    ports:
+      - "5045:5045"
+    depends_on:
+      identity-db:
+        condition: service_healthy
+
+  heroes-api:
+    <<: *api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5281
+      APP_DLL: ForEveryone.Heroes.Api.dll
+      ConnectionStrings__HeroesDb: "Host=heroes-db;Port=5432;Database=foreveryone_heroes;Username=postgres;Password=${HEROES_DB_PASSWORD:?falta HEROES_DB_PASSWORD}"
+      # Estas dos URLs no son opcionales: Heroes las lee con "!" (null-forgiving),
+      # que solo silencia al compilador, asi que si faltan, "new Uri(null)"
+      # revienta al arrancar. Y dentro del contenedor localhost seria el propio
+      # Heroes, no Identity ni Shop: hay que usar el nombre del servicio en la red.
+      IdentityServiceUrl: "http://identity-api:5045/"
+      # El puerto interno de Shop es 4136, no 5136: ver la nota de shop-api.
+      ShopServiceUrl: "http://shop-api:4136/"
+    ports:
+      - "5281:5281"
+    depends_on:
+      heroes-db:
+        condition: service_healthy
+
+  kingdom-api:
+    <<: *api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5256
+      APP_DLL: ForEveryone.Kingdom.Api.dll
+      ConnectionStrings__KingdomDb: "Host=kingdom-db;Port=5432;Database=foreveryone_kingdom;Username=postgres;Password=${KINGDOM_DB_PASSWORD:?falta KINGDOM_DB_PASSWORD}"
+      # Mismo motivo que en Heroes: sin este valor "new Uri(null)" falla al
+      # arrancar, y localhost dentro del contenedor seria Kingdom.
+      IdentityServiceUrl: "http://identity-api:5045/"
+    ports:
+      - "5256:5256"
+    depends_on:
+      kingdom-db:
+        condition: service_healthy
+
+  shop-api:
+    <<: *api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # 5136 queda dentro del rango 5071-5170 que Windows reserva, y por eso
+      # no se puede publicar ahi. Dentro del contenedor 5136 tampoco: ASP.NET
+      # no puede escuchar en un puerto excluido. El puerto 5136 sigue siendo el
+      # que espera el frontend, asi que se publica en el host un puerto libre
+      # y se redirige al 5136 interno. Para volver al 5136, libera el rango
+      # reservado y ajusta a la vez foreveryone-frontend/.env.
+      ASPNETCORE_URLS: http://+:4136
+      APP_DLL: ForEveryone.Shop.Api.dll
+      ConnectionStrings__ShopDb: "Host=shop-db;Port=5432;Database=foreveryone_shop;Username=postgres;Password=${SHOP_DB_PASSWORD:?falta SHOP_DB_PASSWORD}"
+    ports:
+      - "4136:4136"
+    depends_on:
+      shop-db:
+        condition: service_healthy
+
+volumes:
+  identity-data:
+  heroes-data:
+  kingdom-data:
+  shop-data:

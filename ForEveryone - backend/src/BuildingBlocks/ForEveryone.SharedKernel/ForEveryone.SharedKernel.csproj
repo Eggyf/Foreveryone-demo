@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.4.1" />
+    <!-- Los cuatro servicios usan MediatR 14.2.0. El SharedKernel queda
+         tambien en 14.2.0 porque es la raiz del grafo: si se quedara en una
+         version menor, un restore limpio resolveria la mayor para todo el
+         grafo y las APIs que compilaron contra la anterior fallarian al
+         arrancar. -->
+    <PackageReference Include="MediatR" Version="14.2.0" />
   </ItemGroup>
 
 </Project>

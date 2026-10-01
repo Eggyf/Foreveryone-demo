@@ -8,7 +8,15 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="MediatR" Version="12.4.1" />
+    <!-- 14.2.0 y no 12.4.1: Heroes, Kingdom y Shop ya usan 14.2.0, y
+         SharedKernel usa 12.4.1. Con versiones mezcladas, un restore limpio
+         (por ejemplo al compilar dentro de Docker, en Release) resuelve a la
+         mayor del grafo y sobrescribe la 12.4.1 de Identity, que deja de
+         compilar con TypeLoadException sobre
+         Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.
+         En Debug pasaba inadvertido porque la resolución local ya estaba
+         fijada. Mantener las cuatro referencias en la misma version. -->
+    <PackageReference Include="MediatR" Version="14.2.0" />
   </ItemGroup>
 
   <PropertyGroup>
