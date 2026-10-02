@@ -150,7 +150,8 @@ Foreveryone/
 │           └── Shop/
 ├── .env.example                       # plantilla de credenciales (versionada)
 ├── docker-compose.yml                 # las 4 BBDD + las 4 APIs
-├── start-all.ps1                      # arranca Docker Compose y el frontend
+├── start-all.cmd                      # doble clic: lanza Docker Compose y el frontend
+├── start-all.ps1                      # lo mismo, para invocar desde una terminal
 ├── foreveryone-frontend/
 │   ├── src/
 │   │   ├── api/          # instancias de Axios y extracción de errores
@@ -254,18 +255,28 @@ Esas variables **no son opcionales**: el código las lee con `!` (`null-forgivin
 
 #### Script de arranque
 
-En la raíz del repositorio hay un `start-all.ps1` que levanta Docker Compose y el frontend:
+En la raíz del repositorio hay dos archivos para levantar el proyecto. **Doble clic en `start-all.cmd`**, o desde una terminal:
 
 ```powershell
-.\start-all.ps1               # 4 APIs + 4 bases de datos en Docker, y Vite en 5173
-.\start-all.ps1 -Rebuild      # además recompila las imágenes de las APIs
-.\start-all.ps1 -Stop         # para todo, conservando los datos
-.\start-all.ps1 -NoBrowser    # no abre el navegador al terminar
+.\start-all.cmd                # 4 APIs + 4 bases de datos en Docker, y Vite en 5173
+.\start-all.cmd -Rebuild       # además recompila las imágenes de las APIs
+.\start-all.cmd -Stop          # para todo, conservando los datos
+.\start-all.cmd -NoBrowser     # no abre el navegador al terminar
 ```
 
 > El script comprueba que Docker responde, que Node.js está instalado y que el `.env` existe antes de tocar nada; instala las dependencias del frontend si falta `node_modules`; levanta Compose; espera a que **cada API responda por HTTP** (no solo a que abra el puerto: Docker abre el socket antes de que ASP.NET sirva los endpoints) y a que Vite atienda en 5173. Si un puerto ya está ocupado, indica qué proceso lo tiene con su PID y lo reutiliza en vez de esperar. Al final imprime las URLs y abre el navegador.
 
-Si PowerShell no deja ejecutar scripts, lánzalo con `powershell -ExecutionPolicy Bypass -File .\start-all.ps1` en vez de cambiar la política del equipo.
+#### Por qué hay un `.cmd` y un `.ps1`
+
+Porque hacer doble clic en un `.ps1` no funciona con la configuración por defecto de Windows. El menú contextual ejecuta `powershell.exe -file <script>` **sin** `-ExecutionPolicy`, y con la política de ejecución en `Restricted` —el valor por defecto, y el que tiene esta máquina— Windows rechaza el archivo antes de leer la primera línea. La ventana aparece, suelta el error y se cierra, lo que parece un fallo del script cuando en realidad nunca llegó a arrancar.
+
+Un `.cmd` no pasa por el motor de PowerShell, así que `start-all.cmd` se ejecuta siempre: delega en `start-all.ps1` con `-ExecutionPolicy Bypass`, que vale solo para esa llamada y **no cambia la política de la máquina**. Si prefieres no tener dos archivos, relajar la política para tu usuario lo resuelve también:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+Con `RemoteSigned` los scripts locales se ejecutan sin más y solo los descargados exigen firma. Es un cambio de configuración del sistema, así que no lo hace el repositorio por ti.
 
 El `start-all.ps1` que quedaba en `ForEveryone - backend/` ahora solo reenvía al de la raíz, para no tener dos copias que se desincronicen. La razón del traslado: el antiguo esperaba a Shop en el 5136, que ya no existe (ver la nota de puertos más abajo), así que se quedaba 90 segundos esperando un puerto que nunca iba a abrir.
 

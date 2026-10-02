@@ -1,10 +1,16 @@
 # Arranca el proyecto completo de Foreveryone desde la raiz del repositorio.
 #
-# Uso:
+# Uso (desde una terminal):
 #   .\start-all.ps1
 #   .\start-all.ps1 -Rebuild     fuerza a recompilar las imagenes de las APIs
 #   .\start-all.ps1 -Stop        para todo (conserva los datos)
 #   .\start-all.ps1 -NoBrowser   no abre el navegador al final
+#
+# Si prefieres doble clic, usa start-all.cmd, que es este mismo script con la
+# llamada envuelta. La diferencia no es estetica: hacer doble clic en un .ps1
+# ejecuta "powershell.exe -file <script>" sin -ExecutionPolicy, y con la politica
+# de ejecucion en Restricted Windows rechaza el archivo antes de leer la primera
+# linea. La ventana aparece, suelta el error y se cierra.
 #
 # Que levanta:
 #   - 4 bases de datos PostgreSQL y 4 APIs en Docker (docker-compose.yml)
@@ -28,6 +34,7 @@
 # Si PowerShell no deja ejecutar scripts, no cambies la politica del equipo:
 # ejecuta el script asi, que vale igual y solo afecta a esta llamada:
 #   powershell -ExecutionPolicy Bypass -File .\start-all.ps1
+# o, mas comodo, doble clic en start-all.cmd.
 
 [CmdletBinding()]
 param(

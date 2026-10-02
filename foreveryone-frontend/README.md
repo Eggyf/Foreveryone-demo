@@ -6,11 +6,15 @@ sin framework. Habla directamente con los cuatro microservicios del backend; no 
 ## Puesta en marcha
 
 El frontend necesita los cuatro APIs encendidos. El script de la raíz del repositorio los
-levanta todos junto con Vite:
+levanta todos junto con Vite. Doble clic en `start-all.cmd`, o desde una terminal:
 
 ```powershell
-..\start-all.ps1
+..\start-all.cmd
 ```
+
+Se usa el `.cmd` y no el `.ps1` porque hacer doble clic en un `.ps1` ejecuta `powershell.exe
+-file <script>` sin `-ExecutionPolicy`, y con la política de ejecución en `Restricted` Windows
+lo rechaza antes de leer la primera línea: la ventana se abre y se cierra sin hacer nada.
 
 Si se arranca solo el frontend:
 
