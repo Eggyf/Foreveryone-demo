@@ -139,7 +139,7 @@ Foreveryone/
 │   ├── docker/
 │   │   └── Dockerfile                 # imagen común a las cuatro APIs
 │   ├── setup-shop.ps1
-│   ├── start-all.ps1
+│   ├── start-all.ps1                     # reenvía al de la raíz
 │   └── src/
 │       ├── BuildingBlocks/
 │       │   └── ForEveryone.SharedKernel/
@@ -150,6 +150,7 @@ Foreveryone/
 │           └── Shop/
 ├── .env.example                       # plantilla de credenciales (versionada)
 ├── docker-compose.yml                 # las 4 BBDD + las 4 APIs
+├── start-all.ps1                      # arranca Docker Compose y el frontend
 ├── foreveryone-frontend/
 │   ├── src/
 │   │   ├── api/          # instancias de Axios y extracción de errores
@@ -253,15 +254,20 @@ Esas variables **no son opcionales**: el código las lee con `!` (`null-forgivin
 
 #### Script de arranque
 
-También existe `start-all.ps1`, que levanta Docker Compose y abre solo el frontend:
+En la raíz del repositorio hay un `start-all.ps1` que levanta Docker Compose y el frontend:
 
 ```powershell
-cd "ForEveryone - backend"
-.\start-all.ps1
-.\start-all.ps1 -Rebuild    # además recompila las imágenes de las APIs
+.\start-all.ps1               # 4 APIs + 4 bases de datos en Docker, y Vite en 5173
+.\start-all.ps1 -Rebuild      # además recompila las imágenes de las APIs
+.\start-all.ps1 -Stop         # para todo, conservando los datos
+.\start-all.ps1 -NoBrowser    # no abre el navegador al terminar
 ```
 
-> El script comprueba que Docker responde y que el `.env` existe antes de tocar nada, levanta Compose, espera a que cada API responda en su puerto y luego abre Vite en el puerto 5173. Si un puerto ya está ocupado, indica qué proceso lo tiene con su PID y lo reutiliza en vez de esperar.
+> El script comprueba que Docker responde, que Node.js está instalado y que el `.env` existe antes de tocar nada; instala las dependencias del frontend si falta `node_modules`; levanta Compose; espera a que **cada API responda por HTTP** (no solo a que abra el puerto: Docker abre el socket antes de que ASP.NET sirva los endpoints) y a que Vite atienda en 5173. Si un puerto ya está ocupado, indica qué proceso lo tiene con su PID y lo reutiliza en vez de esperar. Al final imprime las URLs y abre el navegador.
+
+Si PowerShell no deja ejecutar scripts, lánzalo con `powershell -ExecutionPolicy Bypass -File .\start-all.ps1` en vez de cambiar la política del equipo.
+
+El `start-all.ps1` que quedaba en `ForEveryone - backend/` ahora solo reenvía al de la raíz, para no tener dos copias que se desincronicen. La razón del traslado: el antiguo esperaba a Shop en el 5136, que ya no existe (ver la nota de puertos más abajo), así que se quedaba 90 segundos esperando un puerto que nunca iba a abrir.
 
 #### Trabajar sobre el backend sin Docker
 

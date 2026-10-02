@@ -9,7 +9,7 @@ El frontend necesita los cuatro APIs encendidos. El script de la raíz del repos
 levanta todos junto con Vite:
 
 ```powershell
-.\start-all.ps1
+..\start-all.ps1
 ```
 
 Si se arranca solo el frontend:
