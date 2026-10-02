@@ -48,6 +48,13 @@
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
 
+  /* Acento de cada zona del mapa. Moss, cold slate and ember rust: three places
+     that read as different without leaving the gold-and-stone palette. Each one
+     needs its counterpart in the light theme below, or the map breaks there. */
+  --zone-forest: #6f8f5a;
+  --zone-caverns: #5b7f9e;
+  --zone-ruins: #b5713f;
+
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Fondo del body. Son colores literales, no tokens, asi que se redefinen aqui
@@ -99,6 +106,12 @@
   --shadow-sm: 0 2px 8px rgba(60, 48, 24, 0.1);
   --shadow-md: 0 8px 24px rgba(60, 48, 24, 0.13);
   --shadow-lg: 0 20px 50px rgba(60, 48, 24, 0.16);
+
+  /* Los acentos de zona se oscurecen como el resto: sobre pergamino, musgo y
+     pizarra claros se leen como spots pastel. */
+  --zone-forest: #4f6b3d;
+  --zone-caverns: #3f5f7d;
+  --zone-ruins: #96552b;
 
   --body-bg: linear-gradient(180deg, #f4efe4 0%, #e6dfcd 100%);
   --body-aura: radial-gradient(

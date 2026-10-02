@@ -58,6 +58,7 @@ public static class BattleEngine
     ///
     /// El motivo es un <see cref="LocalizedText"/>, no una frase: el nombre de la
     /// habilidad viaja como <c>abilityNameKey</c> para que el cliente lo traduzca
+    /// (lo mismo con <c>enemyKey</c>, que lleva <c>Enemy.NameKey</c> y no el id)
     /// antes de insertarlo en el mensaje.
     /// </summary>
     public static LocalizedText? Unavailability(
@@ -165,7 +166,7 @@ public static class BattleEngine
                         ("round", round),
                         ("heroDamage", heroDamage),
                         ("abilityNameKey", ability.NameKey),
-                        ("enemyKey", enemy.Key))));
+                        ("enemyKey", enemy.NameKey))));
 
                 break;
             }
@@ -216,7 +217,7 @@ public static class BattleEngine
                     ("round", round),
                     ("enemyDamage", enemyDamage),
                     ("abilityNameKey", ability.NameKey),
-                    ("enemyKey", enemy.Key),
+                    ("enemyKey", enemy.NameKey),
                     ("heroHealth", heroHealth)),
 
             AbilityEffect.Heal =>
@@ -225,7 +226,7 @@ public static class BattleEngine
                     ("round", round),
                     ("abilityNameKey", ability.NameKey),
                     ("enemyDamage", enemyDamage),
-                    ("enemyKey", enemy.Key),
+                    ("enemyKey", enemy.NameKey),
                     ("heroHealth", heroHealth)),
 
             AbilityEffect.Drain =>
@@ -235,7 +236,7 @@ public static class BattleEngine
                     ("heroDamage", heroDamage),
                     ("abilityNameKey", ability.NameKey),
                     ("enemyDamage", enemyDamage),
-                    ("enemyKey", enemy.Key),
+                    ("enemyKey", enemy.NameKey),
                     ("heroHealth", heroHealth)),
 
             _ =>
@@ -245,7 +246,7 @@ public static class BattleEngine
                     ("heroDamage", heroDamage),
                     ("abilityNameKey", ability.NameKey),
                     ("enemyDamage", enemyDamage),
-                    ("enemyKey", enemy.Key),
+                    ("enemyKey", enemy.NameKey),
                     ("heroHealth", heroHealth))
         };
 }

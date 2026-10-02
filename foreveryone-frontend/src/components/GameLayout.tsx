@@ -21,6 +21,7 @@ export const GameLayout = ({ user, onLogout }: GameLayoutProps) => {
     <div className="game-layout">
       <nav className="navbar" aria-label={t('nav.label')}>
         <NavLink to="/hero" className="nav-link">⚔️ {t('nav.hero')}</NavLink>
+        <NavLink to="/map" className="nav-link">🗺️ {t('nav.map')}</NavLink>
         <NavLink to="/castle" className="nav-link">🏰 {t('nav.castle')}</NavLink>
         <NavLink to="/shop" className="nav-link">🏪 {t('nav.shop')}</NavLink>
         <button type="button" className="logout-btn-nav" onClick={handleLogout}>

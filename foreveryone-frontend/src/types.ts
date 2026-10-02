@@ -59,6 +59,23 @@ export interface EnemyOption {
 }
 
 /**
+ * Zona del mapa con los enemigos que la habitan. Llega anidada porque decidir que
+ * enemigos viven en que zona es del dominio, no del cliente.
+ */
+export interface ZoneOption {
+    key: string;
+    nameKey: string;
+    descriptionKey: string;
+    /**
+     * Nivel de heroe orientativo. No bloquea el acceso: las tres zonas estan
+     * abiertas desde el principio y esto solo evita que un heroe nuevo entre en
+     * las Ruinas sin saber lo que le espera.
+     */
+    recommendedLevel: number;
+    enemies: EnemyOption[];
+}
+
+/**
  * Ranura de accion del servidor. No es una habilidad concreta: cada clase
  * rellena las tres ranuras con su propio kit, y el nombre, el coste y el efecto
  * los decide la API en `actions`. Ver `BattleActionOption`.

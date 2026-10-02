@@ -60,9 +60,23 @@ const spanishSource = {
   nav: {
     label: 'Navegación principal',
     hero: 'Héroe',
+    map: 'Mapa',
     castle: 'Castillo',
     shop: 'Tienda',
     logout: 'Salir',
+  },
+
+  map: {
+    label: 'Mapa del reino',
+    title: 'El mapa',
+    subtitle: 'Tres zonas, nueve rivales. Elige dónde llevar a tu héroe.',
+    selectZone: 'Elige una zona para ver sus rivales.',
+    recommendedLevel: 'Nivel recomendado: {level}',
+    emptyZone: 'Esta zona no tiene rivales.',
+    loadError: 'No se pudo cargar el mapa.',
+    vitals: '{value} / {max}',
+    level: 'Nivel {level}',
+    ready: 'Listo para luchar',
   },
 
   auth: {
@@ -195,7 +209,6 @@ const spanishSource = {
     uses: 'Usos: {left}/{limit}',
     exp: '{value} exp',
     gold: '{value} oro',
-    loadError: 'No se pudieron cargar los enemigos.',
     startError: 'No se pudo iniciar el combate.',
     turnError: 'No se pudo jugar el turno.',
   },
@@ -264,8 +277,29 @@ const spanishSource = {
 
   enemy: {
     goblin: 'Goblin',
-    wolf: 'Lobo',
-    ogre: 'Ogro',
+    spider: 'Araña gigante',
+    treant: 'Treant',
+    bat: 'Murciélago gigante',
+    slime: 'Limo voraz',
+    troll: 'Troll',
+    skeleton: 'Esqueleto',
+    wraith: 'Espectro',
+    golem: 'Golem de obsidiana',
+  },
+
+  zone: {
+    forest: {
+      name: 'Bosque de Ceniza',
+      desc: 'Un pinar denso y húmedo. Aquí se crían criaturas pequeñas.',
+    },
+    caverns: {
+      name: 'Cavernas Selladas',
+      desc: 'Galerías sin luz bajo la montaña.',
+    },
+    ruins: {
+      name: 'Ruinas de Valdoro',
+      desc: 'Lo que quedó en pie de una ciudad enterrada.',
+    },
   },
 
   building: {
@@ -320,26 +354,26 @@ const spanishSource = {
   // --- Claves que emite el servidor ---
 
   'battle.round.struck':
-    'Turno {round}: {ability} hace {heroDamage} de daño. {enemy} responde con {enemyDamage}. Tu vida: {heroHealth}.',
+    'Turno {round}: {abilityNameKey} hace {heroDamage} de daño. {enemyKey} responde con {enemyDamage}. Tu vida: {heroHealth}.',
   'battle.round.guarded':
-    'Turno {round}: {ability} y el golpe de {enemy} rebota: {enemyDamage} de daño. Tu vida: {heroHealth}.',
+    'Turno {round}: {abilityNameKey} y el golpe de {enemyKey} rebota: {enemyDamage} de daño. Tu vida: {heroHealth}.',
   'battle.round.healed':
-    'Turno {round}: {ability} recupera vida antes del contraataque. {enemy} responde con {enemyDamage}. Tu vida: {heroHealth}.',
+    'Turno {round}: {abilityNameKey} recupera vida antes del contraataque. {enemyKey} responde con {enemyDamage}. Tu vida: {heroHealth}.',
   'battle.round.drained':
-    'Turno {round}: {ability} hace {heroDamage} de daño y le roba vida. {enemy} responde con {enemyDamage}. Tu vida: {heroHealth}.',
+    'Turno {round}: {abilityNameKey} hace {heroDamage} de daño y le roba vida. {enemyKey} responde con {enemyDamage}. Tu vida: {heroHealth}.',
   'battle.round.enemyDefeated':
-    'Turno {round}: {ability} hace {heroDamage} de daño. ¡{enemy} ha caído!',
+    'Turno {round}: {abilityNameKey} hace {heroDamage} de daño. ¡{enemyKey} ha caído!',
 
   'battle.outcome.victory':
-    '¡Victoria contra {enemy}! Ganaste {experienceGained} de experiencia y {goldGained} de oro.',
-  'battle.outcome.defeat': 'Has sido derrotado por {enemy}. Tu héroe necesita descansar.',
+    '¡Victoria contra {enemyKey}! Ganaste {experienceGained} de experiencia y {goldGained} de oro.',
+  'battle.outcome.defeat': 'Has sido derrotado por {enemyKey}. Tu héroe necesita descansar.',
 
   'battle.turn.prompt': 'Turno {round}: elige cómo atacar.',
 
   'battle.blocked.notInKit': 'Tu clase no tiene esa habilidad.',
-  'battle.blocked.noUsesLeft': 'No te quedan usos de {ability}.',
+  'battle.blocked.noUsesLeft': 'No te quedan usos de {abilityNameKey}.',
   'battle.blocked.manaTooLow':
-    'Necesitas {cost} de maná para {ability} y solo tienes {have}.',
+    'Necesitas {cost} de maná para {abilityNameKey} y solo tienes {have}.',
 
   'battle.error.noneInProgress': 'No tienes ningún combate en curso.',
   'battle.error.notFound': 'El combate no existe.',
@@ -442,9 +476,23 @@ const english: Record<TranslationKey, string> = flatten({
   nav: {
     label: 'Main navigation',
     hero: 'Hero',
+    map: 'Map',
     castle: 'Castle',
     shop: 'Shop',
     logout: 'Log out',
+  },
+
+  map: {
+    label: 'Kingdom map',
+    title: 'The map',
+    subtitle: 'Three zones, nine rivals. Choose where to take your hero.',
+    selectZone: 'Choose a zone to see its rivals.',
+    recommendedLevel: 'Recommended level: {level}',
+    emptyZone: 'This zone has no rivals.',
+    loadError: 'The map could not be loaded.',
+    vitals: '{value} / {max}',
+    level: 'Level {level}',
+    ready: 'Ready to fight',
   },
 
   auth: {
@@ -574,7 +622,6 @@ const english: Record<TranslationKey, string> = flatten({
     uses: 'Uses: {left}/{limit}',
     exp: '{value} exp',
     gold: '{value} gold',
-    loadError: 'Could not load the enemies.',
     startError: 'Could not start the battle.',
     turnError: 'Could not play the turn.',
   },
@@ -643,8 +690,29 @@ const english: Record<TranslationKey, string> = flatten({
 
   enemy: {
     goblin: 'Goblin',
-    wolf: 'Wolf',
-    ogre: 'Ogre',
+    spider: 'Giant spider',
+    treant: 'Treant',
+    bat: 'Giant bat',
+    slime: 'Greedy slime',
+    troll: 'Troll',
+    skeleton: 'Skeleton',
+    wraith: 'Wraith',
+    golem: 'Obsidian golem',
+  },
+
+  zone: {
+    forest: {
+      name: 'Ash Forest',
+      desc: 'A dense, damp pine wood. Small things breed here.',
+    },
+    caverns: {
+      name: 'Sealed Caverns',
+      desc: 'Lightless galleries under the mountain.',
+    },
+    ruins: {
+      name: 'Ruins of Valdoro',
+      desc: 'Whatever is still standing of a buried city.',
+    },
   },
 
   building: {
@@ -700,26 +768,26 @@ const english: Record<TranslationKey, string> = flatten({
   },
 
   'battle.round.struck':
-    'Turn {round}: {ability} deals {heroDamage} damage. {enemy} answers with {enemyDamage}. Your health: {heroHealth}.',
+    'Turn {round}: {abilityNameKey} deals {heroDamage} damage. {enemyKey} answers with {enemyDamage}. Your health: {heroHealth}.',
   'battle.round.guarded':
-    'Turn {round}: {ability} and {enemy}’s blow bounces off: {enemyDamage} damage. Your health: {heroHealth}.',
+    'Turn {round}: {abilityNameKey} and {enemyKey}’s blow bounces off: {enemyDamage} damage. Your health: {heroHealth}.',
   'battle.round.healed':
-    'Turn {round}: {ability} recovers health before the counterattack. {enemy} answers with {enemyDamage}. Your health: {heroHealth}.',
+    'Turn {round}: {abilityNameKey} recovers health before the counterattack. {enemyKey} answers with {enemyDamage}. Your health: {heroHealth}.',
   'battle.round.drained':
-    'Turn {round}: {ability} deals {heroDamage} damage and steals life. {enemy} answers with {enemyDamage}. Your health: {heroHealth}.',
+    'Turn {round}: {abilityNameKey} deals {heroDamage} damage and steals life. {enemyKey} answers with {enemyDamage}. Your health: {heroHealth}.',
   'battle.round.enemyDefeated':
-    'Turn {round}: {ability} deals {heroDamage} damage. {enemy} has fallen!',
+    'Turn {round}: {abilityNameKey} deals {heroDamage} damage. {enemyKey} has fallen!',
 
   'battle.outcome.victory':
-    'Victory against {enemy}! You gained {experienceGained} experience and {goldGained} gold.',
-  'battle.outcome.defeat': 'You were defeated by {enemy}. Your hero needs to rest.',
+    'Victory against {enemyKey}! You gained {experienceGained} experience and {goldGained} gold.',
+  'battle.outcome.defeat': 'You were defeated by {enemyKey}. Your hero needs to rest.',
 
   'battle.turn.prompt': 'Turn {round}: choose how to attack.',
 
   'battle.blocked.notInKit': 'Your class does not have that ability.',
-  'battle.blocked.noUsesLeft': 'You have no uses left of {ability}.',
+  'battle.blocked.noUsesLeft': 'You have no uses left of {abilityNameKey}.',
   'battle.blocked.manaTooLow':
-    'You need {cost} mana for {ability} and you only have {have}.',
+    'You need {cost} mana for {abilityNameKey} and you only have {have}.',
 
   'battle.error.noneInProgress': 'You have no battle in progress.',
   'battle.error.notFound': 'The battle does not exist.',

@@ -57,26 +57,37 @@ public class HeroesController : ControllerBase
     }
 
     /// <summary>
-    /// Enemigos disponibles. Se expone desde el dominio para que el cliente
-    /// no duplique las recompensas ni las estadisticas de combate.
+    /// Zonas del mapa con los enemigos de cada una. Se expone desde el dominio
+    /// para que el cliente no duplique ni el balance ni la agrupacion: este
+    /// endpoint sustituye al antiguo <c>/api/heroes/enemies</c>, que exponia los
+    /// enemigos sin zona.
     /// </summary>
-    [HttpGet("enemies")]
-    public IActionResult GetEnemies()
+    [HttpGet("zones")]
+    public IActionResult GetZones()
     {
-        var enemies = ForEveryone.Heroes.Domain.EnemyCatalog.All
-            .Select(enemy => new
+        var zones = ZoneCatalog.All
+            .Select(zone => new
             {
-                key = enemy.Key,
-                nameKey = enemy.NameKey,
-                health = enemy.Health,
-                attack = enemy.Attack,
-                defense = enemy.Defense,
-                experienceReward = enemy.ExperienceReward,
-                goldReward = enemy.GoldReward
+                key = zone.Key,
+                nameKey = zone.NameKey,
+                descriptionKey = zone.DescriptionKey,
+                recommendedLevel = zone.RecommendedLevel,
+                enemies = ZoneCatalog.EnemiesIn(zone)
+                    .Select(enemy => new
+                    {
+                        key = enemy.Key,
+                        nameKey = enemy.NameKey,
+                        health = enemy.Health,
+                        attack = enemy.Attack,
+                        defense = enemy.Defense,
+                        experienceReward = enemy.ExperienceReward,
+                        goldReward = enemy.GoldReward
+                    })
+                    .ToList()
             })
             .ToList();
 
-        return Ok(enemies);
+        return Ok(zones);
     }
 
     /// <summary>

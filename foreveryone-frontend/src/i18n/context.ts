@@ -62,11 +62,29 @@ export const translateText = (
 
   for (const [name, value] of Object.entries(text.args ?? {})) {
     // Un argumento cuyo nombre termina en `Key` es otra clave de traduccion:
-    // hay que resolverla antes de meterla en el mensaje.
-    resolved[name] = name.endsWith('Key') ? (messages[value] ?? value) : value;
+    // hay que resolverla antes de meterla en el mensaje. Si la clave no existe,
+    // se avisa: normalmente significa que el servidor y el cliente han divergido
+    // y el mensaje mostrara `{enemyKey}` tal cual.
+    if (name.endsWith('Key')) {
+      const translated = messages[value];
+
+      if (translated === undefined) {
+        console.warn(`[i18n] Falta la clave "${value}" (argumento "${name}").`);
+      }
+
+      resolved[name] = translated ?? value;
+    } else {
+      resolved[name] = value;
+    }
   }
 
-  return interpolate(messages[text.key] ?? text.key, resolved);
+  const template = messages[text.key];
+
+if (template === undefined) {
+  console.warn(`[i18n] Falta la clave "${text.key}".`);
+}
+
+return interpolate(template ?? text.key, resolved);
 };
 
 export const I18nContext = createContext<I18nContextValue | null>(null);

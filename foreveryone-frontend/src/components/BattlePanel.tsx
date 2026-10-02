@@ -8,8 +8,14 @@ import './BattlePanel.css';
 // Iconos en el cliente: el dominio no depende de la presentacion.
 const ENEMY_ICONS: Record<string, string> = {
   goblin: '👺',
-  wolf: '🐺',
-  ogre: '👹',
+  spider: '🕷️',
+  treant: '🌳',
+  bat: '🦇',
+  slime: '🟢',
+  troll: '🧌',
+  skeleton: '☠️',
+  wraith: '👻',
+  golem: '🗿',
 };
 
 const FALLBACK_ENEMY_ICON = '💀';
@@ -19,14 +25,18 @@ const healthPercent = (current: number, max: number) =>
 
 interface BattlePanelProps {
   userId: string;
+  /**
+   * Rivales de la zona activa. Los elige el mapa, no este componente: el dominio
+   * manda las zonas con sus enemigos ya anidados y aqui solo se combate contra lo
+   * que le pasen.
+   */
+  enemies: EnemyOption[];
   disabled: boolean;
   onBattleFinished: () => void;
 }
 
-export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelProps) => {
+export const BattlePanel = ({ userId, enemies, disabled, onBattleFinished }: BattlePanelProps) => {
   const { t, tl } = useTranslation();
-  const [enemies, setEnemies] = useState<EnemyOption[]>([]);
-  const [loadError, setLoadError] = useState('');
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState('');
@@ -40,15 +50,6 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
 
     const load = async () => {
       try {
-        const { data } = await heroesApi.get<EnemyOption[]>('/api/heroes/enemies');
-        if (!isActive) return;
-        setEnemies(data);
-      } catch (err: unknown) {
-        if (isActive) setLoadError(getErrorMessage(err, t('battle.loadError')));
-        return;
-      }
-
-      try {
         const { data } = await heroesApi.get<BattleState>(`/api/heroes/${userId}/battle`);
         if (isActive) setBattle(data);
       } catch {
@@ -58,7 +59,7 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
 
     load();
     return () => { isActive = false; };
-  }, [userId, t]);
+  }, [userId]);
 
   const startBattle = async (enemyKey: string) => {
     setError('');
@@ -97,8 +98,6 @@ export const BattlePanel = ({ userId, disabled, onBattleFinished }: BattlePanelP
       setIsBusy(false);
     }
   };
-
-  if (loadError) return <p className="battle-error">{loadError}</p>;
 
   const enemyName = battle ? t(battle.enemyNameKey) : '';
 

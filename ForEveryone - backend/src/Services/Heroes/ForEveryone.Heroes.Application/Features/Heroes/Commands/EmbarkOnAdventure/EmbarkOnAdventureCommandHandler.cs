@@ -50,10 +50,10 @@ public class EmbarkOnAdventureCommandHandler : IRequestHandler<EmbarkOnAdventure
         var message = replay.Victory
             ? LocalizedText.Of(
                 "battle.outcome.victory",
-                ("enemyKey", enemy.Key),
+                ("enemyKey", enemy.NameKey),
                 ("experienceGained", replay.ExperienceGained),
                 ("goldGained", replay.GoldGained))
-            : LocalizedText.Of("battle.outcome.defeat", ("enemyKey", enemy.Key));
+            : LocalizedText.Of("battle.outcome.defeat", ("enemyKey", enemy.NameKey));
 
         return new AdventureResult(
             replay.Victory,

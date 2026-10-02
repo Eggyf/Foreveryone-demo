@@ -8,6 +8,7 @@ import { GameGate } from './components/GameGate';
 import { GameLayout } from './components/GameLayout';
 import { SettingsBar } from './components/SettingsBar';
 import { HeroPage } from './pages/HeroPage';
+import { MapPage } from './pages/MapPage';
 import { CastlePage } from './pages/CastlePage';
 import { ShopPage } from './pages/ShopPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -53,6 +54,7 @@ function App() {
                 <Route path="/" element={<GameLayout user={user} onLogout={handleLogout} />}>
                   <Route index element={<Navigate to="/hero" replace />} />
                   <Route path="hero" element={<HeroPage />} />
+                  <Route path="map" element={<MapPage />} />
                   <Route path="castle" element={<CastlePage />} />
                   <Route path="shop" element={<ShopPage />} />
                   <Route path="*" element={<NotFoundPage />} />

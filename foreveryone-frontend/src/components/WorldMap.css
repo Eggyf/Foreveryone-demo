@@ -1,0 +1,178 @@
+/* El mapa: un lienzo con las zonas talladas y, encima, los botones que las
+   nombran. Las coordenadas de los botones son porcentajes del mismo lienzo que
+   el `viewBox` del SVG, asi que ambos escalan juntos. */
+
+.world-map {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto 20px;
+}
+
+.world-map-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* La ilustracion es decorativa: el texto y el teclado viven en los botones. */
+  pointer-events: none;
+}
+
+/* El camino entre zonas. Al montar, los puntos SDNacen y recorren el sendero:
+   es el unico momento orquestado de la pagina, el resto son transiciones de
+   hover. */
+.world-map-route {
+  fill: none;
+  /* El camino es casi invisible sobre pergamino con el token de borde, asi que
+     usa el dorado del tema, que en los dos temas tiene el contraste dado. */
+  stroke: var(--dark-gold);
+  stroke-width: 2;
+  stroke-dasharray: 5 7;
+  stroke-linecap: round;
+  opacity: 0.55;
+  animation: world-map-route-march 1.4s var(--ease) both;
+}
+
+@keyframes world-map-route-march {
+  from {
+    stroke-dashoffset: 540;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.world-map-land {
+  fill: color-mix(in srgb, var(--zone-accent) 22%, transparent);
+  stroke: color-mix(in srgb, var(--zone-accent) 62%, transparent);
+  stroke-width: 1.5;
+  transition: fill 0.25s var(--ease), stroke 0.25s var(--ease);
+}
+
+.world-map-land[data-selected] {
+  fill: color-mix(in srgb, var(--zone-accent) 42%, transparent);
+  stroke: var(--zone-accent);
+  stroke-width: 2.5;
+}
+
+.world-map-zones {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.world-map-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.world-map-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 148px;
+  padding: 9px 12px;
+  border: 1px solid color-mix(in srgb, var(--zone-accent) 45%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-deep) 88%, transparent);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.world-map-zone:hover {
+  border-color: var(--zone-accent);
+  transform: translateY(-2px);
+}
+
+/* La zona activa se marca con mas acento, no solo con el color del texto: sobre
+   pergamino un 20 % de mezcla se perdia. */
+.world-map-zone[aria-pressed="true"] {
+  border-color: var(--zone-accent);
+  background: color-mix(in srgb, var(--zone-accent) 30%, var(--bg-deep));
+  box-shadow: 0 0 0 2px var(--zone-accent), var(--shadow-sm);
+}
+
+[data-theme="light"] .world-map-zone[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--zone-accent) 42%, var(--bg-deep));
+}
+
+.world-map-zone:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.world-map-zone strong {
+  color: var(--zone-accent);
+  font-family: "Cinzel", serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.world-map-zone small {
+  color: var(--text-faint);
+  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Sin esto, un nombre de zona largo estira el boton y descuadra la fila en
+   pantallas estrechas. */
+.world-map-zone strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* En pantallas estrechas el lienzo se estrecha y los nombres empiezan a
+   solaparse, asi que por debajo de 560 px el mapa deja de ser una ilustracion y
+   pasa a ser una lista de zonas apiladas. */
+@media (max-width: 560px) {
+  .world-map-art {
+    display: none;
+  }
+
+  .world-map-zones {
+    position: static;
+    display: grid;
+    gap: 8px;
+  }
+
+  /* Un item de grid no baja de su ancho de contenido salvo que se le ponga
+     `min-width: 0`; sin esto la fila del botón se salía del contenedor. */
+  .world-map-slot {
+    position: static;
+    min-width: 0;
+    transform: none;
+  }
+
+  .world-map-zone {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
+  }
+
+  /* En una fila, el `nowrap` del nivel impide que la fila encogiera. */
+  .world-map-zone small {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-map-land,
+  .world-map-zone {
+    transition: none;
+  }
+
+  .world-map-route {
+    animation: none;
+  }
+}

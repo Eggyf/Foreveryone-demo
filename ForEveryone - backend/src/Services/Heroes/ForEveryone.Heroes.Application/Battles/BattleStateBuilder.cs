@@ -30,10 +30,10 @@ public static class BattleStateBuilder
             ? replay.Victory
                 ? LocalizedText.Of(
                     "battle.outcome.victory",
-                    ("enemyKey", enemy.Key),
+                    ("enemyKey", enemy.NameKey),
                     ("experienceGained", replay.ExperienceGained),
                     ("goldGained", replay.GoldGained))
-                : LocalizedText.Of("battle.outcome.defeat", ("enemyKey", enemy.Key))
+                : LocalizedText.Of("battle.outcome.defeat", ("enemyKey", enemy.NameKey))
             : LocalizedText.Of("battle.turn.prompt", ("round", replay.Rounds.Count + 1));
 
         return new BattleStateDto(

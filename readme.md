@@ -363,7 +363,7 @@ el nombre del jugador.
 | --- | --- | --- |
 | `POST` | `/api/heroes` | Crea un héroe con su raza y clase |
 | `GET` | `/api/heroes/options` | Catálogo de razas y clases con sus estadísticas |
-| `GET` | `/api/heroes/enemies` | Catálogo de enemigos con estadísticas y recompensas |
+| `GET` | `/api/heroes/zones` | Zonas del mapa con sus enemigos, estadísticas y recompensas |
 | `POST` | `/api/heroes/{userId}/battle` | Inicia un combate por turnos contra el enemigo del cuerpo |
 | `POST` | `/api/heroes/{userId}/battle/{battleId}/turn` | Juega un turno eligiendo acción |
 | `GET` | `/api/heroes/{userId}/battle` | Combate en curso, para poder retomarlo |
@@ -423,6 +423,44 @@ Las dos tablas de balance viven solo en el dominio. El frontend las recibe de
 `GET /api/heroes/options` y reproduce el mismo cálculo para la vista previa, en
 lugar de duplicar los números.
 
+#### Mapa y zonas
+
+Los enemigos no están sueltos: cada uno pertenece a una zona, y las zonas viven
+en el dominio igual que los enemigos. `ZoneCatalog` es la lista de zonas y
+`EnemyCatalog` sigue siendo la lista plana de enemigos, ahora con un `ZoneKey`
+que dice de dónde es cada uno. `ZoneCatalog.EnemiesIn` agrupa sin duplicar la
+tabla: no hay una segunda lista de enemigos que se pueda desincronizar.
+
+| Zona | Enemigos | Nivel recomendado |
+| --- | --- | --- |
+| Bosque de Ceniza | Goblin, Araña gigante, Treant | 1 |
+| Cavernas Selladas | Murciélago gigante, Limo voraz, Troll | 3 |
+| Ruinas de Valdoro | Esqueleto, Espectro, Golem de obsidiana | 5 |
+
+Las **tres zonas están abiertas desde el principio**: no hay progreso que
+guardar y por eso `StartBattle` no cambia. Sigue validando el enemigo con
+`EnemyCatalog.FindByKey`, que es exactamente lo que hacía antes. El nivel
+recomendado es información, no una cerradura — está en la zona para que un héroe
+nuevo sepa que el Golem le gana de largo, no para impedirle entrar.
+
+El endpoint es `GET /api/heroes/zones` y devuelve las zonas con sus enemigos
+anidados, en el orden en que las presenta el mapa. Sustituye a
+`GET /api/heroes/enemies`, que exponía los enemigos sin zona; mantener ambos
+habría dejado dos contratos que divergir.
+
+```jsonc
+// GET /api/heroes/zones
+// [{ "key": "forest", "nameKey": "zone.forest.name",
+//    "descriptionKey": "zone.forest.desc", "recommendedLevel": 1,
+//    "enemies": [{ "key": "goblin", "nameKey": "enemy.goblin", "health": 50,
+//                  "attack": 12, "defense": 5,
+//                  "experienceReward": 40, "goldReward": 20 }] }]
+```
+
+El texto llega como claves y lo compone el cliente, igual que el resto del
+proyecto. El nombre y la descripción de una zona cuelgan del mismo prefijo
+(`zone.forest.name` y `zone.forest.desc`) para que el cliente los guarde juntos.
+
 #### Batallas por turnos
 
 El combate vive en el servicio Heroes, no en un microservicio aparte. Es lógica
@@ -468,7 +506,7 @@ el control del combate.
 
 ```jsonc
 // POST /api/heroes/{userId}/battle                        -> inicia combate
-// { "enemyKey": "ogre" }
+// { "enemyKey": "treant" }
 
 // POST /api/heroes/{userId}/battle/{battleId}/turn         -> juega un turno
 // { "action": 2 }

@@ -114,4 +114,13 @@ servidor, a usar `LocalizedText` en lugar de una frase.
   tienes héroe" y abre el asistente de creación; no se llama a Identity porque eso ataba el
   login a un segundo servicio.
 - **Balance en el servidor.** Razas, clases, enemigos y acciones de combate se piden a
-  `GET /api/heroes/options` y `GET /api/heroes/enemies`. El cliente no duplica esos números.
+  `GET /api/heroes/options` y `GET /api/heroes/zones`. El cliente no duplica esos números.
+- **Zonas y mapa.** `src/pages/MapPage.tsx` carga `GET /api/heroes/zones` y devuelve las zonas con
+  sus enemigos ya anidados: decidir qué rival vive en qué zona es del dominio, no del cliente.
+  `src/components/WorldMap.tsx` dibuja las tres zonas como siluetas y superpone los botones que
+  las nombran, con coordenadas en porcentajes del mismo `viewBox` para que texto y silueta
+  escalen juntos. Por debajo de 560 px el mapa deja de ser ilustración y pasa a lista.
+  `BattlePanel` ya no pide enemigos: los recibe por prop, así que la zona activa la elige el mapa.
+- **`useHero`.** Cargar el héroe, refrescarlo tras un combate y descansarlo vive en
+  `src/hooks/useHero.ts` porque lo necesitan las dos páginas de juego: la ficha del héroe y el
+  mapa. Devuelve `null` cuando una acción falla y deja el error traducido en `restError`.
