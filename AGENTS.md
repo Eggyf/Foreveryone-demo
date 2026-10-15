@@ -20,7 +20,7 @@ Persistent instructions for OpenCode agents working in the ForEveryone repositor
 
 ## Repository map
 
-- `foreveryone-frontend/`: React 19, TypeScript, Vite, React Router, Axios, and plain CSS.
+- `ForEveryone - frontend/`: React 19, TypeScript, Vite, React Router, Axios, and plain CSS.
 - `ForEveryone - backend/ForEveryone.slnx`: .NET 10 solution.
 - `ForEveryone - backend/src/BuildingBlocks/`: shared backend abstractions.
 - `ForEveryone - backend/src/Services/`: Identity, Heroes, Kingdom, and Shop services.
@@ -42,7 +42,7 @@ Persistent instructions for OpenCode agents working in the ForEveryone repositor
 ## Frontend conventions
 
 - Keep React components and pages in TypeScript; preserve strict typing.
-- Keep API endpoint knowledge in `foreveryone-frontend/src/api/api.ts` unless the project adopts another explicit configuration approach.
+- Keep API endpoint knowledge in `ForEveryone - frontend/src/api/api.ts` unless the project adopts another explicit configuration approach.
 - Co-locate component and page styles with their `.tsx` files. `App.css` is for application-wide theme variables, resets, and root layout only.
 - Reuse a focused shared stylesheet only when multiple components genuinely share the same rules, as with `components/GameCard.css`.
 - Preserve the dark-fantasy visual language and responsive behavior unless the user requests a redesign.
@@ -64,7 +64,7 @@ Run checks from the directory containing the relevant project.
 
 ### Frontend
 
-From `foreveryone-frontend/`:
+From `ForEveryone - frontend/`:
 
 ```powershell
 npm run lint

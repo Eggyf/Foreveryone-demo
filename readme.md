@@ -1,6 +1,6 @@
-# 🛡️ Foreveryone
+# 🛡️ ForEveryone
 
-Foreveryone es un RPG web de gestión y progresión idle (*management/idle game*). Los jugadores pueden registrarse, crear héroes, combatir, fundar reinos, producir recursos, mejorar edificios, entrenar tropas y comprar equipo.
+ForEveryone es un RPG web de gestión y progresión idle (*management/idle game*). Los jugadores pueden registrarse, crear héroes, combatir, fundar reinos, producir recursos, mejorar edificios, entrenar tropas y comprar equipo.
 
 El repositorio contiene una SPA React y cuatro servicios ASP.NET Core independientes. Cada servicio aplica una separación por contextos con capas `Api`, `Application`, `Domain` e `Infrastructure`, y utiliza su propio contexto de persistencia PostgreSQL.
 
@@ -128,7 +128,7 @@ ForEveryone.[Service].Infrastructure
 ## 📂 Estructura del repositorio
 
 ```text
-Foreveryone/
+ForEveryone/
 ├── .agents/
 │   └── skills/                        # Skills de agentes
 ├── .opencode/
@@ -152,7 +152,7 @@ Foreveryone/
 ├── docker-compose.yml                 # las 4 BBDD + las 4 APIs
 ├── start-all.cmd                      # doble clic: lanza Docker Compose y el frontend
 ├── start-all.ps1                      # lo mismo, para invocar desde una terminal
-├── foreveryone-frontend/
+├── ForEveryone - frontend/
 │   ├── src/
 │   │   ├── api/          # instancias de Axios y extracción de errores
 │   │   ├── auth/         # decodificación del JWT y acceso al token
@@ -226,7 +226,7 @@ La primera vez compila las cuatro imágenes de las APIs, y puede tardar varios m
 | `kingdom-api` | — | `5256` |
 | `shop-api` | — | `4136` |
 
-Los puertos de las APIs no han cambiado, salvo Shop. El `5136` cae dentro del rango `5071-5170` que Windows reserva (visible en `netsh interface ipv4 show excludedportrange protocol=tcp`), y en un puerto excluido ni Docker puede publicar ni ASP.NET puede escuchar. Shop se mueve por eso al `4136`, tanto dentro del contenedor como en el host, y `foreveryone-frontend/.env` apunta allí. Para volver al `5136`, libera ese rango reservado y ajusta a la vez `docker-compose.yml` y el `.env` del frontend.
+Los puertos de las APIs no han cambiado, salvo Shop. El `5136` cae dentro del rango `5071-5170` que Windows reserva (visible en `netsh interface ipv4 show excludedportrange protocol=tcp`), y en un puerto excluido ni Docker puede publicar ni ASP.NET puede escuchar. Shop se mueve por eso al `4136`, tanto dentro del contenedor como en el host, y `ForEveryone - frontend/.env` apunta allí. Para volver al `5136`, libera ese rango reservado y ajusta a la vez `docker-compose.yml` y el `.env` del frontend.
 
 Cada API aplica sus migraciones pendientes al arrancar, y solo lo hace porque el compose fija `ASPNETCORE_ENVIRONMENT=Development` en las cuatro. Cada API espera a que su base de datos esté `healthy` (comprobado con `pg_isready`) antes de arrancar, para que la migración no compita con el arranque de PostgreSQL. Fuera de `Development`, las migraciones deben ejecutarse como parte de un proceso explícito de despliegue.
 
@@ -306,7 +306,7 @@ Lo mismo para `HeroesDb` en Heroes, `KingdomDb` en Kingdom y `ShopDb` en Shop, m
 Desde la raíz del repositorio:
 
 ```powershell
-cd foreveryone-frontend
+cd 'ForEveryone - frontend'
 npm ci
 npm run dev
 ```
@@ -317,7 +317,7 @@ Abre:
 http://localhost:5173
 ```
 
-El frontend toma las URLs de los servicios de las variables `VITE_*` de `foreveryone-frontend/.env`, que se leen desde `import.meta.env` en `src/api/api.ts`. Si alguna no está definida se usa el puerto local por defecto (5045, 5281, 5256 y 5136), así que el `.env` es una comodidad y no un requisito.
+El frontend toma las URLs de los servicios de las variables `VITE_*` de `ForEveryone - frontend/.env`, que se leen desde `import.meta.env` en `src/api/api.ts`. Si alguna no está definida se usa el puerto local por defecto (5045, 5281, 5256 y 5136), así que el `.env` es una comodidad y no un requisito.
 
 ## 🔌 Endpoints principales
 
@@ -685,7 +685,7 @@ Los orígenes permitidos se leen de `Cors:AllowedOrigins` en el `appsettings.jso
 ```
 
 Si el navegador muestra un error de CORS, comprueba primero en qué puerto está
-sirviendo Vite. `foreveryone-frontend/vite.config.ts` fija el puerto `5173` con
+sirviendo Vite. `ForEveryone - frontend/vite.config.ts` fija el puerto `5173` con
 `strictPort`, de modo que si está ocupado Vite avisa en lugar de arrancar en
 otro puerto. Para permitir un origen adicional, edita la lista en el
 `appsettings.json` del servicio correspondiente y reinícialo.
@@ -715,4 +715,4 @@ ShopServiceUrl=http://localhost:5136/
 
 ---
 
-Foreveryone es un proyecto activo y en evolución. Las funcionalidades no deben marcarse como aptas para producción hasta completar la autenticación, las pruebas y el endurecimiento operativo.
+ForEveryone es un proyecto activo y en evolución. Las funcionalidades no deben marcarse como aptas para producción hasta completar la autenticación, las pruebas y el endurecimiento operativo.

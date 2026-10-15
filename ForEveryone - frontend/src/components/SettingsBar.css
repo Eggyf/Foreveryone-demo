@@ -1,0 +1,95 @@
+/*
+  Idioma, tema y retícula. Se apoyan en tokens, así que el tema claro los
+  recolorea sin reglas propias.
+
+  La etiqueta se oculta por encima de 900px: el texto "Idioma" sobre un select
+  que ya dice "Español" es ruido, y el select lleva su propio nombre accesible.
+*/
+.settings-bar {
+  position: absolute;
+  top: calc(var(--cell) * 2);
+  right: calc(var(--cell) * 2);
+  display: flex;
+  gap: var(--cell);
+  align-items: center;
+  z-index: 2;
+}
+
+.settings-field {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--cell) * 0.75);
+}
+
+.settings-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+@media (min-width: 901px) {
+  .settings-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* El triángulo de la flecha se dibuja con un borde, no con un degradado: es
+   geometría exacta y así hereda el color de la tinta solo con `currentColor`. */
+.settings-select {
+  appearance: none;
+  padding: calc(var(--cell) * 0.625) calc(var(--cell) * 2.5)
+    calc(var(--cell) * 0.625) calc(var(--cell) * 1.25);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-card);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 14px) calc(50% + 1px),
+    calc(100% - 9px) calc(50% + 1px);
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+  box-shadow: var(--bevel-hi), var(--bevel-lo);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: border-color 0.16s var(--ease), background-color 0.16s var(--ease);
+}
+
+.settings-select:hover {
+  border-color: var(--gold);
+}
+
+.settings-select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+@media (max-width: 900px) {
+  .settings-bar {
+    position: static;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: calc(var(--cell) * 2.5);
+  }
+
+  .settings-label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+  }
+}

@@ -1,5 +1,5 @@
 @echo off
-REM Lanzador de Foreveryone. Doble clic y levanta el proyecto entero.
+REM Lanzador de ForEveryone. Doble clic y levanta el proyecto entero.
 REM
 REM Existe por una razon concreta: al hacer doble clic en un .ps1, el menu
 REM contextual ejecuta "powershell.exe -file <script>" SIN -ExecutionPolicy, y si

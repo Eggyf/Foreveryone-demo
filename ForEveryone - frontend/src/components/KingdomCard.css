@@ -1,0 +1,419 @@
+/*
+  La vista del castillo: el registro de lo que la casa posee y de lo que puede
+  ordenar a continuación.
+
+  Es la superficie más densa de la aplicación —cuatro recursos, nivel, ejército,
+  edificios construidos, menú de construcción y entrenamiento— así que el
+  orden de lectura es el trabajo de diseño: recursos arriba porque son la
+  respuesta a "¿cuánto tengo?", luego lo construido, luego lo que se puede
+  ordenar. Todo alineado a la retícula y separado por líneas de pelo, nunca por
+  sombras ni por bordes de color en un solo lado.
+*/
+
+.kingdom-view {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--cell) * 4);
+  margin-top: calc(var(--cell) * 3);
+}
+
+/* --- La placa principal ------------------------------------------------ */
+
+.castle-card {
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--cell) * 3.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--plate);
+  text-align: left;
+}
+
+/* La retícula vive dentro de la placa, más presente que en el fondo: aquí es
+   donde se lee el cuaderno. */
+.castle-card::after {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+      to right,
+      var(--grid-hair) 0 1px,
+      transparent 1px var(--grid-size)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--grid-hair) 0 1px,
+      transparent 1px var(--grid-size)
+    );
+  content: "";
+  pointer-events: none;
+}
+
+.castle-heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--cell) * 3);
+  padding-bottom: calc(var(--cell) * 3);
+  border-bottom: 1px solid var(--border);
+}
+
+/* El emblema es una celda cuadrada del registro, no un sello circular: el
+   radio corto es lo que mantiene todo el mundo en chapa. */
+.castle-emblem {
+  display: grid;
+  width: calc(var(--cell) * 11);
+  height: calc(var(--cell) * 11);
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  box-shadow: var(--bevel-hi), var(--bevel-lo);
+  color: var(--gold);
+}
+
+.castle-titles {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: calc(var(--cell) * 0.5);
+}
+
+.castle-titles strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-stretch: 120%;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--text-light);
+}
+
+.castle-titles small {
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* --- Recursos ----------------------------------------------------------- */
+
+/* Cuatro celdas iguales: son un conjunto homogéneo y por eso comparten
+   medida. Lo que las distingue es la etiqueta, no el ancho. */
+.castle-stats {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: calc(var(--cell) * 3) 0 0;
+  padding: 1px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--border);
+  overflow: hidden;
+}
+
+.castle-stats > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--cell) * 0.375);
+  padding: calc(var(--cell) * 2) var(--cell);
+  background: var(--bg-deep);
+}
+
+.castle-stats dt {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+}
+
+.castle-stats dd {
+  margin: 0;
+  color: var(--text-light);
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.castle-stat-label {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* --- Ejército ----------------------------------------------------------- */
+
+/* Una sola celda, marcada por su tinta y no por un fondo rojo: el rojo lo
+   elegiría el dato, no la caja que lo contiene. */
+.castle-army {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--cell)) calc(var(--cell) * 3);
+  margin-top: 1px;
+  padding: calc(var(--cell) * 2) calc(var(--cell) * 2.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+}
+
+.castle-army-label {
+  color: var(--text-faint);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.castle-army strong {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--cell) * 0.75);
+  color: var(--text-light);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.castle-army small {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Edificios construidos ---------------------------------------------- */
+
+.castle-empty {
+  position: relative;
+  z-index: 1;
+  margin: calc(var(--cell) * 2) 0 0;
+  padding: calc(var(--cell) * 3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.castle-buildings {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1px;
+  margin-top: calc(var(--cell) * 2);
+  padding: 1px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--border);
+  overflow: hidden;
+}
+
+/* --- Secciones de orden -------------------------------------------------- */
+
+.kingdom-section {
+  text-align: left;
+}
+
+/* Sin kicker: el encabezado de la sección se sostiene solo. */
+.kingdom-section > h4 {
+  margin: 0 0 calc(var(--cell) * 2);
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-stretch: 115%;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Las celdas de acción comparten medida con las del registro: 1px de hueco y
+   el color del borde detrás, que es lo que dibuja la línea entre ellas. */
+.castle-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--border);
+  overflow: hidden;
+}
+
+.castle-action {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--cell) * 0.75);
+  padding: calc(var(--cell) * 2.5) var(--cell);
+  border: none;
+  background: var(--bg-card);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.castle-action svg,
+.castle-action > span[aria-hidden] {
+  color: var(--text-muted);
+  transition: color 0.16s var(--ease);
+}
+
+.castle-action-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.castle-action-sub {
+  color: var(--text-faint);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Construir y mejorar son la misma acción con distinto destino, así que la
+   misma celda; la mejora se distingue por la cifra de nivel que ya lleva y por
+   el icono, no por un color propio. */
+.castle-action.is-upgrade .castle-action-name {
+  color: var(--text-light);
+}
+
+.castle-action:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.castle-action:hover:not(:disabled) svg,
+.castle-action:hover:not(:disabled) > span[aria-hidden] {
+  color: var(--gold);
+}
+
+.castle-action:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+.castle-action:disabled {
+  background: var(--bg-deep);
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.castle-action:disabled svg,
+.castle-action:disabled > span[aria-hidden] {
+  color: var(--text-faint);
+  opacity: 0.55;
+}
+
+/* Entrenar usa el glifo de armas y una cifra (1/5/10): la cifra es la decisión,
+   así que es lo que va grande. */
+.castle-action.is-train .castle-action-name {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.castle-hint {
+  margin: 0;
+  padding: calc(var(--cell) * 2.5);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+/* --- Reino aún no fundado ----------------------------------------------- */
+
+.kingdom-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--cell) * 2.5);
+  max-width: 460px;
+  margin: calc(var(--cell) * 8) auto;
+  padding: calc(var(--cell) * 5) calc(var(--cell) * 4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--plate);
+  text-align: center;
+}
+
+.kingdom-empty-emblem {
+  display: grid;
+  width: calc(var(--cell) * 12);
+  height: calc(var(--cell) * 12);
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-faint);
+}
+
+.kingdom-empty p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .castle-card {
+    padding: calc(var(--cell) * 2.5);
+  }
+
+  .castle-heading {
+    gap: calc(var(--cell) * 2);
+  }
+
+  .castle-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .castle-army {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(var(--cell) * 0.75);
+  }
+
+  .castle-army small {
+    margin-left: 0;
+  }
+
+  .castle-actions,
+  .castle-buildings {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .castle-action,
+  .castle-action svg,
+  .castle-action > span[aria-hidden] {
+    transition: none;
+  }
+}

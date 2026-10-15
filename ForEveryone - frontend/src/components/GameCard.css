@@ -1,0 +1,101 @@
+/*
+  La placa: la superficie que sostiene casi todo lo demas.
+
+  Una placa declara su elevacion una sola vez — bisel grabado, sin sombra
+  difusa — y por dentro lleva un encabezado que se apoya en una regla de una
+  celda. Las filas son celdas de un registro, no tarjetas: comparten fondo con
+  la placa y se separan por una linea de pelo, nunca por un borde de color en
+  un solo lado.
+*/
+
+.stats-card,
+.action-box {
+  margin: calc(var(--cell) * 2) 0;
+  padding: calc(var(--cell) * 3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  text-align: left;
+  box-shadow: var(--plate);
+}
+
+.stats-card h3 {
+  margin: 0 0 calc(var(--cell) * 1.5);
+  padding-bottom: calc(var(--cell));
+  border-bottom: 1px solid var(--border);
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-stretch: 115%;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.stats-card p {
+  margin: calc(var(--cell) * 0.75) 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.stats-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats-card ul li {
+  margin: 0;
+  padding: calc(var(--cell) * 1.25) calc(var(--cell) * 1.5);
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-light);
+  line-height: 1.55;
+}
+
+.stats-card ul li:last-child {
+  border-bottom: none;
+}
+
+/* La caja de accion es una celda retirada: misma medida, sin bisel, para que
+   se lea como hueco reservado y no como contenido. */
+.action-box {
+  border-style: dashed;
+  text-align: center;
+}
+
+.action-box button {
+  padding: calc(var(--cell) * 1.25) calc(var(--cell) * 2.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--bevel-hi), var(--bevel-lo);
+  transition: background-color 0.16s var(--ease), border-color 0.16s var(--ease);
+}
+
+.action-box button:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--surface-hover);
+  color: var(--gold);
+}
+
+.action-box button:disabled {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-faint);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-box button {
+    transition: none;
+  }
+}

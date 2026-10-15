@@ -1,0 +1,45 @@
+/*
+  Pantalla 404. Antes los selectores se llamaban `.notfound-*` y el componente
+  usaba `.not-found*`, asi que ninguna regla llegaba a aplicarse y la pagina
+  salia como texto suelto sobre el fondo. Los nombres siguen al componente.
+*/
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 520px;
+  margin: calc(var(--cell) * 7) auto;
+  padding: calc(var(--cell) * 4.25) calc(var(--cell) * 3.25);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--plate);
+  text-align: center;
+}
+
+.not-found-mark {
+  color: var(--text-faint);
+}
+
+.not-found-mark svg {
+  display: block;
+}
+
+.not-found h2 {
+  margin: calc(var(--cell) * 1.5) 0 calc(var(--cell) * 2.5);
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
+  font-stretch: 118%;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* El relleno, el color del texto y el hover salen de `.btn-primary`. Aqui solo
+   queda la medida de este enlace. */
+.not-found-link {
+  padding: calc(var(--cell) * 1.375) calc(var(--cell) * 2.75);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+}

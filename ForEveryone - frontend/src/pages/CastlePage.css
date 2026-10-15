@@ -1,0 +1,28 @@
+/* La página del castillo es casi toda la vista de KingdomCard; aquí solo viven
+   los estados que no dependen de que haya reino. */
+
+.castle-page {
+  width: 100%;
+}
+
+/* Sin esqueleto parpadeante: el texto de carga dice qué está pasando y un
+   bloque gris no añade nada que el jugador no sepa ya. */
+.castle-loading {
+  margin: calc(var(--cell) * 10) auto;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+.castle-retry {
+  margin: calc(var(--cell) * 2) auto 0;
+  padding: calc(var(--cell) * 1.5) calc(var(--cell) * 3.25);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .castle-retry:hover:not(:disabled) {
+    outline: none;
+  }
+}

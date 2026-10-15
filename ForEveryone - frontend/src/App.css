@@ -1,0 +1,326 @@
+/*
+  Tokens globales. App.css queda limitado a variables de tema, reset del body
+  y layout raiz; el resto de estilos vive junto a cada componente.
+
+  MUNDO VISUAL: la placa de construccion.
+  La aplicacion es el cuaderno de ingenieria de una casa en guerra. Todo lo que
+  hay en pantalla esta alineado a una reticula de celdas de 8px que se ve: no
+  es decoracion, es el armazon sobre el que esta construida la pagina, asi que
+  la reticula es un instrumento de medida y por eso tiene permiso de verse.
+  La profundidad es bisel grabado (una linea de pelo mas un luz interior
+  arriba y una sombra interior abajo), nunca un halo difuso.
+
+  La fantasía entra por el canal de datos, no por el adorno: el ramp de calidad
+  de botin (comun, poco comun, raro, epico, legendario) marca rareza real de
+  un objeto, una mejora o una zona. Un solo plano de acento, el dorado, y lo
+  gana la celda activa y la accion principal.
+
+  El tema oscuro es el tema de partida. El claro no es su version rebajada:
+  es la misma placa sobre papel a luz de dia, y por eso tambien es primario.
+
+  Los tokens se declaran una vez aqui. Ningun CSS de componente debe
+  contener un color literal: o es un token o se deriva con `color-mix` de uno.
+*/
+
+/* Solo se piden las dos familias en uso. */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=Barlow:wght@300;400;500;600;700&display=swap");
+
+:root {
+  /* --- Retícula: el armazón ------------------------------------------- */
+  --cell: 8px;
+  /* La línea de pelo es la retícula de construcción; la columna cae cada
+     ocho celdas y es la regla de un calibre. */
+  --grid-hair: rgba(236, 234, 228, 0.05);
+  --grid-col: rgba(236, 234, 228, 0.11);
+  --grid-size: 64px;
+
+  /* --- Planos ---------------------------------------------------------- */
+  --bg-dark: #14151a;
+  --bg-deep: #0e0f13;
+  --bg-card: #1c1e25;
+  --surface: rgba(236, 234, 228, 0.035);
+  --surface-hover: rgba(236, 234, 228, 0.075);
+  --surface-raised: rgba(236, 234, 228, 0.06);
+  --scrim: rgba(20, 21, 26, 0.86);
+  --track: rgba(0, 0, 0, 0.55);
+  /* El brillo es la cara superior del bisel, no un degradado de lujo. */
+  --sheen: linear-gradient(180deg, rgba(236, 234, 228, 0.055), transparent 42%);
+
+  /* --- Tinta ------------------------------------------------------------ */
+  --text-light: #eceae4;
+  --text-muted: #9b9da4;
+  --text-faint: #83868e;
+
+  /* --- Acento ----------------------------------------------------------- */
+  --gold: #c9a227;
+  --gold-bright: #e2bf52;
+  --dark-gold: #8f7418;
+  --gold-soft: rgba(201, 162, 39, 0.14);
+  --on-gold: #17130a;
+
+  /* --- Semántica de recurso --------------------------------------------- */
+  --health: #e0655a;
+  --mana: #3f8fd4;
+  --danger: #e3655a;
+  --success: #4faa70;
+  --info: #5aa3d8;
+  --health-fill: linear-gradient(90deg, #7d241f, var(--health));
+  --success-fill: linear-gradient(90deg, #22603f, var(--success));
+  --mana-fill: linear-gradient(90deg, #235a86, var(--mana));
+  --shimmer: linear-gradient(90deg, #16181d, #1f222a, #16181d);
+
+  /* --- Ramp de calidad: el canal de la fantasía ------------------------ */
+  /* Solo marca rareza real: común, poco común, raro, épico, legendario.
+     Los cinco están calculados para pasar 4.5:1 sobre los tres planos de cada
+     tema. Todavía no los consume ninguna pantalla porque el backend no expone
+     una rareza por objeto; ver "Unresolved" en el brief de Castle. */
+  --q-common: #9aa0a6;
+  --q-uncommon: #55b06f;
+  --q-rare: #4a9ede;
+  --q-epic: #a77bd8;
+  --q-legendary: #d98a2b;
+
+  /* --- Acción principal -------------------------------------------------- */
+  --gold-fill: var(--gold);
+  /* Sombra con desplazamiento y desenfoque: una sombra, no un halo. */
+  --gold-glow: 0 2px 12px rgba(0, 0, 0, 0.5);
+
+  /* --- Bordes y profundidad --------------------------------------------- */
+  --border: rgba(236, 234, 228, 0.13);
+  --border-strong: rgba(236, 234, 228, 0.3);
+  /* El radio corto es lo que hace que una placa se lea como chapa y no como
+     píldora. */
+  --radius: 4px;
+  --radius-sm: 3px;
+  --bevel-hi: inset 0 1px 0 rgba(236, 234, 228, 0.07);
+  --bevel-lo: inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+  --plate: var(--bevel-hi), var(--bevel-lo), var(--shadow-sm);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 34px rgba(0, 0, 0, 0.55);
+
+  /* --- Acento por zona del mapa ---------------------------------------- */
+  --zone-forest: #6f8f5a;
+  --zone-caverns: #5b7f9e;
+  --zone-ruins: #b5713f;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* --- Tipografía ------------------------------------------------------- */
+  /* Archivo construye sus letras sobre una retícula y trae eje de ancho, así
+     que el título monumental se compone con `font-stretch` sin salir del
+     sistema. Barlow es la neutra pequeña que lleva los datos. Sus cifras son
+     tabulares, que es lo que necesitan las rejillas de números. */
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+
+  /* --- Fondo de la página ------------------------------------------------ */
+  --body-bg: linear-gradient(180deg, #14151a 0%, #0e0f13 100%);
+  --body-aura: radial-gradient(
+    ellipse 70% 45% at 50% -12%,
+    rgba(201, 162, 39, 0.07),
+    transparent 70%
+  );
+}
+
+/* Tema claro: la misma placa sobre papel a luz de día. */
+[data-theme="light"] {
+  --grid-hair: rgba(26, 25, 21, 0.055);
+  --grid-col: rgba(26, 25, 21, 0.12);
+
+  --bg-dark: #f2eee3;
+  --bg-deep: #e7e1d2;
+  --bg-card: #fbf9f3;
+  --surface: rgba(26, 25, 21, 0.03);
+  --surface-hover: rgba(26, 25, 21, 0.06);
+  --surface-raised: rgba(26, 25, 21, 0.055);
+  --scrim: rgba(242, 238, 227, 0.88);
+  --track: rgba(26, 25, 21, 0.16);
+  --sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent 42%);
+
+  --text-light: #1a1915;
+  --text-muted: #4c4a42;
+  --text-faint: #625f58;
+
+  --gold: #755b19;
+  --gold-bright: #8f6d1b;
+  --dark-gold: #5e4a14;
+  --gold-soft: rgba(117, 91, 25, 0.12);
+  --on-gold: #fdfbf5;
+
+  --health: #a82f2f;
+  --mana: #1f5f96;
+  --danger: #a83b28;
+  --success: #2a6840;
+  --info: #1f5f96;
+  --health-fill: linear-gradient(90deg, #78201c, var(--health));
+  --success-fill: linear-gradient(90deg, #1a462c, var(--success));
+  --mana-fill: linear-gradient(90deg, #194a74, var(--mana));
+  --shimmer: linear-gradient(90deg, #e3ddcc, #f1ece0, #e3ddcc);
+
+  --q-common: #5a5e65;
+  --q-uncommon: #2a6840;
+  --q-rare: #1f5f96;
+  --q-epic: #6b4394;
+  --q-legendary: #8a4d17;
+
+  --gold-glow: 0 2px 12px rgba(45, 36, 18, 0.2);
+
+  --border: rgba(26, 25, 21, 0.16);
+  --border-strong: rgba(26, 25, 21, 0.34);
+  --bevel-hi: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --bevel-lo: inset 0 -1px 0 rgba(26, 25, 21, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(60, 48, 24, 0.1);
+  --shadow-md: 0 2px 10px rgba(60, 48, 24, 0.12);
+  --shadow-lg: 0 10px 34px rgba(60, 48, 24, 0.16);
+
+  --zone-forest: #4f6b3d;
+  --zone-caverns: #3f5f7d;
+  --zone-ruins: #96552b;
+
+  --body-bg: linear-gradient(180deg, #f4f0e6 0%, #e6e0d1 100%);
+  --body-aura: radial-gradient(
+    ellipse 70% 45% at 50% -12%,
+    rgba(117, 91, 25, 0.08),
+    transparent 70%
+  );
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* El tema se aplica en <html> desde main.tsx antes de montar React. */
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background-color: var(--bg-dark);
+  background-image: var(--body-bg), var(--body-aura);
+  background-attachment: fixed;
+  color: var(--text-light);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+/*
+  La retícula de construcción.
+
+  Es el motivo firmante y es un estado real, no una textura: `.grid-off` en
+  <html> la apaga y el botón de la barra de ajustes lo alterna. Sin ella, la
+  página sigue leyéndose; con ella, cada panel se apoya en una celda y el
+  jugador ve el andamiaje. Está alineada a `--grid-size`, que son ocho celdas,
+  para que la columna coincida con el ritmo del texto y no sea un crujido.
+*/
+html:not(.grid-off) body::after {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--grid-hair) 0 1px,
+      transparent 1px var(--grid-size)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--grid-hair) 0 1px,
+      transparent 1px var(--grid-size)
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--grid-col) 0 1px,
+      transparent 1px calc(var(--grid-size) * 8)
+    );
+  content: "";
+  pointer-events: none;
+}
+
+/* El contenido va por encima de la retícula, que es un plano de fondo. */
+.app-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: calc(var(--cell) * 5) calc(var(--cell) * 3) calc(var(--cell) * 10);
+}
+
+/*
+  Título. Un solo plano de acento, en sólido: el énfasis viene del peso y del
+  ancho, no de un degradado. Archivo tiene eje de ancho, así que la portada se
+  estira sin dejar de ser la misma letra.
+*/
+.app-container h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-stretch: 125%;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.app-container > p {
+  margin: var(--cell) 0 0;
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/*
+  Anillo de foco único para toda la aplicación. `:where` deja la
+  especificidad en cero, de modo que cada componente puede sobrescribirlo si
+  necesita otra forma.
+*/
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/*
+  Superficies del navegador que no dibujamos pero sí pertenecen a la página.
+  Es lo más barato que separa una página construida de una página ensamblada.
+*/
+/* El icono hereda el color de la tinta que lo rodea y nunca estira su caja. */
+.icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  vertical-align: -0.15em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--gold) 32%, transparent);
+  color: var(--text-light);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

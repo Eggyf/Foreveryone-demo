@@ -1,0 +1,141 @@
+/*
+  La tienda es un registro de filas: un objeto, lo que hace, lo que cuesta y la
+  acción. Cada fila es una celda del mismo ancho y comparte la línea de pelo
+  con su vecina, que es lo que la separa —no un borde propio, que daría una
+  línea doble— y lo que hace que la lista se lea como una tabla y no como un
+  montón de tarjetas.
+*/
+
+.shop-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--cell) * 2);
+  margin-bottom: calc(var(--cell) * 2.5);
+  padding-bottom: calc(var(--cell) * 1.5);
+  border-bottom: 1px solid var(--border);
+}
+
+.shop-header h3 {
+  margin: 0;
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-stretch: 115%;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* El oro del jugador es la cifra que decide si puede comprar, así que vive
+   junto al título y no dentro de cada fila. */
+.gold-display {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--cell) * 0.75);
+  color: var(--gold);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shop-loading,
+.shop-empty {
+  margin: calc(var(--cell) * 2) 0 0;
+  padding: calc(var(--cell) * 3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.shop-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--border);
+  overflow: hidden;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--cell) * 3);
+  padding: calc(var(--cell) * 2.5) calc(var(--cell) * 3);
+  background: var(--bg-card);
+  transition: background-color 0.16s var(--ease);
+}
+
+.shop-item:hover {
+  background: var(--surface-hover);
+}
+
+.item-info {
+  min-width: 0;
+  text-align: left;
+}
+
+.item-info h4 {
+  margin: 0 0 calc(var(--cell) * 0.5);
+  color: var(--text-light);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.item-info p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.item-action {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(var(--cell) * 1.25);
+}
+
+.item-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--cell) * 0.625);
+  color: var(--gold);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Comprar es la acción principal de la fila: por eso toma el plano de acento,
+   igual que el botón primario del resto de la aplicación. */
+.item-action button {
+  padding: calc(var(--cell) * 1.125) calc(var(--cell) * 2.25);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 520px) {
+  .shop-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .item-action {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-item {
+    transition: none;
+  }
+}

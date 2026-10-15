@@ -1,4 +1,4 @@
-# Dockerfile único para las cuatro APIs de Foreveryone.
+# Dockerfile único para las cuatro APIs de ForEveryone.
 #
 # Qué servicio se compila lo decide el build arg PROJECT, de modo que las
 # cuatro imágenes comparten este archivo en lugar de mantener cuatro copias

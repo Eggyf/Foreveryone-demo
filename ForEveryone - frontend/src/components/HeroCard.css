@@ -1,0 +1,393 @@
+.hero-profile-card,
+.hero-loading-card {
+  position: relative;
+  overflow: hidden;
+  margin-top: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--sheen), var(--bg-card);
+  box-shadow: var(--shadow-md);
+}
+
+.hero-profile-card {
+  padding: 26px;
+  text-align: left;
+}
+
+/* La retícula de construcción hace de sigilo: ya no hace falta un glifo gigante
+   detrás del texto, y una retícula es del mundo en vez de ser adorno ajeno. */
+.hero-profile-card::after {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in srgb, var(--gold) 4%, transparent) 0 1px,
+      transparent 1px var(--grid-size)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--gold) 4%, transparent) 0 1px,
+      transparent 1px var(--grid-size)
+    );
+  content: "";
+  pointer-events: none;
+}
+
+.hero-profile-header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.hero-avatar-frame {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  padding: 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg-deep);
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--gold) 7%, transparent),
+    var(--shadow-md);
+  transition: all 0.3s var(--ease);
+}
+
+.hero-avatar-frame:hover {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--gold) 13%, transparent),
+    var(--shadow-lg);
+}
+
+.hero-avatar-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hero-level-badge {
+  position: absolute;
+  right: -8px;
+  bottom: 6px;
+  z-index: 2;
+  padding: 5px 11px;
+  border: 2px solid var(--bg-card);
+  border-radius: var(--radius-sm);
+  background: var(--gold-fill);
+  color: var(--on-gold);
+  font-weight: 700;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.hero-profile-copy {
+  min-width: 0;
+}
+
+.hero-profile-copy h2 {
+  overflow: hidden;
+  margin: 0;
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.hero-badges .hero-class-badge {
+  margin-top: 0;
+}
+
+/* La insignia es una celda con esquinas, no una cápsula: el radio corto es lo
+   que mantiene el registro en chapa y no en pastilla. */
+.hero-class-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--cell) * 0.75);
+  margin-top: calc(var(--cell) * 1.125);
+  padding: calc(var(--cell) * 0.625) calc(var(--cell) * 1.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.hero-profile-copy p {
+  margin: 12px 0 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--success);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* El punto de estado es una celda del mismo tamaño que el resto del registro,
+   no una lámpara con halo. El estado ya lo dice el texto y el color. */
+.hero-status i {
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 1px;
+  background: currentcolor;
+}
+
+.hero-status.is-defeated {
+  color: var(--danger);
+}
+
+.hero-health-panel {
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--health) 24%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--health) 7%, transparent);
+}
+
+.hero-health-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.hero-health-header strong {
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+}
+
+/* El medidor es un calibre: escala de pelo con filo y relleno recto, sin
+   cápsula ni resplandor. El brillo era decoración; la lectura ya la da la
+   cifra que va al lado. */
+.hero-health-track {
+  overflow: hidden;
+  height: var(--cell);
+  border: 1px solid var(--border);
+  border-radius: 1px;
+  background: var(--track);
+}
+
+.hero-health-track span {
+  display: block;
+  height: 100%;
+  background: var(--health-fill);
+  transition: width 0.35s var(--ease);
+}
+
+.hero-health-panel.is-defeated .hero-health-track span {
+  background: var(--text-faint);
+}
+
+.hero-stats-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.hero-stat {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  transition: all 0.2s var(--ease);
+}
+
+.hero-stat:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+.hero-stat > span {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.hero-stat div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.hero-stat small {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hero-stat strong {
+  color: var(--text-light);
+  font-size: 0.98rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-actions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* Descansar e ir a la tienda son las dos acciones de la ficha: la forma la
+   pone `.btn`, aquí solo su medida. */
+.hero-actions button {
+  padding: calc(var(--cell) * 1.5);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+.shop-btn {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin-top: calc(var(--cell) * 1.25);
+  padding: calc(var(--cell) * 1.5);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+.hero-loading-card {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  padding: 26px;
+}
+
+.hero-loading-avatar {
+  overflow: hidden;
+  width: 110px;
+  height: 110px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-deep);
+}
+
+.hero-loading-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+}
+
+.hero-loading-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.hero-loading-copy strong {
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.hero-loading-line {
+  display: block;
+  width: 100%;
+  height: 11px;
+  border-radius: 1px;
+  background: var(--shimmer);
+  background-size: 200% 100%;
+  animation: hero-loading-shimmer 1.4s infinite;
+}
+
+.hero-loading-line-short {
+  width: 28%;
+}
+
+.hero-loading-line-medium {
+  width: 68%;
+}
+
+@keyframes hero-loading-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (max-width: 640px) {
+  .hero-profile-card,
+  .hero-loading-card {
+    padding: 18px;
+  }
+
+  .hero-profile-header {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .hero-profile-copy h2 {
+    max-width: 100%;
+    font-size: 1.4rem;
+    white-space: normal;
+  }
+
+  .hero-badges {
+    justify-content: center;
+  }
+
+  .hero-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-actions button,
+  .shop-btn,
+  .hero-health-track span,
+  .hero-avatar-frame {
+    transition: none;
+  }
+
+  .hero-loading-line {
+    animation: none;
+  }
+}

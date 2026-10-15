@@ -1,0 +1,284 @@
+.creation-shell {
+  width: 100%;
+  max-width: 1000px;
+  margin: 32px auto;
+  padding: 34px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--sheen), var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.creation-welcome {
+  max-width: 46ch;
+  margin: 0 auto var(--cell);
+  color: var(--gold);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* El título pesa por su tamaño y su eje de ancho, no por un degradado. Un
+   degradado en el texto es adorno; aquí el acento lo gana un sólido. */
+.creation-header h1 {
+  margin: 0 0 calc(var(--cell) * 1.5);
+  overflow-wrap: break-word;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-stretch: 120%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--gold);
+}
+
+.creation-header p {
+  max-width: 460px;
+  margin: 0 auto 32px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.creation-steps {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 32px;
+  padding: 0;
+  list-style: none;
+}
+
+.creation-steps li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 0.16s var(--ease),
+    border-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.creation-steps li span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  color: var(--text-faint);
+  font-size: 0.7rem;
+}
+
+.creation-steps li.is-active {
+  border-color: var(--border-strong);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.creation-steps li.is-active span {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+
+.creation-steps li.is-done {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.creation-steps li.is-done span {
+  background: color-mix(in srgb, var(--success) 20%, transparent);
+  color: var(--success);
+}
+
+/* Razas y clases son siempre 4. Con auto-fit el cuarto elemento caia a una
+   segunda fila y dejaba un hueco enorme, asi que se fijan 4 columnas. */
+.creation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .creation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.creation-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 24px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-deep);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: background-color 0.16s var(--ease),
+    border-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.creation-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  }
+
+.creation-card.is-selected {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  box-shadow: 0 0 0 1px var(--border-strong),
+    0 10px 30px color-mix(in srgb, var(--gold) 14%, transparent);
+}
+
+.creation-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.creation-card-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  font-size: 1.7rem;
+  line-height: 1;
+  transition: background-color 0.16s var(--ease),
+    border-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.creation-card.is-selected .creation-card-icon {
+  background: var(--gold-soft);
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+
+.creation-card-title {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.creation-card-text {
+  color: var(--text-muted);
+  font-size: 0.79rem;
+  line-height: 1.5;
+}
+
+.creation-card-mods,
+.creation-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.creation-card-mods i,
+.creation-card-stats i {
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.creation-card-stats i {
+  color: var(--text-light);
+}
+
+.creation-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 28px auto 0;
+  padding: 16px 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--gold-soft);
+}
+
+.creation-preview strong {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+}
+
+.creation-preview span {
+  color: var(--text-light);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.creation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+/* La medida de los dos botones. Relleno, texto y hover salen de `.btn-primary`
+   y `.btn-quiet` en Button.css. */
+.creation-actions button {
+  padding: 12px 24px;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+}
+
+/* Los botones que no viven en `.creation-actions` (el de cerrar sesion cuando la
+   cuenta ya no existe) necesitan su propia medida. */
+.creation-standalone {
+  padding: 12px 24px;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+}
+
+.creation-actions button:disabled {
+  color: var(--text-faint);
+}
+
+.creation-loading,
+.creation-error {
+  margin: 48px 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.creation-error {
+  color: var(--danger);
+}
+
+@media (max-width: 600px) {
+  .creation-shell {
+    margin: 20px 0;
+    padding: 28px 18px;
+  }
+
+  .creation-actions {
+    flex-direction: column-reverse;
+  }
+
+  .creation-actions button {
+    width: 100%;
+  }
+}

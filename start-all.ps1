@@ -1,4 +1,4 @@
-# Arranca el proyecto completo de Foreveryone desde la raiz del repositorio.
+# Arranca el proyecto completo de ForEveryone desde la raiz del repositorio.
 #
 # Uso (desde una terminal):
 #   .\start-all.ps1
@@ -52,10 +52,10 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
-$frontendPath = Join-Path $PSScriptRoot 'foreveryone-frontend'
+$frontendPath = Join-Path $PSScriptRoot 'ForEveryone - frontend'
 
 # Puertos publicados por cada API. Deben coincidir con docker-compose.yml y con
-# las variables VITE_* de foreveryone-frontend/.env.
+# las variables VITE_* de ForEveryone - frontend/.env.
 $servicePorts = [ordered]@{
     'Identity API' = 5045
     'Heroes API'   = 5281
@@ -246,7 +246,7 @@ function Test-DockerReady {
 
 function Stop-Environment {
     Write-Host ''
-    Write-Host '  Foreveryone - parando el entorno' -ForegroundColor Cyan
+    Write-Host '  ForEveryone - parando el entorno' -ForegroundColor Cyan
     Write-Host ''
 
     # El frontend corre en una ventana de PowerShell aparte, asi que se para por
@@ -282,7 +282,7 @@ if ($Stop) {
 }
 
 Write-Host ''
-Write-Host '  Foreveryone - iniciando el proyecto completo' -ForegroundColor Cyan
+Write-Host '  ForEveryone - iniciando el proyecto completo' -ForegroundColor Cyan
 Write-Host "  $($servicePorts.Count) APIs + $($servicePorts.Count) bases de datos en Docker" -ForegroundColor DarkGray
 Write-Host '  1 frontend con Vite en local' -ForegroundColor DarkGray
 Write-Host ''

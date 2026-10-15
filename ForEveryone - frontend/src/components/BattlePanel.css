@@ -1,0 +1,408 @@
+.battle-panel {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--sheen), var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  scroll-margin-top: 96px;
+  text-align: left;
+}
+
+.battle-header h3 {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.battle-header p {
+  margin: 6px 0 18px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.battle-enemies {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.battle-enemy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 18px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: background-color 0.16s var(--ease),
+    border-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.battle-enemy:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  }
+
+.battle-enemy:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.battle-enemy-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.battle-enemy strong {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.battle-enemy-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.battle-enemy-stats i {
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-enemy-rewards {
+  color: var(--text-faint);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Arena: combate en curso --- */
+
+.battle-arena {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+}
+
+/* El resultado se marca con el filo interior de la celda, no tiñendo la caja
+   entera: el color decide si se lee como victoria o como derrota y la placa
+   sigue siendo la misma. */
+.battle-arena.is-victory {
+  box-shadow: var(--bevel-hi), var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--success) 45%, transparent);
+}
+
+.battle-arena.is-defeat {
+  box-shadow: var(--bevel-hi), var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.battle-enemy-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.battle-fighter {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.battle-fighter strong {
+  color: var(--text-light);
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.battle-fighter small {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-track {
+  overflow: hidden;
+  height: var(--cell);
+  border: 1px solid var(--border);
+  border-radius: 1px;
+  background: var(--track);
+}
+
+.battle-track span {
+  display: block;
+  height: 100%;
+  background: var(--health-fill);
+  transition: width 0.35s var(--ease);
+}
+
+.battle-track.is-hero span {
+  background: var(--success-fill);
+}
+
+.battle-track.is-mana span {
+  background: var(--mana-fill);
+}
+
+.battle-hero-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+/* El maná se muestra en su propia columna para que el jugador vea de un vistazo
+   si le llega para la habilidad cara antes de elegirla. */
+.battle-mana {
+  max-width: 190px;
+}
+
+.battle-turn-badge {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Tres acciones por clase. Con auto-fit caben las tres en una fila en pantallas
+   anchas y se apilan solas en movil, sin huecos como fijando un numero de
+   columnas. */
+.battle-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.battle-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background-color 0.16s var(--ease),
+    border-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.battle-choice:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  }
+
+.battle-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* La habilidad es la celda cara del turno, y su coste se lee en la cifra de
+   maná que lleva debajo. El acento la distingue del ataque básico. */
+.battle-choice.is-skill:not(:disabled) {
+  border-color: color-mix(in srgb, var(--gold) 42%, transparent);
+  background: var(--gold-soft);
+}
+
+.battle-choice strong {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.battle-choice-damage {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-choice-desc {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.battle-choice-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.battle-choice-meta i {
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.battle-choice-blocked {
+  color: var(--danger);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.battle-outcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.battle-outcome strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.battle-outcome p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.battle-rewards {
+  color: var(--gold);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-again {
+  margin-top: calc(var(--cell));
+  padding: calc(var(--cell) * 1.25) calc(var(--cell) * 2.5);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+.battle-hint,
+.battle-error {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.battle-hint {
+  background: color-mix(in srgb, var(--info) 8%, transparent);
+  color: var(--info);
+}
+
+.battle-error {
+  margin-top: 14px;
+  background: color-mix(in srgb, var(--danger) 9%, transparent);
+  color: var(--danger);
+}
+
+.battle-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  margin: 18px 0 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+/* Cada fila es una celda del registro. El número de ronda ya marca el
+   comienzo, así que la fila no necesita además un borde de color en un lado. */
+.battle-log li {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.battle-round-number {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.battle-round-text {
+  color: var(--text-muted);
+  font-size: 0.79rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .battle-enemies,
+  .battle-choices {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-hero-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .battle-mana {
+    max-width: none;
+  }
+
+  .battle-turn-badge {
+    align-self: flex-start;
+  }
+}

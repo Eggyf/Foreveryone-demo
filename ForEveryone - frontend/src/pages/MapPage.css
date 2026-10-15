@@ -1,0 +1,160 @@
+.map-page {
+  text-align: left;
+}
+
+.map-header h2 {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.map-header p {
+  margin: 6px 0 18px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Una franja y se va: solo lo que el mapa necesita para decidir si el heroe puede
+   salir a luchar. */
+.map-vitals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+
+.map-vital {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.map-vital small {
+  color: var(--text-faint);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.map-vital strong {
+  color: var(--text-light);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.map-track {
+  display: block;
+  overflow: hidden;
+  width: 130px;
+  height: var(--cell);
+  border: 1px solid var(--border);
+  border-radius: 1px;
+  background: var(--track);
+}
+
+.map-track i {
+  display: block;
+  height: 100%;
+  background: var(--success-fill);
+  transition: width 0.35s var(--ease);
+}
+
+.map-ready {
+  margin-left: auto;
+  color: var(--success);
+  font-size: 0.78rem;
+}
+
+.map-rest {
+  margin-left: auto;
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  color: var(--gold);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: all 0.2s var(--ease);
+}
+
+.map-rest:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--surface-hover);
+}
+
+.map-rest:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.map-rest:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.map-zone-header h3 {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.map-zone-header p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* La zona seleccionada es una placa propia: aquí es donde vive el enemigo que
+   está en combate, así que tiene que pesar más que una simple lista. */
+.map-zone {
+  margin-top: calc(var(--cell) * 4);
+  padding: calc(var(--cell) * 3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--plate);
+}
+
+.map-zone-empty {
+  margin: 0;
+  padding: calc(var(--cell) * 3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .map-vitals {
+    gap: 12px;
+  }
+
+  .map-track {
+    width: 100%;
+  }
+
+  .map-ready,
+  .map-rest {
+    margin-left: 0;
+  }
+}

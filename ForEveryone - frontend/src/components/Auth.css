@@ -1,0 +1,101 @@
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  margin: calc(var(--cell) * 5) auto;
+  padding: calc(var(--cell) * 4) calc(var(--cell) * 3.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--plate);
+}
+
+/* Las pestañas son dos celdas contiguas del mismo registro, separadas por una
+   línea de pelo y no por un hueco: se leen como una fila partida en dos. */
+.tabs {
+  display: flex;
+  gap: 1px;
+  margin-bottom: calc(var(--cell) * 3.5);
+  padding: 1px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+}
+
+.tabs button {
+  flex: 1;
+  padding: calc(var(--cell) * 1.5);
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+
+.tabs button:hover {
+  background: var(--surface);
+  color: var(--text-light);
+}
+
+.tabs button.active {
+  background: var(--gold-soft);
+  color: var(--gold);
+  box-shadow: inset 0 -2px 0 var(--gold);
+}
+
+.tabs button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+/* El campo es un hueco hundido: fondo de pozo y sombra interior, para que se
+   lea como una casilla donde escribir y no como otra placa. */
+.auth-card form input {
+  width: 100%;
+  margin: calc(var(--cell) * 1.25) 0;
+  padding: calc(var(--cell) * 1.5) calc(var(--cell) * 1.75);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  box-shadow: var(--bevel-lo);
+  color: var(--text-light);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
+}
+
+.auth-card form input::placeholder {
+  color: var(--text-faint);
+}
+
+.auth-card form input:focus {
+  border-color: var(--gold);
+  outline: none;
+  box-shadow: var(--bevel-lo), inset 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+/* El relleno dorado, su texto y el hover vienen de `.btn-primary` en Button.css.
+   Aqui solo queda la medida: ocupa todo el ancho de la tarjeta. */
+.auth-card form button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+.auth-card form button:active {
+  transform: translateY(0);
+}
+
+.auth-card .field-hint {
+  margin: -4px 0 12px;
+  color: var(--text-faint);
+  font-size: 0.75rem;
+  text-align: center;
+}

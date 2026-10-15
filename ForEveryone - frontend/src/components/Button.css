@@ -1,0 +1,106 @@
+/*
+  Botones compartidos. La forma del boton es una decision del sistema visual, no
+  de la pantalla que lo usa, asi que vive aqui y cada componente solo ajusta su
+  medida con su propio selector.
+
+  Un boton es una celda del cuaderno: un rectangulo de radio corto, un bisel
+  grabado (luz interior arriba, sombra interior abajo) y ningun halo difuso. El
+  plano de acento lo gana el boton principal y nada mas.
+
+  Movimiento firmante: al pasar el puntero o el foco, la celda que ocupa el
+  control se enciende. Se ve el andamiaje bajo la mano, que es justo lo que un
+  cuaderno de construccion hace visible.
+*/
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--cell));
+  padding: calc(var(--cell) * 1.25) calc(var(--cell) * 2.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  box-shadow: var(--bevel-hi), var(--bevel-lo);
+  transition:
+    background-color 0.16s var(--ease),
+    border-color 0.16s var(--ease),
+    color 0.16s var(--ease),
+    box-shadow 0.16s var(--ease);
+}
+
+/* La celda se enciende: un contorno de acento a la distancia exacta de una
+   celda, para que se lea la casilla y no solo un resplandor. */
+.btn:hover:not(:disabled),
+.btn:focus-visible:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--surface-hover);
+  outline: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  outline-offset: calc(var(--cell) * 0.5);
+}
+
+/* Primario: el unico plano de acento de la aplicacion. */
+.btn-primary {
+  border-color: color-mix(in srgb, var(--gold) 70%, var(--dark-gold));
+  background: var(--gold-fill);
+  color: var(--on-gold);
+  font-weight: 700;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-primary:focus-visible:not(:disabled) {
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  color: var(--on-gold);
+  box-shadow: var(--gold-glow);
+}
+
+/* Secundario: la misma celda, sin acento. */
+.btn-quiet {
+  background: transparent;
+}
+
+.btn-quiet:hover:not(:disabled),
+.btn-quiet:focus-visible:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--gold);
+}
+
+/* Salir y acciones destructivas. El borde y el fondo se derivan de `--danger`
+   con `color-mix`, asi que el tema claro los recalcula sin reglas propias. */
+.btn-danger {
+  border-color: color-mix(in srgb, var(--danger) 38%, transparent);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled),
+.btn-danger:focus-visible:not(:disabled) {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 20%, transparent);
+  color: var(--danger);
+}
+
+.btn:disabled {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-faint);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}

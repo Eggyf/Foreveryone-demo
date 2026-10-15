@@ -1,8 +1,8 @@
-# Entorno de desarrollo de Foreveryone.
+# Entorno de desarrollo de ForEveryone.
 #
 # Aquí viven las cuatro bases de datos PostgreSQL y las cuatro APIs del
 # backend. El frontend sigue en local con "npm run dev", así que cada API
-# publica su puerto en el host y foreveryone-frontend/.env no necesita cambios.
+# publica su puerto en el host y ForEveryone - frontend/.env no necesita cambios.
 #
 #   docker compose up -d --build        levanta todo
 #   docker compose logs -f heroes-api    sigue el log de un servicio
@@ -152,7 +152,7 @@ services:
       # no puede escuchar en un puerto excluido. El puerto 5136 sigue siendo el
       # que espera el frontend, asi que se publica en el host un puerto libre
       # y se redirige al 5136 interno. Para volver al 5136, libera el rango
-      # reservado y ajusta a la vez foreveryone-frontend/.env.
+      # reservado y ajusta a la vez ForEveryone - frontend/.env.
       ASPNETCORE_URLS: http://+:4136
       APP_DLL: ForEveryone.Shop.Api.dll
       ConnectionStrings__ShopDb: "Host=shop-db;Port=5432;Database=foreveryone_shop;Username=postgres;Password=${SHOP_DB_PASSWORD:?falta SHOP_DB_PASSWORD}"

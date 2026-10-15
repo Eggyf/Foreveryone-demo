@@ -1,0 +1,68 @@
+/*
+  Un edificio ya construido, dentro de la tira `.castle-buildings`.
+
+  La tira dibuja las separaciones con 1px de hueco y el color del borde
+  detrás, así que cada edificio no necesita su propio borde: si lo llevara,
+  aparecería una línea doble entre celdas vecinas. Aquí solo la superficie y el
+  bisel, y al pasar el puntero se levanta el fondo.
+*/
+
+.building-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: calc(var(--cell) * 1.25);
+  padding: calc(var(--cell) * 2.5);
+  background: var(--bg-card);
+  transition: background-color 0.16s var(--ease);
+}
+
+.building-card:hover {
+  background: var(--surface-hover);
+}
+
+.building-icon {
+  display: grid;
+  width: calc(var(--cell) * 6);
+  height: calc(var(--cell) * 6);
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  box-shadow: var(--bevel-hi), var(--bevel-lo);
+  color: var(--gold);
+}
+
+.building-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: calc(var(--cell) * 0.375);
+}
+
+.building-copy strong {
+  overflow: hidden;
+  color: var(--text-light);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.building-copy small {
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .building-card {
+    transition: none;
+  }
+}
