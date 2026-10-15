@@ -10,9 +10,9 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: calc(var(--cell) * 2);
-  margin-bottom: calc(var(--cell) * 2.5);
-  padding-bottom: calc(var(--cell) * 1.5);
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -31,7 +31,7 @@
 .gold-display {
   display: inline-flex;
   align-items: center;
-  gap: calc(var(--cell) * 0.75);
+  gap: 6px;
   color: var(--gold);
   font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
@@ -41,8 +41,8 @@
 
 .shop-loading,
 .shop-empty {
-  margin: calc(var(--cell) * 2) 0 0;
-  padding: calc(var(--cell) * 3);
+  margin: 16px 0 0;
+  padding: 24px;
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-deep);
@@ -67,8 +67,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: calc(var(--cell) * 3);
-  padding: calc(var(--cell) * 2.5) calc(var(--cell) * 3);
+  gap: 24px;
+  padding: 20px 24px;
   background: var(--bg-card);
   transition: background-color 0.16s var(--ease);
 }
@@ -83,7 +83,7 @@
 }
 
 .item-info h4 {
-  margin: 0 0 calc(var(--cell) * 0.5);
+  margin: 0 0 4px;
   color: var(--text-light);
   font-size: 0.95rem;
   font-weight: 600;
@@ -101,13 +101,13 @@
   flex: 0 0 auto;
   flex-direction: column;
   align-items: flex-end;
-  gap: calc(var(--cell) * 1.25);
+  gap: 10px;
 }
 
 .item-cost {
   display: inline-flex;
   align-items: center;
-  gap: calc(var(--cell) * 0.625);
+  gap: 5px;
   color: var(--gold);
   font-size: 0.88rem;
   font-variant-numeric: tabular-nums;
@@ -117,7 +117,7 @@
 /* Comprar es la acción principal de la fila: por eso toma el plano de acento,
    igual que el botón primario del resto de la aplicación. */
 .item-action button {
-  padding: calc(var(--cell) * 1.125) calc(var(--cell) * 2.25);
+  padding: 9px 18px;
   font-size: 0.78rem;
 }
 

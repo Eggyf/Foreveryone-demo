@@ -1,12 +1,16 @@
 .auth-card {
   width: 100%;
   max-width: 420px;
-  margin: calc(var(--cell) * 5) auto;
-  padding: calc(var(--cell) * 4) calc(var(--cell) * 3.5);
+  margin: 40px auto;
+  padding: 32px 28px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
-  box-shadow: var(--plate);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 16%, transparent),
+    var(--shadow-lg);
 }
 
 /* Las pestañas son dos celdas contiguas del mismo registro, separadas por una
@@ -14,7 +18,7 @@
 .tabs {
   display: flex;
   gap: 1px;
-  margin-bottom: calc(var(--cell) * 3.5);
+  margin-bottom: 28px;
   padding: 1px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -23,7 +27,7 @@
 
 .tabs button {
   flex: 1;
-  padding: calc(var(--cell) * 1.5);
+  padding: 12px;
   border: none;
   border-radius: 2px;
   background: transparent;
@@ -57,8 +61,8 @@
    lea como una casilla donde escribir y no como otra placa. */
 .auth-card form input {
   width: 100%;
-  margin: calc(var(--cell) * 1.25) 0;
-  padding: calc(var(--cell) * 1.5) calc(var(--cell) * 1.75);
+  margin: 10px 0;
+  padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-deep);

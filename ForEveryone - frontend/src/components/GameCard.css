@@ -10,18 +10,21 @@
 
 .stats-card,
 .action-box {
-  margin: calc(var(--cell) * 2) 0;
-  padding: calc(var(--cell) * 3);
+  margin: 16px 0;
+  padding: 24px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
   text-align: left;
-  box-shadow: var(--plate);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 14%, transparent);
 }
 
 .stats-card h3 {
-  margin: 0 0 calc(var(--cell) * 1.5);
-  padding-bottom: calc(var(--cell));
+  margin: 0 0 12px;
+  padding-bottom: calc(8px);
   border-bottom: 1px solid var(--border);
   color: var(--text-light);
   font-family: var(--font-display);
@@ -33,7 +36,7 @@
 }
 
 .stats-card p {
-  margin: calc(var(--cell) * 0.75) 0;
+  margin: 6px 0;
   color: var(--text-muted);
   line-height: 1.6;
 }
@@ -46,7 +49,7 @@
 
 .stats-card ul li {
   margin: 0;
-  padding: calc(var(--cell) * 1.25) calc(var(--cell) * 1.5);
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   background: transparent;
   color: var(--text-light);
@@ -65,7 +68,7 @@
 }
 
 .action-box button {
-  padding: calc(var(--cell) * 1.25) calc(var(--cell) * 2.5);
+  padding: 10px 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-raised);

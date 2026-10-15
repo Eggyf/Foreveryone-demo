@@ -7,10 +7,10 @@
 */
 .settings-bar {
   position: absolute;
-  top: calc(var(--cell) * 2);
-  right: calc(var(--cell) * 2);
+  top: 16px;
+  right: 16px;
   display: flex;
-  gap: var(--cell);
+  gap: 8px;
   align-items: center;
   z-index: 2;
 }
@@ -18,7 +18,7 @@
 .settings-field {
   display: flex;
   align-items: center;
-  gap: calc(var(--cell) * 0.75);
+  gap: 6px;
 }
 
 .settings-label {
@@ -46,8 +46,8 @@
    geometría exacta y así hereda el color de la tinta solo con `currentColor`. */
 .settings-select {
   appearance: none;
-  padding: calc(var(--cell) * 0.625) calc(var(--cell) * 2.5)
-    calc(var(--cell) * 0.625) calc(var(--cell) * 1.25);
+  padding: 5px 20px
+    5px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background-color: var(--bg-card);
@@ -81,7 +81,7 @@
     position: static;
     justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: calc(var(--cell) * 2.5);
+    margin-bottom: 20px;
   }
 
   .settings-label {

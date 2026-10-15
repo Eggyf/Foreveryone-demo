@@ -8,12 +8,16 @@
   flex-direction: column;
   align-items: center;
   max-width: 520px;
-  margin: calc(var(--cell) * 7) auto;
-  padding: calc(var(--cell) * 4.25) calc(var(--cell) * 3.25);
+  margin: 56px auto;
+  padding: 34px 26px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
-  box-shadow: var(--plate);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 16%, transparent),
+    var(--shadow-md);
   text-align: center;
 }
 
@@ -26,7 +30,7 @@
 }
 
 .not-found h2 {
-  margin: calc(var(--cell) * 1.5) 0 calc(var(--cell) * 2.5);
+  margin: 12px 0 20px;
   color: var(--text-light);
   font-family: var(--font-display);
   font-size: clamp(1.4rem, 4vw, 1.85rem);
@@ -39,7 +43,7 @@
 /* El relleno, el color del texto y el hover salen de `.btn-primary`. Aqui solo
    queda la medida de este enlace. */
 .not-found-link {
-  padding: calc(var(--cell) * 1.375) calc(var(--cell) * 2.75);
+  padding: 11px 22px;
   font-size: 0.82rem;
   letter-spacing: 0.06em;
 }

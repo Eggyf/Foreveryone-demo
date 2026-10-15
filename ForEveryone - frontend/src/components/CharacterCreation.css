@@ -12,7 +12,7 @@
 
 .creation-welcome {
   max-width: 46ch;
-  margin: 0 auto var(--cell);
+  margin: 0 auto 8px;
   color: var(--gold);
   font-size: 0.95rem;
   font-weight: 600;
@@ -21,7 +21,7 @@
 /* El título pesa por su tamaño y su eje de ancho, no por un degradado. Un
    degradado en el texto es adorno; aquí el acento lo gana un sólido. */
 .creation-header h1 {
-  margin: 0 0 calc(var(--cell) * 1.5);
+  margin: 0 0 12px;
   overflow-wrap: break-word;
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 4vw, 2.1rem);

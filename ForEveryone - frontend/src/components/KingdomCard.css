@@ -13,8 +13,8 @@
 .kingdom-view {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--cell) * 4);
-  margin-top: calc(var(--cell) * 3);
+  gap: 32px;
+  margin-top: 24px;
 }
 
 /* --- La placa principal ------------------------------------------------ */
@@ -22,7 +22,7 @@
 .castle-card {
   position: relative;
   overflow: hidden;
-  padding: calc(var(--cell) * 3.5);
+  padding: 28px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
@@ -30,21 +30,12 @@
   text-align: left;
 }
 
-/* La retícula vive dentro de la placa, más presente que en el fondo: aquí es
-   donde se lee el cuaderno. */
+/* El encabezado de la placa lleva el brillo del pergamino en su cara
+   superior: es la luz que cae sobre una hoja, no una trama de fondo. */
 .castle-card::after {
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(
-      to right,
-      var(--grid-hair) 0 1px,
-      transparent 1px var(--grid-size)
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      var(--grid-hair) 0 1px,
-      transparent 1px var(--grid-size)
-    );
+  background: var(--sheen);
   content: "";
   pointer-events: none;
 }
@@ -54,8 +45,8 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: calc(var(--cell) * 3);
-  padding-bottom: calc(var(--cell) * 3);
+  gap: 24px;
+  padding-bottom: 24px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -63,14 +54,17 @@
    radio corto es lo que mantiene todo el mundo en chapa. */
 .castle-emblem {
   display: grid;
-  width: calc(var(--cell) * 11);
-  height: calc(var(--cell) * 11);
+  width: 88px;
+  height: 88px;
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--gold-soft);
-  box-shadow: var(--bevel-hi), var(--bevel-lo);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 26%, transparent);
   color: var(--gold);
 }
 
@@ -78,38 +72,50 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: calc(var(--cell) * 0.5);
+  gap: 4px;
 }
 
 .castle-titles strong {
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-stretch: 120%;
+  font-size: 1.4rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.06em;
   line-height: 1.15;
-  color: var(--text-light);
+  text-transform: uppercase;
+  color: var(--gold);
 }
 
 .castle-titles small {
-  color: var(--gold);
-  font-size: 0.75rem;
+  color: var(--text-faint);
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 /* --- Recursos ----------------------------------------------------------- */
 
-/* Cuatro celdas iguales: son un conjunto homogéneo y por eso comparten
-   medida. Lo que las distingue es la etiqueta, no el ancho. */
+/* El encabezado le dice al jugador que esta mirando recursos: sin el, la tira
+   de cuatro cifras no se sabe que es. */
+.castle-section-title {
+  position: relative;
+  z-index: 1;
+  margin: 24px 0 12px;
+  color: var(--text-faint);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 .castle-stats {
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
-  margin: calc(var(--cell) * 3) 0 0;
+  margin: 0;
   padding: 1px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -122,9 +128,13 @@
   min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: calc(var(--cell) * 0.375);
-  padding: calc(var(--cell) * 2) var(--cell);
+  gap: 4px;
+  padding: 16px 8px;
   background: var(--bg-deep);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
 .castle-stats dt {
@@ -165,9 +175,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: calc(var(--cell)) calc(var(--cell) * 3);
+  gap: calc(8px) 24px;
   margin-top: 1px;
-  padding: calc(var(--cell) * 2) calc(var(--cell) * 2.5);
+  padding: 16px 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-deep);
@@ -184,7 +194,7 @@
 .castle-army strong {
   display: inline-flex;
   align-items: center;
-  gap: calc(var(--cell) * 0.75);
+  gap: 6px;
   color: var(--text-light);
   font-size: 1.05rem;
   font-variant-numeric: tabular-nums;
@@ -202,8 +212,8 @@
 .castle-empty {
   position: relative;
   z-index: 1;
-  margin: calc(var(--cell) * 2) 0 0;
-  padding: calc(var(--cell) * 3);
+  margin: 16px 0 0;
+  padding: 24px;
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-deep);
@@ -212,18 +222,22 @@
   text-align: center;
 }
 
+/* Cada edificio construido es su propia pieza: con un solo edificio la tira
+   se estiraria a todo el ancho y la tarjeta pareceria una banda vacia, asi que
+   el ancho maximo la mantiene en proportion de su contenido. */
 .castle-buildings {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1px;
-  margin-top: calc(var(--cell) * 2);
-  padding: 1px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--border);
-  overflow: hidden;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* La tarjeta lleva su propia medida: es una pieza del registro, no una celda
+   que se estira a lo ancho del hueco. */
+.building-card {
+  max-width: none;
 }
 
 /* --- Secciones de orden -------------------------------------------------- */
@@ -234,13 +248,13 @@
 
 /* Sin kicker: el encabezado de la sección se sostiene solo. */
 .kingdom-section > h4 {
-  margin: 0 0 calc(var(--cell) * 2);
-  color: var(--text-light);
+  margin: 0 0 16px;
+  color: var(--gold);
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-stretch: 115%;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 /* Las celdas de acción comparten medida con las del registro: 1px de hueco y
@@ -261,14 +275,18 @@
   min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: calc(var(--cell) * 0.75);
-  padding: calc(var(--cell) * 2.5) var(--cell);
+  gap: 6px;
+  padding: 20px 8px;
   border: none;
-  background: var(--bg-card);
+  background: var(--bg-deep);
   color: var(--text-light);
   cursor: pointer;
   font-family: var(--font-body);
-  transition: background-color 0.16s var(--ease), color 0.16s var(--ease);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  transition: background 0.16s var(--ease), color 0.16s var(--ease);
 }
 
 .castle-action svg,
@@ -337,7 +355,7 @@
 
 .castle-hint {
   margin: 0;
-  padding: calc(var(--cell) * 2.5);
+  padding: 20px;
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-deep);
@@ -352,10 +370,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(var(--cell) * 2.5);
+  gap: 20px;
   max-width: 460px;
-  margin: calc(var(--cell) * 8) auto;
-  padding: calc(var(--cell) * 5) calc(var(--cell) * 4);
+  margin: 64px auto;
+  padding: 40px 32px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
@@ -365,8 +383,8 @@
 
 .kingdom-empty-emblem {
   display: grid;
-  width: calc(var(--cell) * 12);
-  height: calc(var(--cell) * 12);
+  width: 96px;
+  height: 96px;
   place-items: center;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -383,11 +401,11 @@
 
 @media (max-width: 640px) {
   .castle-card {
-    padding: calc(var(--cell) * 2.5);
+    padding: 20px;
   }
 
   .castle-heading {
-    gap: calc(var(--cell) * 2);
+    gap: 16px;
   }
 
   .castle-stats {
@@ -397,7 +415,7 @@
   .castle-army {
     flex-direction: column;
     align-items: flex-start;
-    gap: calc(var(--cell) * 0.75);
+    gap: 6px;
   }
 
   .castle-army small {

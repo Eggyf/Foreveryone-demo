@@ -1,63 +1,77 @@
 /*
-  Un edificio ya construido, dentro de la tira `.castle-buildings`.
-
-  La tira dibuja las separaciones con 1px de hueco y el color del borde
-  detrás, así que cada edificio no necesita su propio borde: si lo llevara,
-  aparecería una línea doble entre celdas vecinas. Aquí solo la superficie y el
-  bisel, y al pasar el puntero se levanta el fondo.
+  Un edificio ya construido. Es una pieza independiente, con su propio marco de
+  metal como el resto de superficies del mundo, y se apoya en la tira
+  `.castle-buildings` con hueco y no con un borde compartido.
 */
 
 .building-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
   min-width: 0;
-  flex-direction: column;
-  gap: calc(var(--cell) * 1.25);
-  padding: calc(var(--cell) * 2.5);
-  background: var(--bg-card);
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.25);
   transition: background-color 0.16s var(--ease);
 }
 
 .building-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--border));
   background: var(--surface-hover);
 }
 
 .building-icon {
   display: grid;
-  width: calc(var(--cell) * 6);
-  height: calc(var(--cell) * 6);
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--bg-deep);
-  box-shadow: var(--bevel-hi), var(--bevel-lo);
+  background: var(--gold-soft);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 24%, transparent);
   color: var(--gold);
 }
 
+/* Nombre y nivel en una sola linea: el nivel es un dato de la misma fila que
+   el nombre, no un pie de tarjeta. */
 .building-copy {
   display: flex;
   min-width: 0;
-  flex-direction: column;
-  gap: calc(var(--cell) * 0.375);
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .building-copy strong {
   overflow: hidden;
-  color: var(--text-light);
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .building-copy small {
-  color: var(--gold);
-  font-size: 0.7rem;
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  font-size: 0.72rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 

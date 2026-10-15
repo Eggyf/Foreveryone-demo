@@ -2,7 +2,12 @@ import { useTranslation } from '../i18n/useI18n';
 import type { BuildingData, KingdomData } from '../types';
 import { BuildingCard } from './BuildingCard';
 import { Icon } from './Icon';
-import { BARRACKS_TYPE, CASTLE_TYPE, getBuildingDetails } from './buildings';
+import {
+  BARRACKS_TYPE,
+  BUILDABLE_BUILDINGS,
+  CASTLE_TYPE,
+  getBuildingDetails,
+} from './buildings';
 import './KingdomCard.css';
 
 interface KingdomCardProps {
@@ -17,8 +22,16 @@ interface KingdomCardProps {
 /** Cantidades ofrecidas al entrenar. El coste por soldado lo fija el dominio. */
 const TROOP_OPTIONS = [1, 5, 10] as const;
 
-/** Tipos que aparecen en el menu de construccion, en el orden en que se pintan. */
-const MENU_TYPES = [2, 3, 4, 5] as const;
+/**
+ * El menu se deriva del catalogo, no de una lista de tipos escrita a mano.
+ *
+ * Estaba en `[2, 3, 4, 5]` y por eso el Cuartel (tipo 6) nunca aparecia: el
+ * jugador leia "Construye un Cuartel para poder entrenar tropas" y no habia
+ * ninguna forma de construirlo, porque el unico edificio queTraining necesita
+ * era justo el que faltaba en la lista. El catalogo ya lo tiene, y anadirlo a
+ * mano era volver a dejar que las dos listas se separaran.
+ */
+const MENU_TYPES = BUILDABLE_BUILDINGS.map((building) => building.type);
 
 export const KingdomCard = ({
   kingdom,
@@ -71,6 +84,7 @@ export const KingdomCard = ({
           </div>
         </header>
 
+        <h4 className="castle-section-title">{t('kingdom.resources')}</h4>
         <dl className="castle-stats">
           <div>
             <dt>
@@ -91,7 +105,7 @@ export const KingdomCard = ({
               <Icon name="coin" size={16} />
             </dt>
             <dd>{kingdom.gold}</dd>
-            <span className="castle-stat-label">{t('hero.gold')}</span>
+            <span className="castle-stat-label">{t('kingdom.gold')}</span>
           </div>
           <div>
             <dt>

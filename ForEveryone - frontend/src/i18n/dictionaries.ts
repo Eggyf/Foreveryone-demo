@@ -55,9 +55,6 @@ const spanishSource = {
     theme: 'Tema',
     themeDark: 'Oscuro',
     themeLight: 'Claro',
-    grid: 'Retícula',
-    gridOn: 'Visible',
-    gridOff: 'Oculta',
   },
 
   nav: {
@@ -146,6 +143,11 @@ const spanishSource = {
     healthLabel: 'Vida del héroe',
     statsLabel: 'Estadísticas del héroe',
     manaLabel: 'Maná',
+    // Las cuatro celdas de estadísticas. Estaban bajo `creation` por un copiado
+    // y salían en pantalla como la clave cruda (`hero.attack`).
+    attack: 'Ataque',
+    defense: 'Defensa',
+    gold: 'Oro',
     statusDefeated: 'Derrotado',
     statusRested: 'Descansado',
     statusReady: 'Listo para aventurearse',
@@ -233,7 +235,9 @@ const spanishSource = {
     militaryPower: 'Poder militar: {power}',
     wood: 'Madera',
     stone: 'Piedra',
+    gold: 'Oro',
     food: 'Comida',
+    resources: 'Recursos',
     training: 'Entrenar tropas',
     train: 'Entrenar {amount} tropas',
     soldiers: 'tropas',
@@ -243,7 +247,6 @@ const spanishSource = {
     built: '{building} construida.',
     upgraded: '{building} mejorada al nivel {level}.',
     actionError: 'No se pudo completar la acción.',
-    resources: 'Recursos',
   },
 
   shop: {
@@ -474,9 +477,6 @@ const english: Record<TranslationKey, string> = flatten({
     theme: 'Theme',
     themeDark: 'Dark',
     themeLight: 'Light',
-    grid: 'Grid',
-    gridOn: 'Shown',
-    gridOff: 'Hidden',
   },
 
   nav: {
@@ -562,6 +562,9 @@ const english: Record<TranslationKey, string> = flatten({
     healthLabel: 'Hero health',
     statsLabel: 'Hero stats',
     manaLabel: 'Mana',
+    attack: 'Attack',
+    defense: 'Defense',
+    gold: 'Gold',
     statusDefeated: 'Defeated',
     statusRested: 'Rested',
     statusReady: 'Ready for adventure',
@@ -649,7 +652,9 @@ const english: Record<TranslationKey, string> = flatten({
     militaryPower: 'Military power: {power}',
     wood: 'Wood',
     stone: 'Stone',
+    gold: 'Gold',
     food: 'Food',
+    resources: 'Resources',
     training: 'Train troops',
     train: 'Train {amount} troops',
     soldiers: 'troops',
@@ -659,7 +664,6 @@ const english: Record<TranslationKey, string> = flatten({
     built: '{building} built.',
     upgraded: '{building} upgraded to level {level}.',
     actionError: 'The action could not be completed.',
-    resources: 'Resources',
   },
 
   shop: {

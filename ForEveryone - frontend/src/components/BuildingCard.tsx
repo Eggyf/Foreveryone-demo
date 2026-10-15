@@ -6,6 +6,7 @@ import {
   getBuildingDetails,
 } from './buildings';
 import { Icon, type IconName } from './Icon';
+import './BuildingCard.css';
 
 interface BuildingCardProps {
   building: BuildingData;
@@ -33,7 +34,7 @@ export const BuildingCard = ({ building }: BuildingCardProps) => {
       </span>
       <div className="building-copy">
         <strong>{t(nameKey)}</strong>
-        <small>Nv. {building.level}</small>
+        <small>{t('kingdom.level', { level: building.level })}</small>
       </div>
     </article>
   );

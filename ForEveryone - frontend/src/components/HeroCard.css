@@ -5,8 +5,8 @@
   margin-top: 22px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--sheen), var(--bg-card);
-  box-shadow: var(--shadow-md);
+  background: var(--bg-card);
+  box-shadow: var(--plate);
 }
 
 .hero-profile-card {
@@ -14,21 +14,12 @@
   text-align: left;
 }
 
-/* La retícula de construcción hace de sigilo: ya no hace falta un glifo gigante
-   detrás del texto, y una retícula es del mundo en vez de ser adorno ajeno. */
+/* La ficha lleva el brillo del pergamino en su cara superior: es la luz que
+   cae sobre una hoja, no una trama de fondo. */
 .hero-profile-card::after {
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(
-      to right,
-      color-mix(in srgb, var(--gold) 4%, transparent) 0 1px,
-      transparent 1px var(--grid-size)
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--gold) 4%, transparent) 0 1px,
-      transparent 1px var(--grid-size)
-    );
+  background: var(--sheen);
   content: "";
   pointer-events: none;
 }
@@ -39,30 +30,32 @@
   display: grid;
   grid-template-columns: 140px minmax(0, 1fr);
   align-items: center;
-  gap: 24px;
+  gap: 28px;
 }
 
+/* El retrato va en una celda con esquina, no en un círculo: el medallón lo
+   dibuja la propia imagen. El marco solo la encuadra con su bisel. */
 .hero-avatar-frame {
   position: relative;
   width: 140px;
   height: 140px;
   padding: 5px;
-  border: 1px solid var(--border-strong);
-  border-radius: 50%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--bg-deep);
-  box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--gold) 7%, transparent),
-    var(--shadow-md);
-  transition: all 0.3s var(--ease);
+  box-shadow: var(--bevel-hi), var(--bevel-lo), var(--shadow-sm);
+  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
 }
 
 .hero-avatar-frame:hover {
-  border-color: var(--gold);
-  box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--gold) 13%, transparent),
-    var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--border));
+  box-shadow: var(--bevel-hi), var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 32%, transparent),
+    var(--shadow-sm);
 }
 
+/* El medallón se recorta en círculo dentro de la celda: el marco es cuadrado
+   como todo lo demás, y el disco es de la propia ilustración. */
 .hero-avatar-frame img {
   display: block;
   width: 100%;
@@ -71,21 +64,24 @@
   object-fit: cover;
 }
 
+/* El nivel va sobre la esquina de la celda, no flotando fuera: pertenece a la
+   ficha, no flota encima. */
 .hero-level-badge {
   position: absolute;
-  right: -8px;
-  bottom: 6px;
+  right: 0;
+  bottom: 0;
   z-index: 2;
-  padding: 5px 11px;
-  border: 2px solid var(--bg-card);
-  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  border-radius: 0 var(--radius-sm) 0 var(--radius-sm);
   background: var(--gold-fill);
   color: var(--on-gold);
-  font-weight: 700;
   font-family: var(--font-body);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
 }
 
 .hero-profile-copy {
@@ -95,11 +91,11 @@
 .hero-profile-copy h2 {
   overflow: hidden;
   margin: 0;
-  color: var(--text-light);
+  color: var(--gold);
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -120,9 +116,9 @@
 .hero-class-badge {
   display: inline-flex;
   align-items: center;
-  gap: calc(var(--cell) * 0.75);
-  margin-top: calc(var(--cell) * 1.125);
-  padding: calc(var(--cell) * 0.625) calc(var(--cell) * 1.5);
+  gap: 6px;
+  margin-top: 9px;
+  padding: 5px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--gold-soft);
@@ -152,8 +148,8 @@
 /* El punto de estado es una celda del mismo tamaño que el resto del registro,
    no una lámpara con halo. El estado ya lo dice el texto y el color. */
 .hero-status i {
-  width: var(--cell);
-  height: var(--cell);
+  width: 8px;
+  height: 8px;
   border-radius: 1px;
   background: currentcolor;
 }
@@ -162,6 +158,7 @@
   color: var(--danger);
 }
 
+/* La barra de vida es un medidor de metal: surco y relleno recto. */
 .hero-health-panel {
   position: relative;
   z-index: 1;
@@ -191,7 +188,7 @@
    cifra que va al lado. */
 .hero-health-track {
   overflow: hidden;
-  height: var(--cell);
+  height: 8px;
   border: 1px solid var(--border);
   border-radius: 1px;
   background: var(--track);
@@ -273,7 +270,7 @@
 /* Descansar e ir a la tienda son las dos acciones de la ficha: la forma la
    pone `.btn`, aquí solo su medida. */
 .hero-actions button {
-  padding: calc(var(--cell) * 1.5);
+  padding: 12px;
   font-size: 0.85rem;
   letter-spacing: 0.06em;
 }
@@ -282,32 +279,38 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  margin-top: calc(var(--cell) * 1.25);
-  padding: calc(var(--cell) * 1.5);
+  margin-top: 10px;
+  padding: 12px;
   font-size: 0.85rem;
   letter-spacing: 0.06em;
 }
 
 .hero-loading-card {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
+  grid-template-columns: 140px minmax(0, 1fr);
   align-items: center;
-  gap: 22px;
+  gap: 24px;
   padding: 26px;
 }
 
+/* El esqueleto de carga replica la medida exacta de la ficha real: misma
+   celda, mismo marco, mismo medallón. Si el hueco tiene otra forma, el cambio
+   al cargar mueve todo lo de alrededor. */
 .hero-loading-avatar {
   overflow: hidden;
-  width: 110px;
-  height: 110px;
+  width: 140px;
+  height: 140px;
+  padding: 5px;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   background: var(--bg-deep);
+  box-shadow: var(--bevel-hi), var(--bevel-lo);
 }
 
 .hero-loading-avatar img {
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   object-fit: cover;
   opacity: 0.4;
 }

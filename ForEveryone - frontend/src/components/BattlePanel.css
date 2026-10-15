@@ -3,8 +3,12 @@
   padding: 22px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--sheen), var(--bg-card);
-  box-shadow: var(--shadow-sm);
+  background: var(--bg-card);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 14%, transparent),
+    var(--shadow-md);
   scroll-margin-top: 96px;
   text-align: left;
 }
@@ -14,8 +18,9 @@
   color: var(--gold);
   font-family: var(--font-display);
   font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .battle-header p {
@@ -108,6 +113,10 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-deep);
+  box-shadow:
+    var(--bevel-hi),
+    var(--bevel-lo),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
 /* El resultado se marca con el filo interior de la celda, no tiñendo la caja
@@ -154,7 +163,7 @@
 
 .battle-track {
   overflow: hidden;
-  height: var(--cell);
+  height: 8px;
   border: 1px solid var(--border);
   border-radius: 1px;
   background: var(--track);
@@ -320,8 +329,8 @@
 }
 
 .battle-again {
-  margin-top: calc(var(--cell));
-  padding: calc(var(--cell) * 1.25) calc(var(--cell) * 2.5);
+  margin-top: calc(8px);
+  padding: 10px 20px;
   font-size: 0.8rem;
   letter-spacing: 0.08em;
 }
